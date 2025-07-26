@@ -1,0 +1,19 @@
+/* PageHeader */
+.footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    background-color: #f4eff4FF;
+    width: 100%;
+    position: sticky;
+}
+
+.footer-nav {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: fit-content;
+    gap: 2rem;
+    padding: 1rem;
+    font-size: 0.8rem;
+}

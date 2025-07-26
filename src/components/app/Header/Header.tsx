@@ -1,6 +1,6 @@
 import React from 'react';
 
-import './header.css';
+import './Header.css';
 import {NavButton} from "../NavButton/NavButton.tsx";
 
 export const Header = () => (
