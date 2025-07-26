@@ -1,32 +1,24 @@
-.storybook-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 15px 20px;
-  font-family: 'Nunito Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+/* PageHeader */
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: #f4eff4FF;
+    width: 100%;
+    position: sticky;
 }
 
-.storybook-header svg {
-  display: inline-block;
-  vertical-align: top;
+.header-title {
+    width: fit-content;
+    padding: 1rem;
+    font-size: 1.3rem;
 }
 
-.storybook-header h1 {
-  display: inline-block;
-  vertical-align: top;
-  margin: 6px 0 6px 10px;
-  font-weight: 700;
-  font-size: 20px;
-  line-height: 1;
-}
-
-.storybook-header button + button {
-  margin-left: 10px;
-}
-
-.storybook-header .welcome {
-  margin-right: 10px;
-  color: #333;
-  font-size: 14px;
+.header-nav {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: fit-content;
+    gap: 2rem;
+    padding: 1rem;
 }

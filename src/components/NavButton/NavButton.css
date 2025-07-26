@@ -1,0 +1,6 @@
+/* Develop */
+.nav-button {
+    &.active {
+        font-weight: bold;
+    }
+}
