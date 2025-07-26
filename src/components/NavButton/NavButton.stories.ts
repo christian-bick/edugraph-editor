@@ -12,14 +12,15 @@ type Story = StoryObj<typeof meta>;
 
 export const Inactive: Story = {
     args: {
-        label: "Inactive",
+        label: "Lorem",
         active: false
     },
 }
 
 export const Active: Story = {
     args: {
-        label: "Active",
         active: true
     },
 }
+
+export default meta;
