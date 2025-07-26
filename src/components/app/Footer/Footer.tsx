@@ -1,7 +1,7 @@
 import React from 'react';
 
 import './Footer.css';
-import {NavButton} from "../NavButton/NavButton.tsx";
+import {NavButton} from "../Header/NavButton/NavButton.tsx";
 
 export const Footer = () => (
     <header className="footer">
