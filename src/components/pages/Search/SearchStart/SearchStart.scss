@@ -1,3 +1,5 @@
+@use "/src/colors.scss" as colors;
+
 .search-start {
     grid-column-start: 1;
     grid-column-end: 13;
@@ -22,7 +24,7 @@
         max-width: 300px;
         aspect-ratio: 1;
         width: 100%;
-        border: 5px rgb(0, 0, 0, 0.2) solid;
+        border: 5px colors.$container-border solid;
         border-radius: 15px;
 
         label {

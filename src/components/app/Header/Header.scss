@@ -1,8 +1,10 @@
+@use "/src/colors.scss" as colors;
+
 .header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    background-color: #f4eff4FF;
+    background-color: colors.$container-background;
     width: 100%;
 
     .header-title {

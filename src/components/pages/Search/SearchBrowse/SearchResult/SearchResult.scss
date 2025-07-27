@@ -1,5 +1,7 @@
+@use "/src/colors.scss" as colors;
+
 .search-result {
     width: 100%;
     aspect-ratio: 1;
-    background-color: rgb(0, 0, 0, 0.1);
+    background-color: colors.$container-background;
 }

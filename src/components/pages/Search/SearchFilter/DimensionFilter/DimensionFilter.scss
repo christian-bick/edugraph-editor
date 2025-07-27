@@ -1,18 +1,18 @@
-@import "/src/colors.scss";
+@use "/src/colors.scss" as colors;
 
 .dimension-filter {
     color: white;
     padding: 0.8rem;
 
     &.dimension-1 {
-        background-color: $color-1;
+        background-color: colors.$color-1;
     }
 
     &.dimension-2 {
-        background-color: $color-2;
+        background-color: colors.$color-2;
     }
 
     &.dimension-3 {
-        background-color: $color-3;
+        background-color: colors.$color-3;
     }
 }
