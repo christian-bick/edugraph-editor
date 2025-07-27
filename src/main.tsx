@@ -1,6 +1,6 @@
 import React, {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'
-import './index.css'
+import './main.scss'
 import {Header} from './components/app/Header/Header.tsx';
 import {Footer} from './components/app/Footer/Footer.tsx';
 import {Content} from './components/app/Content/Content.tsx';
