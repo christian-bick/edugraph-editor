@@ -1,0 +1,12 @@
+.search-browse {
+    grid-column-start: 1;
+    grid-column-end: 9;
+
+    .search-input {
+
+        .input-icon {
+            border: 3px solid rgb(0, 0, 0, 0.5);
+        }
+
+    }
+}

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import './NavButton.css';
+import './NavButton.scss';
 import clsx from "clsx";
 
 

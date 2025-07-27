@@ -1,6 +1,6 @@
 import React from 'react';
 
-import './Footer.css';
+import './Footer.scss';
 import {NavButton} from "../Header/NavButton/NavButton.tsx";
 
 export const Footer = () => (

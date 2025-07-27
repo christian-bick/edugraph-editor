@@ -1,6 +1,6 @@
 import React from 'react';
 
-import './Content.css';
+import './Content.scss';
 
 export const Content = (props) => (
     <div className="content">

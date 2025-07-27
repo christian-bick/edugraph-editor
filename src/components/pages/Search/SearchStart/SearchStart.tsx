@@ -1,4 +1,4 @@
-import './SearchStart.css'
+import './SearchStart.scss'
 import React from 'react';
 import icon_photo from '../../../../assets/icons/take_photo.svg'
 import icon_upload from '../../../../assets/icons/upload.svg'
