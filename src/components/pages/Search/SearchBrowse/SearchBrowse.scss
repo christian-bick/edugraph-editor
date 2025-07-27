@@ -1,3 +1,5 @@
+@import "/src/colors.scss";
+
 .search-browse {
     grid-column-start: 1;
     grid-column-end: 9;
@@ -14,7 +16,7 @@
         width: 100%;
 
         .input-container {
-            border: 1px solid rgb(0, 0, 0, 0.5);
+            border: 1px solid $container-border;
             border-radius: 3px;
         }
 
