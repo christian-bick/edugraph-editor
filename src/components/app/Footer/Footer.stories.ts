@@ -8,7 +8,7 @@ const meta = {
   tags: ['autodocs'],
   args: {
   },
-} satisfies Meta<typeof Header>;
+} satisfies Meta<typeof Footer>;
 
 type Story = StoryObj<typeof meta>;
 
