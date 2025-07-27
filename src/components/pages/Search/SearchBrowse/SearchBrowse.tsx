@@ -17,6 +17,7 @@ export const SearchBrowse = () => ([
 
             </div>
             <div className="input-upload">
+                <img src={input_icon} alt="Input Icon"/>
             </div>
         </div>
 
