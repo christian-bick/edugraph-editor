@@ -13,3 +13,17 @@ export const classifyFile = (file) => {
         body: formData
     }).then(response => response.json())
 }
+
+const SEARCH_URL = `${ENDPOINT}/search`
+
+export const searchFile = (file) => {
+    const name = file.name;
+    let formData = new FormData();
+    formData.append('file', file);
+    formData.append('name', name);
+
+    return fetch(SEARCH_URL, {
+        method: 'POST',
+        body: formData
+    }).then(response => response.json())
+}

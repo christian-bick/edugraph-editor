@@ -1,6 +1,6 @@
 import './SearchStart.scss'
 import React, {useState} from 'react';
-import {classifyFile} from '../../../../api/classify'
+import {classifyFile, searchFile} from '../../../../api/classify'
 import icon_photo from '../../../../assets/icons/take_photo.svg'
 import icon_upload from '../../../../assets/icons/upload.svg'
 
@@ -14,7 +14,7 @@ export const SearchStart = () => {
         if (files && files.length > 0 && typeof files[0] !== 'undefined') {
             setWaiting(true);
             try {
-                const classification = await classifyFile(files[0])
+                const classification = await searchFile(files[0])
                 console.log(classification)
             } catch (err) {
                 setError(err)
