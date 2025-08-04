@@ -16,7 +16,7 @@ export const classifyFile = (file) => {
 
 const SEARCH_URL = `${ENDPOINT}/search`
 
-export const searchFile = (file) => {
+export const searchFile = (file: File) => {
     const name = file.name;
     let formData = new FormData();
     formData.append('file', file);
