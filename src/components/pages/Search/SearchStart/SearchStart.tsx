@@ -1,10 +1,9 @@
 import './SearchStart.scss'
 import React, {useState} from 'react';
-import {classifyFile, searchFile} from '../../../../api/classify'
+import {classifyAndSearchFile} from '../../../../api/classify'
 import icon_photo from '../../../../assets/icons/take_photo.svg'
 import icon_upload from '../../../../assets/icons/upload.svg'
 import {useSearchStore} from "../../../../stores/search.ts";
-import {file} from "storybook/internal/babel";
 import {useNavigate} from "react-router";
 
 export const SearchStart = () => {
@@ -13,7 +12,7 @@ export const SearchStart = () => {
     const [error, setError] = useState<string>(null)
 
     const setInput = useSearchStore((state) => state.setInput)
-    const addResults = useSearchStore((state) => state.addResults)
+    const setResults = useSearchStore((state) => state.setResults)
     const navigate = useNavigate()
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,9 +22,9 @@ export const SearchStart = () => {
             setInput({name: file.name, file: file})
             setWaiting(true);
             try {
-                const results = await searchFile(file)
-                addResults(results)
+                const results = await classifyAndSearchFile(file)
                 console.log(results)
+                setResults(results.neighbors)
                 navigate("/search")
             } catch (err) {
                 setError(err)

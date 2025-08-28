@@ -9,6 +9,7 @@ import {useSearchStore} from "../../../../stores/search.ts";
 export const SearchBrowse = () => {
 
     const results = useSearchStore(state => state.results)
+    console.log(results)
 
     return ([
         <div className="search-browse">
@@ -27,7 +28,12 @@ export const SearchBrowse = () => {
                 </div>
             </div>
             <div className="search-result-list">
-                {results.map(result => <SearchResultTile {...result.content}/>)}
+                {results.map(result => <SearchResultTile
+                    key={result.contentHash}
+                    original={result.questionDoc}
+                    preview={result.questionImage}
+                />)
+                }
             </div>
         </div>,
         <SearchFilter/>

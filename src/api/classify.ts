@@ -1,28 +1,11 @@
 import {ENDPOINT} from "./enpoint.ts";
 
-const CLASSIFY_URL = `${ENDPOINT}/classify`
-
-export const classifyFile = (file) => {
-    const name = file.name;
-    let formData = new FormData();
+const CLASSIFY_AND_SEARCH_URL = `${ENDPOINT}/classify_and_search`
+export const classifyAndSearchFile = (file) => {
+    const formData = new FormData();
     formData.append('file', file);
-    formData.append('name', name);
 
-    return fetch(CLASSIFY_URL, {
-        method: 'POST',
-        body: formData
-    }).then(response => response.json())
-}
-
-const SEARCH_URL = `${ENDPOINT}/search`
-
-export const searchFile = (file: File) => {
-    const name = file.name;
-    let formData = new FormData();
-    formData.append('file', file);
-    formData.append('name', name);
-
-    return fetch(SEARCH_URL, {
+    return fetch(CLASSIFY_AND_SEARCH_URL, {
         method: 'POST',
         body: formData
     }).then(response => response.json())
