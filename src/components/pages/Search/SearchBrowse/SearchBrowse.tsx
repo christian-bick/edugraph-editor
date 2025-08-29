@@ -53,8 +53,7 @@ export const SearchBrowse = () => {
                 <div className="search-result-list">
                     {results.map(result => <SearchResultTile
                         key={result.contentHash}
-                        original={result.questionDoc}
-                        preview={result.questionImage}
+                        result={result}
                     />)
                     }
                 </div>

@@ -15,4 +15,12 @@
     &.dimension-3 {
         background-color: colors.$color-3;
     }
+
+    &.lowlight {
+        opacity: 0.5;
+    }
+
+    &.highlight {
+        outline: 3px solid black;
+    }
 }

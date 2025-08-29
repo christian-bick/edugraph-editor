@@ -11,9 +11,9 @@ export const SearchStart = () => {
     const [waiting, setWaiting] = useState<boolean>(false);
     const [error, setError] = useState<string>(null)
 
-    const setInput = useSearchStore((state) => state.setInput)
-    const setResults = useSearchStore((state) => state.setResults)
-    const setClassification = useSearchStore((state) => state.setClassification)
+    const setInput = useSearchStore(state => state.setInput)
+    const setResults = useSearchStore(state => state.setResults)
+    const setClassification = useSearchStore(state => state.setClassification)
     const navigate = useNavigate()
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files

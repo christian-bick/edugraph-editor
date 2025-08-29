@@ -1,17 +1,17 @@
 import {create} from 'zustand'
 
-interface SearchInput {
+export interface SearchInput {
     name: string
     file: File
 }
 
-interface Labels {
+export interface Labels {
     Ability: string[],
     Area: string[],
     Scope: string[],
 }
 
-interface SearchResult {
+export interface SearchResult {
     contentHash: string,
     questionDoc: string,
     questionImage: string,
@@ -26,12 +26,14 @@ interface SearchResult {
 interface SearchState {
     input: SearchInput
     classification: Labels
+    highlightedResult: SearchResult
     results: [SearchResult]
 }
 
 interface SearchAction {
     setInput: (input: SearchInput) => void
     setClassification: (classification: Labels) => void
+    setHighlightedResult:  (result: SearchResult) => void
     setResults: (results: [SearchResult]) => void
     addResults: (results: [SearchResult]) => void
 }
@@ -41,6 +43,7 @@ export const useSearchStore = create<SearchState & SearchAction>((set) => ({
     results: [],
     setInput: (input) => set(() => ({input: input})),
     setClassification: (classification) => set(() => ({classification: classification})),
+    setHighlightedResult:  (result: SearchResult) => set(() => ({highlightedResult: result})),
     setResults: (results) => set(() => ({results: results})),
     addResults: (results) => set((state) => ({results: [...state.results, ...results]}))
 }))

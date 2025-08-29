@@ -1,15 +1,19 @@
 import './SearchResultTile.scss'
 import React from 'react';
+import {SearchResult, useSearchStore} from "../../../../../stores/search.ts";
 
 interface SearchResultTileProps {
-    preview: string,
-    original: string
+    result: SearchResult
 }
 
-export const SearchResultTile = (props: SearchResultTileProps) => (
-    <div className="search-result">
-        <a href={props.original} target="_blank">
-            <img src={props.preview} alt="Search Result" />
-        </a>
-    </div>
-)
+export const SearchResultTile = ({ result }: SearchResultTileProps) => {
+    const setHighlightedResult = useSearchStore(state => state.setHighlightedResult)
+
+    return (
+        <div className="search-result" onMouseEnter={() => setHighlightedResult(result)}>
+            <a href={result.questionDoc} target="_blank">
+                <img src={result.questionImage} alt="Search Result"/>
+            </a>
+        </div>
+    )
+}
