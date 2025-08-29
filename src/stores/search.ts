@@ -25,11 +25,13 @@ interface SearchResult {
 
 interface SearchState {
     input: SearchInput
+    classification: Labels
     results: [SearchResult]
 }
 
 interface SearchAction {
     setInput: (input: SearchInput) => void
+    setClassification: (classification: Labels) => void
     setResults: (results: [SearchResult]) => void
     addResults: (results: [SearchResult]) => void
 }
@@ -38,6 +40,7 @@ export const useSearchStore = create<SearchState & SearchAction>((set) => ({
     input: null,
     results: [],
     setInput: (input) => set(() => ({input: input})),
+    setClassification: (classification) => set(() => ({classification: classification})),
     setResults: (results) => set(() => ({results: results})),
     addResults: (results) => set((state) => ({results: [...state.results, ...results]}))
 }))

@@ -13,6 +13,7 @@ export const SearchStart = () => {
 
     const setInput = useSearchStore((state) => state.setInput)
     const setResults = useSearchStore((state) => state.setResults)
+    const setClassification = useSearchStore((state) => state.setClassification)
     const navigate = useNavigate()
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,9 +23,10 @@ export const SearchStart = () => {
             setInput({name: file.name, file: file})
             setWaiting(true);
             try {
-                const results = await classifyAndSearchFile(file)
-                console.log(results)
-                setResults(results.neighbors)
+                const response = await classifyAndSearchFile(file)
+                console.log(response)
+                setClassification(response.classification)
+                setResults(response.neighbors)
                 navigate("/search")
             } catch (err) {
                 setError(err)
