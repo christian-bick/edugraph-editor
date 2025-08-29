@@ -1,6 +1,11 @@
 /* Develop */
 .nav-button {
+    opacity: 0.3;
+    cursor: default;
+
     &.active {
         font-weight: bold;
+        opacity: 1;
+        cursor: pointer;
     }
 }
