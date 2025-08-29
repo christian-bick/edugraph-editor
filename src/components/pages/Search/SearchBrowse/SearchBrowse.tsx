@@ -12,7 +12,7 @@ export const SearchBrowse = () => {
     const results = useSearchStore(state => state.results)
     const input = useSearchStore(state => state.input)
 
-    const [inputContent, setInputContent] = useState<string | ArrayBuffer>("");
+    const [inputContent, setInputContent] = useState<string | ArrayBuffer>(null);
 
     useEffect(() => {
         const reader = new FileReader();
