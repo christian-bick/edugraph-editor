@@ -6,7 +6,7 @@ import {NavButton} from "./NavButton/NavButton.tsx";
 export const Header = () => (
     <header className="header">
         <div className="header-title">
-            ImagineDB
+            ImagineBase
         </div>
         <div className="header-nav">
             <NavButton label="Develop"/>
