@@ -5,6 +5,7 @@ import {SectionHeader} from '../../../global/SectionHeader/SectionHeader.tsx';
 import {SearchFilter} from '../SearchFilter/SearchFilter.tsx';
 import {SearchResultTile} from "./SearchResultTile/SearchResultTile.tsx";
 import {useSearchStore} from "../../../../stores/search.ts";
+import {Link} from "react-router";
 
 export const SearchBrowse = () => {
 
@@ -43,7 +44,9 @@ export const SearchBrowse = () => {
 
                 </div>
                 <div className="input-upload">
-                    <img src={input_icon} alt="Input Icon"/>
+                    <Link to="/">
+                        <img src={input_icon} alt="Input Icon"/>
+                    </Link>
                 </div>
             </div>
             <div className="search-result-list">
@@ -57,23 +60,4 @@ export const SearchBrowse = () => {
         </div>,
         <SearchFilter/>
     ])
-}
-
-function readFileAsDataURL(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-
-        // Resolve the promise with the result when the reader has successfully loaded the file
-        reader.onload = (event) => {
-            resolve(event.target.result);
-        };
-
-        // Reject the promise if there's an error
-        reader.onerror = (error) => {
-            reject(error);
-        };
-
-        // Start reading the file
-        reader.readAsDataURL(file);
-    });
 }
