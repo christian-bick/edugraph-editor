@@ -18,6 +18,11 @@
         font-size: 1rem;
         color: rgb(0, 0, 0, 0.6);
         text-transform: uppercase;
+
+        .error {
+            color: darkred;
+            text-transform: none;
+        }
     }
 
     .search-form {
@@ -26,6 +31,10 @@
         width: 100%;
         border: 5px colors.$container-border solid;
         border-radius: 15px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
         label {
             width: 100%;
@@ -38,7 +47,28 @@
             img {
                 width: 25%;
                 height: 25%;
-                opacity: 0.25;
+                opacity: 0.75;
+            }
+        }
+
+        .loader {
+            /* Size of the loader */
+            width: 50px;
+            height: 50px;
+
+            /* Thickness and color of the border */
+            border: 5px solid colors.$color-2; /* Light grey base circle */
+            border-top: 5px solid colors.$color-1; /* Blue spinning part */
+
+            /* Make it a circle */
+            border-radius: 50%;
+
+            /* Animation properties */
+            animation: spin 1s linear infinite;
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
             }
         }
     }

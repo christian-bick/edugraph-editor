@@ -1,8 +1,8 @@
 import './SearchStart.scss'
 import React, {useState} from 'react';
 import {classifyAndSearchFile} from '../../../../api/classify'
-import icon_photo from '../../../../assets/icons/take_photo.svg'
-import icon_upload from '../../../../assets/icons/upload.svg'
+import icon_photo from '../../../../assets/icons/add_photo_c1.svg'
+import icon_upload from '../../../../assets/icons/upload_c2.svg'
 import {useSearchStore} from "../../../../stores/search.ts";
 import {useNavigate} from "react-router";
 
@@ -15,7 +15,6 @@ export const SearchStart = () => {
     const setResults = useSearchStore((state) => state.setResults)
     const setClassification = useSearchStore((state) => state.setClassification)
     const navigate = useNavigate()
-
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files
         if (files && files.length > 0 && typeof files[0] !== 'undefined') {
@@ -24,12 +23,17 @@ export const SearchStart = () => {
             setWaiting(true);
             try {
                 const response = await classifyAndSearchFile(file)
-                console.log(response)
-                setClassification(response.classification)
-                setResults(response.neighbors)
-                navigate("/search")
+                if (response.error) {
+                    console.log(response.error)
+                    setError(response.error)
+                } else {
+                    setClassification(response.classification)
+                    setResults(response.neighbors)
+                    navigate("/search")
+                }
             } catch (err) {
-                setError(err)
+                console.log(err)
+                setError(err.message)
             } finally {
                 setWaiting(false)
             }
@@ -40,19 +44,37 @@ export const SearchStart = () => {
     return (
         <div className="search-start">
             <div className="search-prompt">
-                Share Example
+                Share an Example
             </div>
             <div className="search-form">
-                <label htmlFor="upload-input">
-                    <img src={icon_photo} alt="Photo"/>
-                    <img src={icon_upload} alt="Scan"/>
-                </label>
+                {!waiting ? (
+                    <label htmlFor="upload-input">
+                        <img src={icon_photo} alt="Photo"/>
+                        <img src={icon_upload} alt="Scan"/>
+                    </label>
+                ) : (
+                    <div className="loader"></div>
+                )}
                 <input id="upload-input" type="file" accept="image/*" capture="environment"
                        onChange={handleFileChange}/>
             </div>
             <div className="search-prompt">
-                to find similar
+                {!error ? (
+                    <span>to find similar</span>
+                ) : (
+                    <span className="error">Search failed: {truncateString(error, 40)}</span>
+                )}
             </div>
         </div>
     )
+}
+
+function truncateString(str, maxLength) {
+    if (!str) {
+        return "Unknown reason"
+    }
+    if (str.length <= maxLength) {
+        return str;
+    }
+    return str.slice(0, maxLength-3) + '...';
 }
