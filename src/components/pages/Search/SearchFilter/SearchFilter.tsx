@@ -12,6 +12,7 @@ export const SearchFilter = () => {
             <div className="filter-section">
                 <SectionHeader>Area</SectionHeader>
                 {classification.Area.map(label => <DimensionFilter
+                    key={label}
                     dimension="1"
                     label={uriToLabel(label)}
                 />)
@@ -20,6 +21,7 @@ export const SearchFilter = () => {
             <div className="filter-section">
                 <SectionHeader>Ability</SectionHeader>
                 {classification.Ability.map(label => <DimensionFilter
+                    key={label}
                     dimension="2"
                     label={uriToLabel(label)}
                 />)
@@ -28,6 +30,7 @@ export const SearchFilter = () => {
             <div className="filter-section">
                 <SectionHeader>Scope</SectionHeader>
                 {classification.Scope.map(label => <DimensionFilter
+                    key={label}
                     dimension="3"
                     label={uriToLabel(label)}
                 />)

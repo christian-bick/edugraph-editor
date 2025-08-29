@@ -31,33 +31,34 @@ export const SearchBrowse = () => {
         reader.readAsDataURL(input.file);
     }, [input])
 
-    return ([
-        <div className="search-browse">
-            <SectionHeader>
-                Search
-            </SectionHeader>
-            <div className="search-input">
-                <div className="input-icon">
-                    <img src={inputContent} alt="Input Icon"/>
-                </div>
-                <div className="input-description">
+    return (
+        <>
+            <div className="search-browse">
+                <SectionHeader>
+                    Search
+                </SectionHeader>
+                <div className="search-input">
+                    <div className="input-icon">
+                        <img src={inputContent} alt="Input Icon"/>
+                    </div>
+                    <div className="input-description">
 
+                    </div>
+                    <div className="input-upload">
+                        <Link to="/">
+                            <img src={input_icon} alt="Input Icon"/>
+                        </Link>
+                    </div>
                 </div>
-                <div className="input-upload">
-                    <Link to="/">
-                        <img src={input_icon} alt="Input Icon"/>
-                    </Link>
+                <div className="search-result-list">
+                    {results.map(result => <SearchResultTile
+                        key={result.contentHash}
+                        original={result.questionDoc}
+                        preview={result.questionImage}
+                    />)
+                    }
                 </div>
             </div>
-            <div className="search-result-list">
-                {results.map(result => <SearchResultTile
-                    key={result.contentHash}
-                    original={result.questionDoc}
-                    preview={result.questionImage}
-                />)
-                }
-            </div>
-        </div>,
-        <SearchFilter/>
-    ])
+            <SearchFilter/>
+        </>)
 }
