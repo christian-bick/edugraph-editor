@@ -4,12 +4,22 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     background-color: colors.$container-background;
     width: 100%;
+    height: 3rem;
+
+    position: sticky;
+    top: 0;
+    left: 0;
+
+    z-index: 10;
+
+    border-bottom: 1rem white solid;
 
     .header-title {
         width: fit-content;
-        padding: 1rem;
+        padding: 0 1rem;
         font-size: 1.3rem;
     }
 
@@ -19,6 +29,6 @@
         align-items: center;
         width: fit-content;
         gap: 2rem;
-        padding: 1rem;
+        padding: 0 1rem;
     }
 }
