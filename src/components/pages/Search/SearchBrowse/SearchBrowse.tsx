@@ -6,11 +6,13 @@ import {SearchFilter} from '../SearchFilter/SearchFilter.tsx';
 import {SearchResultTile} from "./SearchResultTile/SearchResultTile.tsx";
 import {useSearchStore} from "../../../../stores/search.ts";
 import {Link} from "react-router";
+import {SearchResultDetail} from "./SearchResultDetail/SearchResultDetail.tsx";
 
 export const SearchBrowse = () => {
 
     const results = useSearchStore(state => state.results)
     const input = useSearchStore(state => state.input)
+    const selectedResult = useSearchStore(state => state.selectedResult)
 
     const [inputContent, setInputContent] = useState<string | ArrayBuffer>(null);
 
@@ -50,13 +52,15 @@ export const SearchBrowse = () => {
                         </Link>
                     </div>
                 </div>
-                <div className="search-result-list">
-                    {results.map(result => <SearchResultTile
-                        key={result.contentHash}
-                        result={result}
-                    />)
-                    }
-                </div>
+                {!selectedResult ? (
+                    <div className="search-result-list">
+                        {results.map(result =>
+                            <SearchResultTile key={result.contentHash} result={result}/>
+                        )}
+                    </div>
+                ) : (
+                    <SearchResultDetail result={selectedResult}/>
+                )}
             </div>
             <SearchFilter/>
         </>)
