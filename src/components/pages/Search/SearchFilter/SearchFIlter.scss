@@ -6,6 +6,12 @@
     flex-direction: column;
     gap: 2rem;
 
+    top: 5px;
+    left: 0;
+
+    align-self: start;
+    position: sticky;
+
     .filter-section {
         display: flex;
         flex-direction: column;
