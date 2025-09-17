@@ -28,5 +28,6 @@ storybook-static
 
 #Environment
 **/temp/
-*.env
+.env
+.env.bak
 *-credentials.json
