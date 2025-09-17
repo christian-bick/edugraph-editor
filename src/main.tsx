@@ -1,10 +1,10 @@
-import React, {StrictMode} from 'react'
+import {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'
 import './main.scss'
 import {Header} from './components/app/Header/Header.tsx';
 import {Footer} from './components/app/Footer/Footer.tsx';
 import {Content} from './components/app/Content/Content.tsx';
-import {BrowserRouter, Routes, Route, useNavigate} from 'react-router';
+import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import {SearchBrowse} from "./components/pages/Search/SearchBrowse/SearchBrowse.tsx";
 import {SearchStart} from "./components/pages/Search/SearchStart/SearchStart.tsx";
 

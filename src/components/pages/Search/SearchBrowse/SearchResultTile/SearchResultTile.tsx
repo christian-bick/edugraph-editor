@@ -1,6 +1,5 @@
 import './SearchResultTile.scss'
-import React from 'react';
-import {SearchResult, useSearchStore} from "../../../../../stores/search.ts";
+import {type SearchResult, useSearchStore} from "../../../../../stores/search.ts";
 
 interface SearchResultTileProps {
     result: SearchResult

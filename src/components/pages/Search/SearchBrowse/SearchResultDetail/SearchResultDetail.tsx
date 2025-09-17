@@ -1,6 +1,5 @@
 import './SearchResultDetail.scss'
-import React from 'react';
-import {SearchResult, useSearchStore} from "../../../../../stores/search.ts";
+import {type SearchResult, useSearchStore} from "../../../../../stores/search.ts";
 import close from "../../../../../assets/icons/close.svg";
 import download from "../../../../../assets/icons/download.svg";
 

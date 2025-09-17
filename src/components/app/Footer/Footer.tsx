@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 import './Footer.scss';
 import {NavButton} from "../Header/NavButton/NavButton.tsx";

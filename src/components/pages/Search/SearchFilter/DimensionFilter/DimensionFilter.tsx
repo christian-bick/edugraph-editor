@@ -1,4 +1,3 @@
-import React from 'react';
 import './DimensionFilter.scss'
 
 export interface DimensionFilterProps {
@@ -8,7 +7,7 @@ export interface DimensionFilterProps {
     lowlight: boolean
 }
 
-export const DimensionFilter = ({dimension, label, highlight, lowlight}) => {
+export const DimensionFilter = ({dimension, label, highlight, lowlight}: DimensionFilterProps) => {
     const dimensionClass = "dimension-" + dimension
 
     let emphasizeClass = ""

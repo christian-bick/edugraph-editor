@@ -1,20 +1,21 @@
 import './SearchFilter.scss'
-import React, {useState} from 'react';
 import {SectionHeader} from "../../../global/SectionHeader/SectionHeader.tsx";
 import {DimensionFilter} from "./DimensionFilter/DimensionFilter.tsx";
 import {useSearchStore} from "../../../../stores/search.ts";
+
+type Diff = { more: Set<string>; less: Set<string> };
 
 export const SearchFilter = () => {
 
     const highlightedResult = useSearchStore(state => state.highlightedResult)
     const classification  = useSearchStore(state => state.classification)
 
-    let areaLabels = classification.Area
-    let abilityLabels = classification.Ability
-    let scopeLabels = classification.Scope
-    let areaDiff = { more: new Set(), less: new Set()}
-    let abilityDiff = { more: new Set(), less: new Set()}
-    let scopeDiff = { more: new Set(), less: new Set()}
+    let areaLabels: string[] = classification.Area
+    let abilityLabels: string[] = classification.Ability
+    let scopeLabels: string[] = classification.Scope
+    let areaDiff: Diff = { more: new Set(), less: new Set()}
+    let abilityDiff: Diff = { more: new Set(), less: new Set()}
+    let scopeDiff: Diff = { more: new Set(), less: new Set()}
 
     if (highlightedResult) {
         [ areaLabels, areaDiff] = mergeAndDiffArrays(areaLabels, highlightedResult.labels.Area);
@@ -28,7 +29,7 @@ export const SearchFilter = () => {
                 <SectionHeader>Area</SectionHeader>
                 {areaLabels.map(label => <DimensionFilter
                     key={label}
-                    dimension="1"
+                    dimension={1}
                     label={uriToLabel(label)}
                     highlight={ areaDiff.more.has(label) }
                     lowlight={ areaDiff.less.has(label) }
@@ -39,7 +40,7 @@ export const SearchFilter = () => {
                 <SectionHeader>Ability</SectionHeader>
                 {abilityLabels.map(label => <DimensionFilter
                     key={label}
-                    dimension="2"
+                    dimension={2}
                     label={uriToLabel(label)}
                     highlight={ abilityDiff.more.has(label) }
                     lowlight={ abilityDiff.less.has(label) }
@@ -50,7 +51,7 @@ export const SearchFilter = () => {
                 <SectionHeader>Scope</SectionHeader>
                 {scopeLabels.map(label => <DimensionFilter
                     key={label}
-                    dimension="3"
+                    dimension={3}
                     label={uriToLabel(label)}
                     highlight={ scopeDiff.more.has(label) }
                     lowlight={ scopeDiff.less.has(label) }
@@ -61,7 +62,7 @@ export const SearchFilter = () => {
     )
 }
 
-function uriToLabel(uri) {
+function uriToLabel(uri: string) {
     // 1. Get the part of the string after the '#' symbol.
     const fragment = uri.split('#').pop() || '';
     // 2. Add a space before each uppercase letter
@@ -77,10 +78,10 @@ function uriToLabel(uri) {
  *
  * @param {string[]} arr1 The original array.
  * @param {string[]} arr2 The new array to merge and compare against.
- * @returns {{merged: string[], diff: {more: string[], less: string[]}}}
+ * @returns {[string[], Diff]}
  * An object containing the merged array and the diff.
  */
-function mergeAndDiffArrays(arr1, arr2) {
+function mergeAndDiffArrays(arr1: string[], arr2: string[]): [string[], Diff] {
     // --- Part 1: Calculate the Diff ---
 
     // Use Sets for efficient lookups (O(1) average time complexity for .has())
@@ -93,13 +94,13 @@ function mergeAndDiffArrays(arr1, arr2) {
     // 'less': items that are in the first array but not in the second.
     const less = arr1.filter(item => !set2.has(item));
 
-    const diff = { more: new Set(more), less: new Set(less) };
+    const diff: Diff = { more: new Set(more), less: new Set(less) };
 
 
     // --- Part 2: Perform the Merge ---
 
     // Combine the arrays and remove duplicates using a Set
-    const merged = [...new Set([...arr1, ...arr2])];
+    const merged: string[] = [...new Set([...arr1, ...arr2])];
 
 
     // --- Return both results ---

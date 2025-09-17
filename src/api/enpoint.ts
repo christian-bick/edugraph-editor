@@ -1,1 +1,1 @@
-export const ENDPOINT = import.meta.env.PROD ? "PROD-ENDPOINT" : "http://localhost:8080"
+export const ENDPOINT = import.meta.env.API_ENDPOINT || "http://localhost:8080"

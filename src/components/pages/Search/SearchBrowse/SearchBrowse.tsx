@@ -1,11 +1,11 @@
 import './SearchBrowse.scss'
-import React, {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import input_icon from '../../../../assets/icons/add_photo.svg'
 import {SectionHeader} from '../../../global/SectionHeader/SectionHeader.tsx';
 import {SearchFilter} from '../SearchFilter/SearchFilter.tsx';
 import {SearchResultTile} from "./SearchResultTile/SearchResultTile.tsx";
 import {useSearchStore} from "../../../../stores/search.ts";
-import {Link} from "react-router";
+import {Link} from "react-router-dom";
 import {SearchResultDetail} from "./SearchResultDetail/SearchResultDetail.tsx";
 
 export const SearchBrowse = () => {
@@ -14,14 +14,16 @@ export const SearchBrowse = () => {
     const input = useSearchStore(state => state.input)
     const selectedResult = useSearchStore(state => state.selectedResult)
 
-    const [inputContent, setInputContent] = useState<string | ArrayBuffer>(null);
+    const [inputContent, setInputContent] = useState<string | ArrayBuffer>('');
 
     useEffect(() => {
         const reader = new FileReader();
 
         // Resolve the promise with the result when the reader has successfully loaded the file
         reader.onload = (event) => {
-            setInputContent(event.target.result);
+            if (event.target && event.target.result) {
+                setInputContent(event.target.result);
+            }
         };
 
         // Reject the promise if there's an error
@@ -30,7 +32,9 @@ export const SearchBrowse = () => {
         };
 
         // Start reading the file
-        reader.readAsDataURL(input.file);
+        if (input) {
+            reader.readAsDataURL(input.file);
+        }
     }, [input])
 
     return (
@@ -41,7 +45,7 @@ export const SearchBrowse = () => {
                 </SectionHeader>
                 <div className="search-input">
                     <div className="input-icon">
-                        <img src={inputContent} alt="Input Icon"/>
+                        <img src={inputContent as string} alt="Input Icon"/>
                     </div>
                     <div className="input-description">
 

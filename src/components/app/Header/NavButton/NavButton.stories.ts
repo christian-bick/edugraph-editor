@@ -19,6 +19,7 @@ export const Inactive: Story = {
 
 export const Active: Story = {
     args: {
+        label: "Lorem",
         active: true
     },
 }

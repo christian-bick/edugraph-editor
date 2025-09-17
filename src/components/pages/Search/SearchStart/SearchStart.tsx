@@ -1,5 +1,5 @@
 import './SearchStart.scss'
-import React, {useState} from 'react';
+import {useState} from 'react';
 import {classifyAndSearchFile} from '../../../../api/classify'
 import icon_photo from '../../../../assets/icons/add_photo_c1.svg'
 import icon_upload from '../../../../assets/icons/upload_c2.svg'
@@ -9,7 +9,7 @@ import {useNavigate} from "react-router";
 export const SearchStart = () => {
 
     const [waiting, setWaiting] = useState<boolean>(false);
-    const [error, setError] = useState<string>(null)
+    const [error, setError] = useState<string>('')
 
     const setInput = useSearchStore(state => state.setInput)
     const setResults = useSearchStore(state => state.setResults)
@@ -31,7 +31,7 @@ export const SearchStart = () => {
                     setResults(response.neighbors)
                     navigate("/search")
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.log(err)
                 setError(err.message)
             } finally {
@@ -69,7 +69,7 @@ export const SearchStart = () => {
     )
 }
 
-function truncateString(str, maxLength) {
+function truncateString(str: string, maxLength: number) {
     if (!str) {
         return "Unknown reason"
     }
