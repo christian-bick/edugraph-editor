@@ -1,0 +1,34 @@
+name: Deploy to Firebase Hosting
+
+on:
+    push:
+        branches:
+            - main # Or whatever branch you want to deploy from
+
+jobs:
+    build_and_deploy:
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout Code
+                uses: actions/checkout@v4
+
+            -   name: Setup Node.js
+                uses: actions/setup-node@v4
+                with:
+                    node-version: '22' # Use a Node.js version compatible with your project
+
+            -   name: Install Dependencies
+                run: npm install
+
+            -   name: Build Vite App
+                run: npm run build
+
+            -   name: Deploy to Firebase Hosting
+                uses: FirebaseExtended/action-hosting-deploy@v0
+                with:
+                    repoToken: '${{ secrets.GITHUB_TOKEN }}' # Required for GitHub deployments
+                    firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' # Your Firebase token secret
+                    projectId: 'edugraph-438718' # Your Firebase Project ID
+                    channelId: live # Deploy to the 'live' channel (your default site)
+                    target: imagine-web # Your Firebase Hosting site ID, if you have multiple sites
+                    entryPoint: . # The directory containing firebase.json
