@@ -30,5 +30,4 @@ jobs:
                     firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' # Your Firebase token secret
                     projectId: 'edugraph-438718' # Your Firebase Project ID
                     channelId: live # Deploy to the 'live' channel (your default site)
-                    target: imagine-web # Your Firebase Hosting site ID, if you have multiple sites
                     entryPoint: . # The directory containing firebase.json
