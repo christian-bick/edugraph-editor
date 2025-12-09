@@ -26,6 +26,7 @@ jobs:
             -   name: Deploy to Firebase Hosting
                 uses: FirebaseExtended/action-hosting-deploy@v0
                 with:
+                    target: 'imagine-web',
                     repoToken: '${{ secrets.GITHUB_TOKEN }}' # Required for GitHub deployments
                     firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' # Your Firebase token secret
                     projectId: 'edugraph-438718' # Your Firebase Project ID
