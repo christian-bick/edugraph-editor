@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "edugraph": "edugraph-438718"
+  },
+  "targets": {
+    "edugraph-438718": {
+      "hosting": {
+        "imagine-web": [
+          "imagine-web"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
