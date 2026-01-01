@@ -1,4 +1,5 @@
 import {create} from 'zustand'
+import {SearchFunction} from "./searchFunction.ts";
 
 export interface SearchInput {
     name: string
@@ -29,6 +30,7 @@ interface SearchState {
     highlightedResult: SearchResult | null
     selectedResult: SearchResult | null
     results: SearchResult[]
+    selectedFunction: SearchFunction
 }
 
 interface SearchAction {
@@ -38,6 +40,7 @@ interface SearchAction {
     setSelectedResult: (result: SearchResult | null) => void
     setResults: (results: SearchResult[]) => void
     addResults: (results: SearchResult[]) => void
+    setSelectedFunction: (selectedFunction: SearchFunction) => void
 }
 
 export const useSearchStore = create<SearchState & SearchAction>((set) => ({
@@ -46,10 +49,12 @@ export const useSearchStore = create<SearchState & SearchAction>((set) => ({
     classification: {Ability: [], Area: [], Scope: []},
     highlightedResult: null,
     selectedResult: null,
+    selectedFunction: SearchFunction.Classification,
     setInput: (input) => set(() => ({input: input})),
     setClassification: (classification) => set(() => ({classification: classification})),
     setHighlightedResult: (result) => set(() => ({highlightedResult: result})),
     setSelectedResult: (result) => set(() => ({selectedResult: result, highlightedResult: result})),
     setResults: (results) => set(() => ({results: results})),
-    addResults: (results) => set((state) => ({results: [...state.results, ...results]}))
+    addResults: (results) => set((state) => ({results: [...state.results, ...results]})),
+    setSelectedFunction: (selectedFunction) => set(() => ({selectedFunction: selectedFunction})),
 }))

@@ -12,7 +12,7 @@
 
         display: flex;
         gap: 1rem;
-        height: 4rem;
+        height: 2.5rem;
         width: 100%;
 
         .input-container {
@@ -34,6 +34,34 @@
 
             img {
                 height: 100%;
+            }
+        }
+
+        .input-action {
+            flex: 1 0;
+            height: 100%;
+
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+
+            .action-item {
+                @extend .input-container;
+                height: 100%;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: rgb(0, 0, 0, 0.5);
+                padding: 0 0.8rem;
+
+                cursor: pointer;
+
+                &.active {
+                    border-width: 2px;
+                    border-color: colors.$color-2-dark;
+                    color: colors.$color-2-dark;
+                }
             }
         }
 
