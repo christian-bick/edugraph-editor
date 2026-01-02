@@ -5,6 +5,9 @@ export const SearchFunction = {
     Similarity: "Similarity",
 } as const;
 
+export type SearchFunction = (typeof SearchFunction)[keyof typeof SearchFunction];
+
+
 export interface SearchInput {
     name: string
     file: File
