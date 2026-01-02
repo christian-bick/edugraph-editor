@@ -5,6 +5,20 @@ import {useSearchStore} from "../../../../stores/search.ts";
 
 type Diff = { more: Set<string>; less: Set<string> };
 
+function FilterDimension(props: { name: string, dimension: number, labels: string[], diff: Diff }) {
+    return <div className="filter-section">
+        <SectionHeader>{ props.name }</SectionHeader>
+        {props.labels.map(label => <DimensionFilter
+            key={label}
+            dimension={props.dimension}
+            label={uriToLabel(label)}
+            highlight={props.diff.more.has(label)}
+            lowlight={props.diff.less.has(label)}
+        />)
+        }
+    </div>;
+}
+
 export const SearchFilter = () => {
 
     const highlightedResult = useSearchStore(state => state.highlightedResult)
@@ -25,39 +39,9 @@ export const SearchFilter = () => {
 
     return (
         <div className="search-filter">
-            <div className="filter-section">
-                <SectionHeader>Area</SectionHeader>
-                {areaLabels.map(label => <DimensionFilter
-                    key={label}
-                    dimension={1}
-                    label={uriToLabel(label)}
-                    highlight={ areaDiff.more.has(label) }
-                    lowlight={ areaDiff.less.has(label) }
-                />)
-                }
-            </div>
-            <div className="filter-section">
-                <SectionHeader>Ability</SectionHeader>
-                {abilityLabels.map(label => <DimensionFilter
-                    key={label}
-                    dimension={2}
-                    label={uriToLabel(label)}
-                    highlight={ abilityDiff.more.has(label) }
-                    lowlight={ abilityDiff.less.has(label) }
-                />)
-                }
-            </div>
-            <div className="filter-section">
-                <SectionHeader>Scope</SectionHeader>
-                {scopeLabels.map(label => <DimensionFilter
-                    key={label}
-                    dimension={3}
-                    label={uriToLabel(label)}
-                    highlight={ scopeDiff.more.has(label) }
-                    lowlight={ scopeDiff.less.has(label) }
-                />)
-                }
-            </div>
+            <FilterDimension name="Area" dimension={1} labels={areaLabels} diff={areaDiff} />
+            <FilterDimension name="Ability" dimension={2} labels={abilityLabels} diff={abilityDiff} />
+            <FilterDimension name="Scope" dimension={3} labels={scopeLabels} diff={scopeDiff} />
         </div>
     )
 }
