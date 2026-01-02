@@ -19,24 +19,31 @@ export const SearchStart = () => {
         const files = e.target.files
         if (files && files.length > 0 && typeof files[0] !== 'undefined') {
             const file = files[0]
-            setInput({name: file.name, file: file})
-            setWaiting(true);
-            try {
-                const response = await classifyAndSearchFile(file)
-                if (response.error) {
-                    console.log(response.error)
-                    setError(response.error)
-                } else {
-                    setClassification(response.classification)
-                    setResults(response.neighbors)
-                    navigate("/search")
+            
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const preview = event.target?.result as string;
+                setInput({name: file.name, preview: preview})
+                
+                setWaiting(true);
+                try {
+                    const response = await classifyAndSearchFile(file)
+                    if (response.error) {
+                        console.log(response.error)
+                        setError(response.error)
+                    } else {
+                        setClassification(response.classification)
+                        setResults(response.neighbors)
+                        navigate("/search")
+                    }
+                } catch (err: any) {
+                    console.log(err)
+                    setError(err.message)
+                } finally {
+                    setWaiting(false)
                 }
-            } catch (err: any) {
-                console.log(err)
-                setError(err.message)
-            } finally {
-                setWaiting(false)
-            }
+            };
+            reader.readAsDataURL(file);
         }
     };
 

@@ -1,4 +1,5 @@
 import {create} from 'zustand'
+import {persist, createJSONStorage} from 'zustand/middleware'
 
 export const SearchFunction = {
     Classification: "Classification",
@@ -10,7 +11,7 @@ export type SearchFunction = (typeof SearchFunction)[keyof typeof SearchFunction
 
 export interface SearchInput {
     name: string
-    file: File
+    preview: string
 }
 
 export interface Labels {
@@ -50,18 +51,31 @@ interface SearchAction {
     setSelectedFunction: (selectedFunction: SearchFunction) => void
 }
 
-export const useSearchStore = create<SearchState & SearchAction>((set) => ({
-    input: null,
-    results: [],
-    classification: {Ability: [], Area: [], Scope: []},
-    highlightedResult: null,
-    selectedResult: null,
-    selectedFunction: SearchFunction.Classification,
-    setInput: (input) => set(() => ({input: input})),
-    setClassification: (classification) => set(() => ({classification: classification})),
-    setHighlightedResult: (result) => set(() => ({highlightedResult: result})),
-    setSelectedResult: (result) => set(() => ({selectedResult: result, highlightedResult: result})),
-    setResults: (results) => set(() => ({results: results})),
-    addResults: (results) => set((state) => ({results: [...state.results, ...results]})),
-    setSelectedFunction: (selectedFunction) => set(() => ({selectedFunction: selectedFunction, selectedResult: null, highlightedResult: null })),
-}))
+export const useSearchStore = create<SearchState & SearchAction>()(
+    persist(
+        (set) => ({
+            input: null,
+            results: [],
+            classification: {Ability: [], Area: [], Scope: []},
+            highlightedResult: null,
+            selectedResult: null,
+            selectedFunction: SearchFunction.Classification,
+            setInput: (input) => set(() => ({input: input})),
+            setClassification: (classification) => set(() => ({classification: classification})),
+            setHighlightedResult: (result) => set(() => ({highlightedResult: result})),
+            setSelectedResult: (result) => set(() => ({selectedResult: result, highlightedResult: result})),
+            setResults: (results) => set(() => ({results: results})),
+            addResults: (results) => set((state) => ({results: [...state.results, ...results]})),
+            setSelectedFunction: (selectedFunction) => set(() => ({
+                selectedFunction: selectedFunction,
+                selectedResult: null,
+                highlightedResult: null
+            })),
+        }),
+        {
+            name: 'search-storage',
+            storage: createJSONStorage(() => sessionStorage),
+        }
+    )
+)
+
