@@ -14,6 +14,8 @@
     justify-content: center;
     align-items: center;
 
+    padding: 0.5rem;
+
     .preview-image {
         max-width: 100%;
         max-height: 100%;
@@ -27,7 +29,7 @@
         right: 10px;
 
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         gap: 0.5rem;
     }
 }

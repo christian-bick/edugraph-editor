@@ -14,10 +14,10 @@ export const SearchResultDetail = ({result}: SearchResultDetailProps) => {
         <div className="search-result-detail">
             <img className="preview-image" src={result.questionImage} alt="Search Result"/>
             <div className="action-buttons">
+                <img onClick={() => setSelectedResult(null)} src={close} alt="Close"/>
                 <a href={result.questionDoc} target="_blank">
                     <img src={download} alt="Download"/>
                 </a>
-                <img onClick={() => setSelectedResult(null)} src={close} alt="Close"/>
             </div>
         </div>
     )

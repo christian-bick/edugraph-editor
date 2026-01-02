@@ -1,6 +1,8 @@
 import './SearchResultDetail.scss'
 import {useSearchStore} from "../../../../../stores/search.ts";
 import {useEffect, useState} from "react";
+import close from "../../../../../assets/icons/close.svg";
+import download from "../../../../../assets/icons/download.svg";
 
 export const SearchInputDetail = () => {
 
