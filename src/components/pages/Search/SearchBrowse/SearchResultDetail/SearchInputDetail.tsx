@@ -1,6 +1,5 @@
 import './SearchResultDetail.scss'
 import {useSearchStore} from "../../../../../stores/search.ts";
-import {useEffect, useState} from "react";
 
 export const SearchInputDetail = () => {
 
@@ -14,4 +13,5 @@ export const SearchInputDetail = () => {
         </div>
     )
 }
+
 
