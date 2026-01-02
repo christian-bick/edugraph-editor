@@ -3,10 +3,9 @@ import input_icon from '../../../../assets/icons/add_photo.svg'
 import {SectionHeader} from '../../../global/SectionHeader/SectionHeader.tsx';
 import {SearchFilter} from '../SearchFilter/SearchFilter.tsx';
 import {SearchResultTile} from "./SearchResultTile/SearchResultTile.tsx";
-import {useSearchStore} from "../../../../stores/search.ts";
+import {useSearchStore, SearchFunction} from "../../../../stores/search.ts";
 import {Link} from "react-router-dom";
 import {SearchResultDetail} from "./SearchResultDetail/SearchResultDetail.tsx";
-import {SearchFunction} from "../../../../stores/searchFunction.ts";
 import {SearchInputDetail} from "./SearchResultDetail/SearchInputDetail.tsx";
 
 function SearchResultBody() {
@@ -43,7 +42,7 @@ export const SearchBrowse = () => {
                 <div className="search-input">
                     <div className="input-upload">
                         <Link to="/">
-                            <img src={input_icon} alt="Input Icon"/>
+                            <img src={input_icon as string} alt="Input Icon"/>
                         </Link>
                     </div>
                     <div className="input-action">

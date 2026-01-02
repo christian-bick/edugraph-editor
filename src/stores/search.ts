@@ -1,6 +1,11 @@
 import {create} from 'zustand'
 import {SearchFunction} from "./searchFunction.ts";
 
+export const SearchFunction = {
+    Classification: "Classification",
+    Similarity: "Similarity",
+} as const;
+
 export interface SearchInput {
     name: string
     file: File
