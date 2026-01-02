@@ -1,5 +1,4 @@
 import {create} from 'zustand'
-import {SearchFunction} from "./searchFunction.ts";
 
 export const SearchFunction = {
     Classification: "Classification",
