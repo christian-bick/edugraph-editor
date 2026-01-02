@@ -1,6 +1,5 @@
 import './SearchBrowse.scss'
 import input_icon from '../../../../assets/icons/add_photo.svg'
-import {SectionHeader} from '../../../global/SectionHeader/SectionHeader.tsx';
 import {SearchFilter} from '../SearchFilter/SearchFilter.tsx';
 import {SearchResultTile} from "./SearchResultTile/SearchResultTile.tsx";
 import {useSearchStore, SearchFunction} from "../../../../stores/search.ts";
@@ -36,9 +35,6 @@ export const SearchBrowse = () => {
     return (
         <>
             <div className="search-browse">
-                <SectionHeader>
-                    Explore
-                </SectionHeader>
                 <div className="search-input">
                     <div className="input-upload">
                         <Link to="/">
@@ -47,10 +43,10 @@ export const SearchBrowse = () => {
                     </div>
                     <div className="input-action">
                         <div className={`action-item ${classifyClass}`} onClick={() => selectFunction(SearchFunction.Classification)}>
-                            Classification
+                            Classify
                         </div>
                         <div className={`action-item ${similarClass}`} onClick={() => selectFunction(SearchFunction.Similarity)}>
-                            Similar
+                            Find Similar
                         </div>
                     </div>
                 </div>
