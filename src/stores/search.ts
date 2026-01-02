@@ -61,5 +61,5 @@ export const useSearchStore = create<SearchState & SearchAction>((set) => ({
     setSelectedResult: (result) => set(() => ({selectedResult: result, highlightedResult: result})),
     setResults: (results) => set(() => ({results: results})),
     addResults: (results) => set((state) => ({results: [...state.results, ...results]})),
-    setSelectedFunction: (selectedFunction) => set(() => ({selectedFunction: selectedFunction})),
+    setSelectedFunction: (selectedFunction) => set(() => ({selectedFunction: selectedFunction, selectedResult: null, highlightedResult: null })),
 }))
