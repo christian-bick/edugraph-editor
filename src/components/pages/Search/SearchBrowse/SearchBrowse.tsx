@@ -34,22 +34,25 @@ export const SearchBrowse = () => {
 
     return (
         <>
-            <div className="search-browse">
-                <div className="search-input">
-                    <div className="input-upload">
-                        <Link to="/">
-                            <img src={input_icon as string} alt="Input Icon"/>
-                        </Link>
+            <div className="search-input">
+                <div className="input-upload">
+                    <Link to="/">
+                        <img src={input_icon as string} alt="Input Icon"/>
+                    </Link>
+                </div>
+                <div className="input-action">
+                    <div className={`action-item ${classifyClass}`}
+                         onClick={() => selectFunction(SearchFunction.Classification)}>
+                        Classify
                     </div>
-                    <div className="input-action">
-                        <div className={`action-item ${classifyClass}`} onClick={() => selectFunction(SearchFunction.Classification)}>
-                            Classify
-                        </div>
-                        <div className={`action-item ${similarClass}`} onClick={() => selectFunction(SearchFunction.Similarity)}>
-                            Find Similar
-                        </div>
+                    <div className={`action-item ${similarClass}`}
+                         onClick={() => selectFunction(SearchFunction.Similarity)}>
+                        Find Similar
                     </div>
                 </div>
+            </div>
+            <div className="search-browse">
+
                 {selectedFunction === SearchFunction.Similarity ?
                     <SearchResultBody/> :
                     <SearchInputDetail/>

@@ -6,11 +6,16 @@
     flex-direction: column;
     gap: 2rem;
 
-    top: 7.5rem;
-    left: 0;
-
     align-self: start;
     position: sticky;
+
+    @media (max-width: 800px) {
+        grid-column-start: 1;
+        grid-column-end: -1;
+
+        padding: 0 1rem;
+        gap: 1rem;
+    }
 
     .filter-section {
         display: flex;

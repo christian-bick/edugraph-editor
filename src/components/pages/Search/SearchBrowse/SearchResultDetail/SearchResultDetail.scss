@@ -14,12 +14,12 @@
     justify-content: center;
     align-items: center;
 
-    padding: 0.5rem;
-
     .preview-image {
         max-width: 100%;
         max-height: 100%;
         object-fit: contain;
+        padding: 1rem;
+        box-sizing: border-box;
     }
 
     .action-buttons {
