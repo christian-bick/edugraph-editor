@@ -33,7 +33,7 @@ export const SearchBrowse = () => {
     const classifyClass = selectedFunction === SearchFunction.Classification ? "active" : "inactive"
 
     return (
-        <>
+        <div className="search-page-grid">
             <div className="search-input">
                 <div className="input-upload">
                     <Link to="/">
@@ -59,5 +59,6 @@ export const SearchBrowse = () => {
                 }
             </div>
             <SearchFilter/>
-        </>)
+        </div>)
 }
+

@@ -1,14 +1,27 @@
 @use "/src/colors.scss" as colors;
 
+.search-page-grid {
+    grid-column-start: 1;
+    grid-column-end: -1;
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 2rem;
+    align-content: start;
+}
+
 .search-input {
 
     grid-column-start: 1;
     grid-column-end: -1;
 
-    @media (max-width: 800px) {
+    @media (max-width: 1400px) {
         padding: 0 1rem;
         box-sizing: border-box;
     }
+
+    height: fit-content;
 
     display: flex;
     gap: 1rem;

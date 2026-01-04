@@ -9,6 +9,11 @@
     align-self: start;
     position: sticky;
 
+    @media (max-width: 1400px) {
+        padding-right: 1rem;
+        box-sizing: border-box;
+    }
+
     @media (max-width: 800px) {
         grid-column-start: 1;
         grid-column-end: -1;
