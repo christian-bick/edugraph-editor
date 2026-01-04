@@ -100,14 +100,14 @@ export const SearchStart = () => {
                 <input id="upload-input" type="file" accept="image/*" capture="environment"
                        onChange={handleFileChange}/>
             </div>
-            <div className="search-prompt">
+            <div className="search-prompt" style={{visibility: waiting ? 'hidden' : 'visible'}}>
                 {!error ? (
                     <span>or use an example</span>
                 ) : (
                     <span className="error">Search failed: {truncateString(error, 100)}</span>
                 )}
             </div>
-            <div className="example-carousel">
+            <div className="example-carousel" style={{visibility: waiting ? 'hidden' : 'visible'}}>
                 <button className="nav-btn prev" onClick={prevExample}>&lt;</button>
                 <img
                     src={EXAMPLES[currentExampleIndex]}
@@ -118,6 +118,7 @@ export const SearchStart = () => {
                 />
                 <button className="nav-btn next" onClick={nextExample}>&gt;</button>
             </div>
+
         </div>
     )
 }
