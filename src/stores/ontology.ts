@@ -16,6 +16,8 @@ export interface OntologyEntities {
 export interface OntologyRelations {
     expands: Record<string, string[]>;
     partOf: Record<string, string[]>;
+    expandedBy?: Record<string, string[]>;
+    hasPart?: Record<string, string[]>;
 }
 
 export interface Ontology {
@@ -34,18 +36,44 @@ interface OntologyAction {
     fetchOntology: () => Promise<void>;
 }
 
+const computeInverse = (source: Record<string, string[]>) => {
+    const inverse: Record<string, string[]> = {};
+    for (const [key, values] of Object.entries(source)) {
+        for (const value of values) {
+            if (!inverse[value]) {
+                inverse[value] = [];
+            }
+            inverse[value].push(key);
+        }
+    }
+    return inverse;
+};
+
+const enrichOntology = (ontology: Ontology): Ontology => {
+    if (!ontology || !ontology.relations) return ontology;
+    
+    return {
+        ...ontology,
+        relations: {
+            ...ontology.relations,
+            expandedBy: computeInverse(ontology.relations.expands || {}),
+            hasPart: computeInverse(ontology.relations.partOf || {}),
+        }
+    };
+};
+
 export const useOntologyStore = create<OntologyState & OntologyAction>()(
     persist(
         (set) => ({
             ontology: null,
             loading: false,
             error: null,
-            setOntology: (ontology) => set({ontology}),
+            setOntology: (ontology) => set({ontology: enrichOntology(ontology)}),
             fetchOntology: async () => {
                 set({loading: true, error: null});
                 try {
-                    const ontology = await loadOntology();
-                    set({ontology, loading: false});
+                    const rawOntology = await loadOntology();
+                    set({ontology: enrichOntology(rawOntology), loading: false});
                 } catch (error: any) {
                     set({error: error.message, loading: false});
                 }
@@ -54,6 +82,27 @@ export const useOntologyStore = create<OntologyState & OntologyAction>()(
         {
             name: 'ontology-storage',
             storage: createJSONStorage(() => sessionStorage),
+            partialize: (state) => {
+                if (state.ontology && state.ontology.relations) {
+                    // Create a copy of ontology relations without derived properties
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const { expandedBy, hasPart, ...persistedRelations } = state.ontology.relations;
+                    return {
+                        ...state,
+                        ontology: {
+                            ...state.ontology,
+                            relations: persistedRelations
+                        }
+                    };
+                }
+                return state;
+            },
+            onRehydrateStorage: () => (state) => {
+                if (state && state.ontology) {
+                    state.setOntology(state.ontology);
+                }
+            },
         }
     )
 )
+
