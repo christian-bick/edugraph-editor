@@ -30,8 +30,10 @@
 
         .indicator-container {
             width: $button-width;
+            height: $button-width; /* Reserve height to prevent jump */
             display: flex;
             justify-content: center;
+            align-items: center; /* Center vertically */
             flex-shrink: 0;
             font-weight: bold;
             cursor: pointer;
@@ -39,6 +41,7 @@
             .indicator {
                 width: 1.2rem;
                 height: 1.2rem;
+                box-sizing: border-box; /* Ensure border is included or handled consistently */
                 border: 2px solid white;
                 border-radius: 50%;
                 display: flex;

@@ -21,7 +21,7 @@ interface ResolvedEntity {
 
 const resolveNames = (keys: string[], ontology: Ontology | null): ResolvedEntity[] => {
     if (!ontology || !keys.length) return [];
-    
+
     // Helper to find natural name in a specific category or all
     const findNaturalName = (key: string): ResolvedEntity => {
         for (const category of Object.values(ontology.entities)) {
@@ -37,6 +37,7 @@ const resolveNames = (keys: string[], ontology: Ontology | null): ResolvedEntity
 
 export const DimensionFilter = ({dimension, label, entityName, category, highlight, lowlight}: DimensionFilterProps) => {
     const selectedFunction = useSearchStore(state => state.selectedFunction)
+    const selectedResult = useSearchStore(state => state.selectedResult)
     const search = useSearchStore(state => state.search)
     const setSearch = useSearchStore(state => state.setSearch)
     const ontology = useOntologyStore(state => state.ontology)
@@ -56,13 +57,13 @@ export const DimensionFilter = ({dimension, label, entityName, category, highlig
     let extendsList: ResolvedEntity[] = [];
     let extendedByList: ResolvedEntity[] = [];
 
-    if (selectedFunction === SearchFunction.Similarity && ontology?.relations) {
+    if (selectedFunction === SearchFunction.Similarity && ontology?.relations && !selectedResult) {
         const extendsKeys = ontology.relations.expands?.[entityName] || [];
         const extendedByKeys = ontology.relations.expandedBy?.[entityName] || [];
-        
+
         hasExtends = extendsKeys.length > 0;
         hasExtendedBy = extendedByKeys.length > 0;
-        
+
         if (openList === 'extends') {
             extendsList = resolveNames(extendsKeys, ontology);
         } else if (openList === 'extendedBy') {
@@ -90,12 +91,12 @@ export const DimensionFilter = ({dimension, label, entityName, category, highlig
             // 3. Update the search state
             const newUris = [...currentUris];
             newUris[currentUriIndex] = newUri;
-            
+
             setSearch({
                 ...search,
                 [category]: newUris
             });
-            
+
             closeList();
         } else {
             console.warn(`Could not find URI for entity ${entityName} in category ${category}`);
