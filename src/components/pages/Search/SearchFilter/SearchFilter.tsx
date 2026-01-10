@@ -26,11 +26,13 @@ function FilterDimension(props: { name: keyof OntologyEntities, dimension: numbe
             return <DimensionFilter
                 key={label}
                 dimension={props.dimension}
+                category={props.name}
                 label={naturalName}
                 entityName={entityName}
                 highlight={props.diff.more.has(label)}
                 lowlight={props.diff.less.has(label)}
             />
+
         })
         }
     </div>;
@@ -39,11 +41,11 @@ function FilterDimension(props: { name: keyof OntologyEntities, dimension: numbe
 export const SearchFilter = () => {
 
     const highlightedResult = useSearchStore(state => state.highlightedResult)
-    const classification  = useSearchStore(state => state.classification)
+    const search  = useSearchStore(state => state.search)
 
-    let areaLabels: string[] = classification.Area
-    let abilityLabels: string[] = classification.Ability
-    let scopeLabels: string[] = classification.Scope
+    let areaLabels: string[] = search.Area
+    let abilityLabels: string[] = search.Ability
+    let scopeLabels: string[] = search.Scope
     let areaDiff: Diff = { more: new Set(), less: new Set()}
     let abilityDiff: Diff = { more: new Set(), less: new Set()}
     let scopeDiff: Diff = { more: new Set(), less: new Set()}

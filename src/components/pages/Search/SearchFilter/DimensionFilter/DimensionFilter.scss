@@ -59,8 +59,12 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            cursor: pointer;
+            cursor: default;
         }
+    }
+
+    &.has-open-list .filter-header .label-container {
+        cursor: pointer;
     }
 
     .relation-list {
@@ -76,6 +80,8 @@
             opacity: 0.95;
             position: relative;
             z-index: 2;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
         }
 
         /* --- Extends Mode (Left Tree) --- */
@@ -144,15 +150,24 @@
         .filter-header, .relation-item {
             background-color: colors.$color-1;
         }
+        .relation-item:hover {
+            background-color: colors.$color-1-dark;
+        }
     }
     &.dimension-2 {
         .filter-header, .relation-item {
             background-color: colors.$color-2;
         }
+        .relation-item:hover {
+            background-color: colors.$color-2-dark;
+        }
     }
     &.dimension-3 {
         .filter-header, .relation-item {
             background-color: colors.$color-3;
+        }
+        .relation-item:hover {
+            background-color: colors.$color-3-dark;
         }
     }
 

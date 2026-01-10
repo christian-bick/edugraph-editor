@@ -35,6 +35,7 @@ export interface SearchResult {
 interface SearchState {
     input: SearchInput | null
     classification: Labels
+    search: Labels
     highlightedResult: SearchResult | null
     selectedResult: SearchResult | null
     results: SearchResult[]
@@ -44,6 +45,7 @@ interface SearchState {
 interface SearchAction {
     setInput: (input: SearchInput) => void
     setClassification: (classification: Labels) => void
+    setSearch: (search: Labels) => void
     setHighlightedResult: (result: SearchResult | null) => void
     setSelectedResult: (result: SearchResult | null) => void
     setResults: (results: SearchResult[]) => void
@@ -57,11 +59,13 @@ export const useSearchStore = create<SearchState & SearchAction>()(
             input: null,
             results: [],
             classification: {Ability: [], Area: [], Scope: []},
+            search: {Ability: [], Area: [], Scope: []},
             highlightedResult: null,
             selectedResult: null,
             selectedFunction: SearchFunction.Classification,
             setInput: (input) => set(() => ({input: input})),
-            setClassification: (classification) => set(() => ({classification: classification})),
+            setClassification: (classification) => set(() => ({classification: classification, search: classification})),
+            setSearch: (search) => set(() => ({search: search})),
             setHighlightedResult: (result) => set(() => ({highlightedResult: result})),
             setSelectedResult: (result) => set(() => ({selectedResult: result, highlightedResult: result})),
             setResults: (results) => set(() => ({results: results})),
@@ -78,4 +82,5 @@ export const useSearchStore = create<SearchState & SearchAction>()(
         }
     )
 )
+
 
