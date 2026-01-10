@@ -2,7 +2,8 @@ import './SearchFilter.scss'
 import {SectionHeader} from "../../../global/SectionHeader/SectionHeader.tsx";
 import {DimensionFilter} from "./DimensionFilter/DimensionFilter.tsx";
 import {useSearchStore} from "../../../../stores/search.ts";
-import {useOntologyStore, OntologyEntities} from "../../../../stores/ontology.ts";
+import {useOntologyStore, type OntologyEntities} from "../../../../stores/ontology.ts";
+
 
 type Diff = { more: Set<string>; less: Set<string> };
 
