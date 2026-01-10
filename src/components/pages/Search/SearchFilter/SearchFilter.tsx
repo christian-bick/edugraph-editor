@@ -2,19 +2,35 @@ import './SearchFilter.scss'
 import {SectionHeader} from "../../../global/SectionHeader/SectionHeader.tsx";
 import {DimensionFilter} from "./DimensionFilter/DimensionFilter.tsx";
 import {useSearchStore} from "../../../../stores/search.ts";
+import {useOntologyStore, OntologyEntities} from "../../../../stores/ontology.ts";
 
 type Diff = { more: Set<string>; less: Set<string> };
 
-function FilterDimension(props: { name: string, dimension: number, labels: string[], diff: Diff }) {
+function FilterDimension(props: { name: keyof OntologyEntities, dimension: number, labels: string[], diff: Diff }) {
+    const ontology = useOntologyStore(state => state.ontology);
+
     return <div className="filter-section">
         <SectionHeader>{ props.name }</SectionHeader>
-        {props.labels.map(label => <DimensionFilter
-            key={label}
-            dimension={props.dimension}
-            label={uriToLabel(label)}
-            highlight={props.diff.more.has(label)}
-            lowlight={props.diff.less.has(label)}
-        />)
+        {props.labels.map(label => {
+            const entityName = label.split('#').pop() || '';
+            let naturalName = entityName;
+
+            if (ontology && ontology.entities && ontology.entities[props.name]) {
+                const entity = ontology.entities[props.name].find(e => e.name === entityName);
+                if (entity) {
+                    naturalName = entity.natural_name;
+                }
+            }
+
+            return <DimensionFilter
+                key={label}
+                dimension={props.dimension}
+                label={naturalName}
+                entityName={entityName}
+                highlight={props.diff.more.has(label)}
+                lowlight={props.diff.less.has(label)}
+            />
+        })
         }
     </div>;
 }
@@ -44,13 +60,6 @@ export const SearchFilter = () => {
             <FilterDimension name="Scope" dimension={3} labels={scopeLabels} diff={scopeDiff} />
         </div>
     )
-}
-
-function uriToLabel(uri: string) {
-    // 1. Get the part of the string after the '#' symbol.
-    const fragment = uri.split('#').pop() || '';
-    // 2. Add a space before each uppercase letter
-    return fragment.replace(/([A-Z])/g, ' $1').trim();
 }
 
 /**
@@ -90,3 +99,4 @@ function mergeAndDiffArrays(arr1: string[], arr2: string[]): [string[], Diff] {
     // --- Return both results ---
     return [ merged, diff ];
 }
+
