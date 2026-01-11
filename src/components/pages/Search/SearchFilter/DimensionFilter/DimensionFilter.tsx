@@ -58,8 +58,14 @@ export const DimensionFilter = ({dimension, label, entityName, category, highlig
     let extendedByList: ResolvedEntity[] = [];
 
     if (selectedFunction === SearchFunction.Similarity && ontology?.relations && !selectedResult) {
-        const extendsKeys = ontology.relations.expands?.[entityName] || [];
-        const extendedByKeys = ontology.relations.expandedBy?.[entityName] || [];
+        const expands = ontology.relations.expands?.[entityName] || [];
+        const expandedBy = ontology.relations.expandedBy?.[entityName] || [];
+
+        const implies = ontology.relations.implies?.[entityName] || [];
+        const impliedBy = ontology.relations.impliedBy?.[entityName] || [];
+
+        const extendsKeys = Array.from(new Set([...expands, ...impliedBy]));
+        const extendedByKeys = Array.from(new Set([...expandedBy, ...implies]));
 
         hasExtends = extendsKeys.length > 0;
         hasExtendedBy = extendedByKeys.length > 0;
@@ -70,6 +76,7 @@ export const DimensionFilter = ({dimension, label, entityName, category, highlig
             extendedByList = resolveNames(extendedByKeys, ontology);
         }
     }
+
 
     const toggleExtends = () => setOpenList(prev => prev === 'extends' ? null : 'extends');
     const toggleExtendedBy = () => setOpenList(prev => prev === 'extendedBy' ? null : 'extendedBy');

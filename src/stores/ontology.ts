@@ -16,8 +16,10 @@ export interface OntologyEntities {
 export interface OntologyRelations {
     expands: Record<string, string[]>;
     partOf: Record<string, string[]>;
+    implies: Record<string, string[]>;
     expandedBy?: Record<string, string[]>;
     hasPart?: Record<string, string[]>;
+    impliedBy?: Record<string, string[]>;
 }
 
 export interface Ontology {
@@ -49,18 +51,63 @@ const computeInverse = (source: Record<string, string[]>) => {
     return inverse;
 };
 
+const computeTransitiveClosure = (source: Record<string, string[]>) => {
+    const closure: Record<string, Set<string>> = {};
+
+    // Initialize with direct relations
+    Object.keys(source).forEach(key => {
+        closure[key] = new Set(source[key]);
+    });
+
+    let changed = true;
+    while (changed) {
+        changed = false;
+        // Create a snapshot of keys to iterate to allow reading updated sets effectively
+        // (though finding fixed point doesn't strictly need snapshot if we just iterate enough)
+        const keys = Object.keys(closure);
+        for (const key of keys) {
+            const currentSet = closure[key];
+            const originalSize = currentSet.size;
+
+            for (const neighbor of Array.from(currentSet)) {
+                if (closure[neighbor]) {
+                    for (const n of Array.from(closure[neighbor])) {
+                        currentSet.add(n);
+                    }
+                }
+            }
+
+            if (currentSet.size > originalSize) {
+                changed = true;
+            }
+        }
+    }
+
+    // Convert back to arrays
+    const result: Record<string, string[]> = {};
+    Object.keys(closure).forEach(key => {
+        result[key] = Array.from(closure[key]);
+    });
+    return result;
+};
+
 const enrichOntology = (ontology: Ontology): Ontology => {
     if (!ontology || !ontology.relations) return ontology;
-    
+
+    const transitiveImplies = computeTransitiveClosure(ontology.relations.implies || {});
+
     return {
         ...ontology,
         relations: {
             ...ontology.relations,
+            implies: transitiveImplies,
             expandedBy: computeInverse(ontology.relations.expands || {}),
             hasPart: computeInverse(ontology.relations.partOf || {}),
+            impliedBy: computeInverse(transitiveImplies),
         }
     };
 };
+
 
 export const useOntologyStore = create<OntologyState & OntologyAction>()(
     persist(
@@ -86,7 +133,7 @@ export const useOntologyStore = create<OntologyState & OntologyAction>()(
                 if (state.ontology && state.ontology.relations) {
                     // Create a copy of ontology relations without derived properties
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const { expandedBy, hasPart, ...persistedRelations } = state.ontology.relations;
+                    const { expandedBy, hasPart, impliedBy, ...persistedRelations } = state.ontology.relations;
                     return {
                         ...state,
                         ontology: {
@@ -105,4 +152,5 @@ export const useOntologyStore = create<OntologyState & OntologyAction>()(
         }
     )
 )
+
 
