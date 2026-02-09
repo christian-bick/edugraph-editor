@@ -108,7 +108,7 @@ export const SearchStart = () => {
                 )}
             </div>
             <div className="example-carousel" style={{visibility: waiting ? 'hidden' : 'visible'}}>
-                <button className="nav-btn prev" onClick={prevExample}>&lt;</button>
+                <button className="nav-btn prev" onClick={prevExample}></button>
                 <img
                     src={EXAMPLES[currentExampleIndex]}
                     alt={`Example ${currentExampleIndex + 1}`}
@@ -116,7 +116,7 @@ export const SearchStart = () => {
                     onClick={handleExampleClick}
                     style={{cursor: 'pointer'}}
                 />
-                <button className="nav-btn next" onClick={nextExample}>&gt;</button>
+                <button className="nav-btn next" onClick={nextExample}></button>
             </div>
 
         </div>

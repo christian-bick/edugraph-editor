@@ -115,10 +115,22 @@
 
             &.prev {
                 left: 0px;
+
+                &::before {
+                    content: '◀';
+                    position: relative;
+                    left: -2px; /* Adjust as needed */
+                }
             }
 
             &.next {
                 right: 0px;
+
+                &::before {
+                    content: '▶';
+                    position: relative;
+                    right: -2px; /* Adjust as needed */
+                }
             }
         }
     }
