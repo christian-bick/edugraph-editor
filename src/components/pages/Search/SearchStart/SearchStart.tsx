@@ -1,7 +1,7 @@
 import './SearchStart.scss'
 import {useState} from 'react';
 import {classifyAndSearchFile} from '../../../../api/classify'
-import icon_photo from '../../../../assets/icons/add_photo_c1.svg'
+import icon_photo from '../../../../assets/icons/upload_c2.svg'
 import {useSearchStore} from "../../../../stores/search.ts";
 import {useNavigate} from "react-router";
 
