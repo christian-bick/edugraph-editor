@@ -78,7 +78,6 @@
 
     .example-carousel {
         max-width: 300px;
-        aspect-ratio: 1;
         width: 100%;
         position: relative;
         display: flex;
@@ -87,8 +86,9 @@
         overflow: hidden; /* Ensure image doesn't spill out */
 
         .example-image {
-            width: 80%;
-            height: 80%;
+            width: 65%;
+            height: auto;
+            max-height: 100%;
             object-fit: contain;
         }
 

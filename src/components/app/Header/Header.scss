@@ -22,6 +22,16 @@
         padding: 0 1rem;
         font-size: 1.3rem;
 
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        img {
+            width: 16px;
+            height: 16px;
+            margin-right: 0.5rem;
+        }
+
         a {
             text-decoration: none;
             color: inherit;
@@ -35,5 +45,9 @@
         width: fit-content;
         gap: 2rem;
         padding: 0 1rem;
+    }
+
+    @media (max-width: 800px) {
+        justify-content: center;
     }
 }

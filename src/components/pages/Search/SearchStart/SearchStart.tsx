@@ -87,7 +87,7 @@ export const SearchStart = () => {
     return (
         <div className="search-start">
             <div className="search-prompt">
-                Classify Content
+                Classify K-4 Math Content
             </div>
             <div className="search-form">
                 {!waiting ? (

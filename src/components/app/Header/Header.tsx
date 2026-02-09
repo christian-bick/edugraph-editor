@@ -3,9 +3,8 @@ import './Header.scss';
 export const Header = () => (
     <header className="header">
         <div className="header-title">
-            <a href="/">ImagineBase</a>
-        </div>
-        <div className="header-nav">
+            <img src="/favicon.png" alt="Logo" />
+            <a href="/">EduGraph Demo</a>
         </div>
     </header>
 );
