@@ -102,10 +102,13 @@ export const SearchStart = () => {
             </div>
             <div className="search-prompt" style={{visibility: waiting ? 'hidden' : 'visible'}}>
                 {!error ? (
-                    <span>or use an example</span>
+                    <span>&nbsp;</span>
                 ) : (
                     <span className="error">Search failed: {truncateString(error, 100)}</span>
                 )}
+            </div>
+            <div className="search-prompt" style={{visibility: waiting ? 'hidden' : 'visible'}}>
+                or use an example
             </div>
             <div className="example-carousel" style={{visibility: waiting ? 'hidden' : 'visible'}}>
                 <button className="nav-btn prev" onClick={prevExample}></button>
