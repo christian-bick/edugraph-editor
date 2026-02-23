@@ -40,6 +40,7 @@ export const GraphExplorer: React.FC = () => {
                     linkDistance: 100,
                     nodeStrength: -300,
                     edgeStrength: 0.1,
+                    maxIteration: 1000,
                 },
                 defaultNode: {
                     type: 'circle',
@@ -48,12 +49,11 @@ export const GraphExplorer: React.FC = () => {
                         fill: '#C6E5FF',
                         stroke: '#5B8EE4',
                         lineWidth: 2,
-                    },
-                    labelCfg: {
-                        style: {
-                            fill: '#000',
-                            fontSize: 12,
-                        },
+                        labelFill: '#000',
+                        labelFontSize: 12,
+                        labelFontWeight: 'bold',
+                        labelTextAlign: 'center',
+                        labelTextBaseline: 'middle',
                     },
                 },
                 defaultEdge: {
@@ -61,20 +61,17 @@ export const GraphExplorer: React.FC = () => {
                     style: {
                         stroke: '#999',
                         lineWidth: 1,
+                        labelFill: '#555',
+                        labelFontSize: 10,
+                        labelFontWeight: 'bold',
+                        labelTextAlign: 'center',
+                        labelTextBaseline: 'middle',
+                        labelBackgroundFill: '#fff',
+                        labelBackgroundStroke: '#fff',
+                        labelBackgroundPadding: [2, 2, 2, 2],
+                        labelBackgroundRadius: 2,
                     },
-                    labelCfg: {
-                        autoRotate: true,
-                        style: {
-                            fill: '#555',
-                            fontSize: 8,
-                            background: {
-                                fill: '#fff',
-                                stroke: '#fff',
-                                padding: [2, 2, 2, 2],
-                                radius: 2,
-                            },
-                        },
-                    },
+                    labelAutoRotate: true,
                 },
                 nodeStateStyles: {
                     hover: {
