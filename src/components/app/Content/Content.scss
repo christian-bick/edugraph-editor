@@ -3,17 +3,4 @@
     flex: 1 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 0 1rem;
-
-    .content-grid {
-        width: 100%;
-        flex: 1 0;
-        display: grid;
-        grid-template-columns: repeat(12, 1fr);
-        grid-gap: 2rem;
-    }
 }
-
-
