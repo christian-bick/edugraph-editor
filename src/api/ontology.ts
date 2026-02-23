@@ -1,7 +1,8 @@
-const ONTOLOGY_URL = `https://github.com/christian-bick/edugraph-ontology/raw/refs/heads/main/core-ontology.ttl`
+const ONTOLOGY_URL = `https://corsproxy.io/?https://github.com/christian-bick/edugraph-ontology/raw/refs/heads/main/core-ontology.ttl`
 
 export const loadOntology = () => {
     return fetch(ONTOLOGY_URL, {
         method: 'GET',
-    }).then(response => response.json())
+    }).then(response => response.text())
 }
+

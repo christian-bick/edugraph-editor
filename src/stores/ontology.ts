@@ -1,6 +1,7 @@
 import {create} from 'zustand'
 import {persist, createJSONStorage} from 'zustand/middleware'
 import {loadOntology} from '../api/ontology.ts'
+import { Parser, Quad } from 'n3';
 
 export interface OntologyEntity {
     name: string;
@@ -108,6 +109,162 @@ const enrichOntology = (ontology: Ontology): Ontology => {
     };
 };
 
+// RDF URIs based on core-ontology.ttl
+const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+const RDFS_COMMENT = 'http://www.w3.org/2000/01/rdf-schema#comment';
+const RDFS_IS_DEFINED_BY = 'http://www.w3.org/2000/01/rdf-schema#isDefinedBy';
+const RDFS_SUB_PROPERTY_OF = 'http://www.w3.org/2000/01/rdf-schema#subPropertyOf';
+
+const EDU_BASE = 'http://edugraph.io/edu#';
+const OWL_NAMED_INDIVIDUAL = 'http://www.w3.org/2002/07/owl#NamedIndividual';
+
+const TYPE_ABILITY = EDU_BASE + 'Ability';
+const TYPE_AREA = EDU_BASE + 'Area';
+const TYPE_SCOPE = EDU_BASE + 'Scope';
+
+const PREDICATE_EXPANDS = EDU_BASE + 'expands';
+const PREDICATE_PARTOF = EDU_BASE + 'partOf';
+const PREDICATE_IMPLIES = EDU_BASE + 'implies';
+
+interface EntityTempInfo {
+    type: keyof OntologyEntities;
+    name: string;
+    natural_name: string;
+    iri: string;
+}
+
+const parseAndTransformOntology = async (turtleString: string): Promise<Ontology> => {
+    const parser = new Parser();
+
+    const quads: Quad[] = await new Promise((resolve, reject) => {
+        const parsedQuads: Quad[] = [];
+        parser.parse(turtleString, (error, quad, prefixes) => {
+            if (error) {
+                return reject(error);
+            }
+            if (quad) {
+                parsedQuads.push(quad);
+            } else {
+                resolve(parsedQuads);
+            }
+        });
+    });
+
+    const newOntology: Ontology = {
+        entities: {
+            Ability: [],
+            Area: [],
+            Scope: [],
+        },
+        relations: {
+            expands: {},
+            partOf: {},
+            implies: {},
+        },
+    };
+
+    const entityInfoMap = new Map<string, EntityTempInfo>(); // Key is IRI
+    const subPropertyMap = new Map<string, string>(); // specificPropertyIRI -> generalPropertyIRI
+
+    // Pre-pass: Identify sub-property relationships
+    quads.forEach(quad => {
+        if (quad.predicate.value === RDFS_SUB_PROPERTY_OF && quad.object.termType === 'NamedNode') {
+            const specificProperty = quad.subject.value;
+            const generalProperty = quad.object.value;
+            if (generalProperty === PREDICATE_EXPANDS || generalProperty === PREDICATE_PARTOF || generalProperty === PREDICATE_IMPLIES) {
+                subPropertyMap.set(specificProperty, generalProperty);
+            }
+        }
+    });
+
+    // First pass: Identify entities (NamedIndividuals) and their types
+    quads.forEach(quad => {
+        const subjectIRI = quad.subject.value;
+        const predicateIRI = quad.predicate.value;
+        const objectValue = quad.object.value;
+
+        if (predicateIRI === RDF_TYPE && objectValue === OWL_NAMED_INDIVIDUAL) {
+            // Initialize entity with default name, will refine type in second pass
+            if (!entityInfoMap.has(subjectIRI)) {
+                 entityInfoMap.set(subjectIRI, {
+                    type: 'Ability', // Default, will be updated
+                    name: subjectIRI.replace(EDU_BASE, ''),
+                    natural_name: subjectIRI.replace(EDU_BASE, ''),
+                    iri: subjectIRI
+                });
+            }
+        }
+    });
+
+    // Second pass: Populate types, natural names, and relations
+    quads.forEach(quad => {
+        const subjectIRI = quad.subject.value;
+        let predicateIRI = quad.predicate.value; // Allow modification for sub-properties
+        const objectValue = quad.object.value;
+
+        if (entityInfoMap.has(subjectIRI)) {
+            const entity = entityInfoMap.get(subjectIRI)!;
+
+            // Refine entity type
+            if (predicateIRI === RDF_TYPE && (objectValue === TYPE_ABILITY || objectValue === TYPE_AREA || objectValue === TYPE_SCOPE)) {
+                if (objectValue === TYPE_ABILITY) entity.type = 'Ability';
+                else if (objectValue === TYPE_AREA) entity.type = 'Area';
+                else if (objectValue === TYPE_SCOPE) entity.type = 'Scope';
+            }
+
+            // Populate natural_name from rdfs:comment or rdfs:isDefinedBy
+            if (quad.object.termType === 'Literal') {
+                if (predicateIRI === RDFS_COMMENT) {
+                    entity.natural_name = quad.object.value;
+                } else if (predicateIRI === RDFS_IS_DEFINED_BY && !entity.natural_name) {
+                    // Prioritize comment, but use isDefinedBy if comment is not found yet
+                    entity.natural_name = quad.object.value;
+                }
+            }
+        }
+
+        // Resolve predicate to its general form if it's a sub-property
+        if (subPropertyMap.has(predicateIRI)) {
+            predicateIRI = subPropertyMap.get(predicateIRI)!;
+        }
+
+        // Populate relations (subject and object must be NamedNodes)
+        if (quad.subject.termType === 'NamedNode' && quad.object.termType === 'NamedNode') {
+            const subjectName = quad.subject.value;
+            const objectName = quad.object.value;
+
+            if (predicateIRI === PREDICATE_EXPANDS) {
+                if (!newOntology.relations.expands[subjectName]) {
+                    newOntology.relations.expands[subjectName] = [];
+                }
+                newOntology.relations.expands[subjectName].push(objectName);
+            } else if (predicateIRI === PREDICATE_PARTOF) {
+                if (!newOntology.relations.partOf[subjectName]) {
+                    newOntology.relations.partOf[subjectName] = [];
+                }
+                newOntology.relations.partOf[subjectName].push(objectName);
+            } else if (predicateIRI === PREDICATE_IMPLIES) {
+                if (!newOntology.relations.implies[subjectName]) {
+                    newOntology.relations.implies[subjectName] = [];
+                }
+                newOntology.relations.implies[subjectName].push(objectName);
+            }
+        }
+    });
+
+    // Finally, add all collected entities to the newOntology.entities structure
+    entityInfoMap.forEach(info => {
+        // Ensure entity is of one of the expected types before adding
+        if (['Ability', 'Area', 'Scope'].includes(info.type)) {
+            newOntology.entities[info.type].push({
+                name: info.name,
+                natural_name: info.natural_name
+            });
+        }
+    });
+
+    return newOntology;
+};
 
 export const useOntologyStore = create<OntologyState & OntologyAction>()(
     persist(
@@ -119,10 +276,12 @@ export const useOntologyStore = create<OntologyState & OntologyAction>()(
             fetchOntology: async () => {
                 set({loading: true, error: null});
                 try {
-                    const rawOntology = await loadOntology();
-                    set({ontology: enrichOntology(rawOntology), loading: false});
+                    const rawOntologyTurtle = await loadOntology();
+                    const parsedOntology = await parseAndTransformOntology(rawOntologyTurtle);
+                    set({ontology: enrichOntology(parsedOntology), loading: false});
                 } catch (error: any) {
                     set({error: error.message, loading: false});
+                    console.error(error);
                 }
             },
         }),
@@ -152,5 +311,6 @@ export const useOntologyStore = create<OntologyState & OntologyAction>()(
         }
     )
 )
+
 
 
