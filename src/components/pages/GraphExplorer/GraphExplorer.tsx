@@ -35,12 +35,11 @@ export const GraphExplorer: React.FC = () => {
                     default: ['drag-canvas', 'zoom-canvas', 'drag-node'],
                 },
                 layout: {
-                    type: 'force', // Force-directed layout
-                    preventOverlap: true, // Prevents node overlap
-                    linkDistance: 100,
-                    nodeStrength: -300,
-                    edgeStrength: 0.1,
-                    maxIteration: 1000,
+                    type: 'd3-force',
+                    collide: {
+                        // Prevent nodes from overlapping by specifying a collision radius for each node.
+                        radius: (d) => d.size / 2,
+                    },
                 },
                 defaultNode: {
                     type: 'circle',
