@@ -100,30 +100,6 @@ export const GraphExplorer: React.FC = () => {
             resizeObserver.observe(ref.current);
 
             await graph.render();
-
-
-            // Fit view after layout animation
-            graph.on('afterlayout', () => {
-                graph.fitView();
-            });
-
-            // Event listeners for hover states
-            graph.on('node:mouseenter', (e: any) => {
-                const nodeItem = e.item;
-                graph.setItemState(nodeItem, 'hover', true);
-            });
-            graph.on('node:mouseleave', (e: any) => {
-                const nodeItem = e.item;
-                graph.setItemState(nodeItem, 'hover', false);
-            });
-            graph.on('edge:mouseenter', (e: any) => {
-                const edgeItem = e.item;
-                graph.setItemState(edgeItem, 'hover', true);
-            });
-            graph.on('edge:mouseleave', (e: any) => {
-                const edgeItem = e.item;
-                graph.setItemState(edgeItem, 'hover', false);
-            });
         };
 
         const timer = setTimeout(initGraph, 0);
