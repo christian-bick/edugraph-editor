@@ -279,13 +279,7 @@ interface G6Edge {
     color?: string;
 }
 
-// Dummy G6 object for arrow path until G6 is properly imported in the consuming component
-// This prevents TypeScript errors but is not functional.
-const G6 = {
-    Arrow: {
-        triangle: (width: number, length: number) => `M 0 0 L ${length} ${width / 2} L ${length} ${-width / 2} Z`,
-    },
-};
+
 
 // New function to convert Ontology to G6 Graph Data
 export const getG6GraphData = (ontology: Ontology | null) => {
@@ -306,21 +300,6 @@ export const getG6GraphData = (ontology: Ontology | null) => {
                 id: id,
                 label: entity.natural_name || entity.name, // Prefer natural_name, fall back to name
                 entityType: entityType,
-                type: 'circle', // Default node shape
-                size: 60,
-                style: {
-                    fill: entityType === 'Ability' ? '#9EC9FF' :
-                          entityType === 'Area' ? '#A2CCFF' :
-                          '#B5DFFF', // Different colors for different types
-                    stroke: '#333',
-                    lineWidth: 1,
-                },
-                labelCfg: {
-                    style: {
-                        fill: '#000',
-                        fontSize: 10,
-                    },
-                },
             });
         });
     });
@@ -342,31 +321,6 @@ export const getG6GraphData = (ontology: Ontology | null) => {
                             source: sourceId,
                             target: targetId,
                             label: relationType,
-                            type: 'line-arrow', // Default edge shape with arrow
-                            style: {
-                                stroke: relationType === 'expands' ? '#5B8EE4' :
-                                        relationType === 'partOf' ? '#5AD8A6' :
-                                        '#F7C96B', // Different colors for different relations
-                                lineWidth: 1,
-                                startArrow: false,
-                                endArrow: {
-                                    path: G6.Arrow.triangle(6, 8), // Standard arrow
-                                    d: 0,
-                                },
-                            },
-                            labelCfg: {
-                                autoRotate: true,
-                                style: {
-                                    fill: '#555',
-                                    fontSize: 8,
-                                    background: {
-                                        fill: '#fff',
-                                        stroke: '#fff',
-                                        padding: [2, 2, 2, 2],
-                                        radius: 2,
-                                    },
-                                },
-                            },
                         });
                     }
                 });

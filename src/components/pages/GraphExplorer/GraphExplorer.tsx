@@ -58,8 +58,8 @@ export const GraphExplorer: React.FC = () => {
                 defaultEdge: {
                     type: 'line-arrow',
                     style: {
-                        stroke: '#999',
-                        lineWidth: 1,
+                        stroke: '#333',
+                        lineWidth: 2,
                         labelFill: '#555',
                         labelFontSize: 10,
                         labelFontWeight: 'bold',
@@ -69,6 +69,10 @@ export const GraphExplorer: React.FC = () => {
                         labelBackgroundStroke: '#fff',
                         labelBackgroundPadding: [2, 2, 2, 2],
                         labelBackgroundRadius: 2,
+                        endArrow: {
+                            type: 'triangle',
+                            size: 6,
+                        },
                     },
                     labelAutoRotate: true,
                 },
