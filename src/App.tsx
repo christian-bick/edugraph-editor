@@ -3,9 +3,8 @@ import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {useOntologyStore} from "./stores/ontology.ts";
 import {Header} from "./components/app/Header/Header.tsx";
 import {Content} from "./components/app/Content/Content.tsx";
-import {SearchStart} from "./components/pages/Search/SearchStart/SearchStart.tsx";
-import {SearchBrowse} from "./components/pages/Search/SearchBrowse/SearchBrowse.tsx";
 import {Footer} from "./components/app/Footer/Footer.tsx";
+import {GraphExplorer} from "./components/pages/GraphExplorer/GraphExplorer.tsx";
 
 export const App = () => {
     const fetchOntology = useOntologyStore(state => state.fetchOntology);
@@ -22,8 +21,7 @@ export const App = () => {
             <Header/>
             <Content>
                 <Routes>
-                    <Route index element={<SearchStart/>}/>
-                    <Route path="search" element={<SearchBrowse/>}/>
+                    <Route index element={<GraphExplorer/>}/>
                 </Routes>
             </Content>
             <Footer/>

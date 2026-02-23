@@ -1,6 +1,4 @@
-import {ENDPOINT} from "./enpoint.ts";
-
-const ONTOLOGY_URL = `${ENDPOINT}/ontology`
+const ONTOLOGY_URL = `https://github.com/christian-bick/edugraph-ontology/raw/refs/heads/main/core-ontology.ttl`
 
 export const loadOntology = () => {
     return fetch(ONTOLOGY_URL, {
