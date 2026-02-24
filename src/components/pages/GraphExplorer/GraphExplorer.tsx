@@ -34,11 +34,12 @@ export const GraphExplorer: React.FC = () => {
                     default: ['drag-canvas', 'zoom-canvas', 'drag-node'],
                 },
                 layout: {
-                    type: 'd3-force',
-                    collide: {
-                        // Prevent nodes from overlapping by specifying a collision radius for each node.
-                        radius: (d) => d.size / 2,
-                    },
+                    type: 'antv-dagre',
+                    rankdir: 'TB',
+                    align: 'UL',
+                    nodesep: 50,
+                    ranksep: 50,
+                    controlPoints: false,
                 },
                 defaultNode: {
                     type: 'circle',
@@ -98,14 +99,22 @@ export const GraphExplorer: React.FC = () => {
                 graph.fitView();
             }
 
-            resizeObserver = new ResizeObserver(entries => {
-                for (const entry of entries) {
-                    adjustGraph(entry.contentRect);
+            // After initial layout is fully settled, fit the view and start listening for resize
+            graph.on('afterlayout', () => {
+                if (ref.current) {
+                    adjustGraph(ref.current.getBoundingClientRect());
+                    if (!resizeObserver) {
+                        resizeObserver = new ResizeObserver(entries => {
+                            for (const entry of entries) {
+                                adjustGraph(entry.contentRect);
+                            }
+                        });
+                        resizeObserver.observe(ref.current);
+                    }
                 }
             });
-            resizeObserver.observe(ref.current);
+
             await graph.render();
-            adjustGraph(ref.current.getBoundingClientRect());
         };
 
         const timer = setTimeout(initGraph, 0);
