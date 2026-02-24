@@ -1,0 +1,51 @@
+import {create} from 'zustand'
+import {createJSONStorage, persist} from 'zustand/middleware'
+import {loadOntology} from '../api/ontology.ts'
+import type {Ontology, OntologyEntities, OntologyRelations} from "../types/ontology-types.ts";
+import {parseAndTransformOntology} from "./ontology-parser.ts";
+
+interface OntologyState {
+    ontology: Ontology | null;
+    loading: boolean;
+    error: string | null;
+}
+
+interface OntologyAction {
+    setOntology: (ontology: Ontology) => void;
+    fetchOntology: () => Promise<void>;
+}
+
+
+export const useOntologyStore = create<OntologyState & OntologyAction>()(
+    persist(
+        (set) => ({
+            ontology: null,
+            loading: false,
+            error: null,
+            setOntology: (ontology) => set({ontology: ontology}),
+            fetchOntology: async () => {
+                set({loading: true, error: null});
+                try {
+                    const rawOntologyTurtle = await loadOntology();
+                    const ontology = await parseAndTransformOntology(rawOntologyTurtle);
+                    set({ontology: ontology, loading: false});
+                } catch (error: any) {
+                    set({error: error.message, loading: false});
+                    console.error(error);
+                }
+            },
+        }),
+        {
+            name: 'ontology-storage',
+            storage: createJSONStorage(() => sessionStorage),
+            onRehydrateStorage: () => (state) => {
+                if (state && state.ontology) {
+                    state.setOntology(state.ontology);
+                }
+            },
+        }
+    )
+)
+
+
+

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as G6 from '@antv/g6';
-import {getG6GraphData, useOntologyStore} from "../../../stores/ontology.ts";
+import {getG6GraphData} from "../../../graphs/taxonomy.ts";
+import {useOntologyStore} from "../../../stores/ontology-store.ts";
 
 export const GraphExplorer: React.FC = () => {
     const ref = useRef<HTMLDivElement>(null);
@@ -21,8 +22,6 @@ export const GraphExplorer: React.FC = () => {
             }
 
             const data = getG6GraphData(ontology);
-
-            console.log(data)
 
             // Initialize G6 graph
             const graph = new G6.Graph({

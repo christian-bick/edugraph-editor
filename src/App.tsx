@@ -1,6 +1,6 @@
 import {useEffect} from 'react';
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import {useOntologyStore} from "./stores/ontology.ts";
+import {useOntologyStore} from "./stores/ontology-store.ts";
 import {Header} from "./components/app/Header/Header.tsx";
 import {Content} from "./components/app/Content/Content.tsx";
 import {Footer} from "./components/app/Footer/Footer.tsx";
