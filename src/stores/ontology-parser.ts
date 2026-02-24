@@ -1,5 +1,5 @@
 import { Parser, Quad } from 'n3';
-import type {Ontology, OntologyEntities} from "./ontology-types.ts";
+import type {Ontology, OntologyEntities} from "../types/ontology-types.ts";
 
 // RDF URIs based on core-ontology.ttl
 const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
@@ -38,7 +38,7 @@ export const parseAndTransformOntology = async (turtleString: string): Promise<O
 
     const quads: Quad[] = await new Promise((resolve, reject) => {
         const parsedQuads: Quad[] = [];
-        parser.parse(turtleString, (error, quad, prefixes) => {
+        parser.parse(turtleString, (error, quad) => {
             if (error) {
                 return reject(error);
             }
@@ -156,7 +156,9 @@ export const parseAndTransformOntology = async (turtleString: string): Promise<O
             newOntology.entities[info.type].push({
                 iri: info.iri,
                 name: info.name,
-                natural_name: info.natural_name
+                natural_name: info.natural_name,
+                definition: info.definition,
+                examples: info.examples,
             });
         }
     });
