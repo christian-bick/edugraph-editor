@@ -27,6 +27,12 @@ interface EntityTempInfo {
     examples: string;
 }
 
+const toNaturalName = (name: string): string => {
+    return name
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/([A-Za-z])([0-9])/g, '$1 $2');
+};
+
 export const parseAndTransformOntology = async (turtleString: string): Promise<Ontology> => {
     const parser = new Parser();
 
@@ -80,10 +86,11 @@ export const parseAndTransformOntology = async (turtleString: string): Promise<O
         if (predicateIRI === RDF_TYPE && objectValue === OWL_NAMED_INDIVIDUAL) {
             // Initialize entity with default name, will refine type in second pass
             if (!entityInfoMap.has(subjectIRI)) {
+                const name = subjectIRI.replace(EDU_BASE, '');
                 entityInfoMap.set(subjectIRI, {
                     type: 'Ability', // Default, will be updated
-                    name: subjectIRI.replace(EDU_BASE, ''),
-                    natural_name: subjectIRI.replace(EDU_BASE, ''),
+                    name,
+                    natural_name: toNaturalName(name),
                     iri: subjectIRI,
                     definition: '',
                     examples: ''
