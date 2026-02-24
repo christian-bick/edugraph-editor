@@ -1,12 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, {useEffect, useRef} from 'react';
 import * as G6 from '@antv/g6';
-import {getG6GraphData} from "../../../graphs/taxonomy.ts";
+import {getGraphData} from "../../../graphs/taxonomy.ts";
 import {useOntologyStore} from "../../../stores/ontology-store.ts";
 
 export const GraphExplorer: React.FC = () => {
     const ref = useRef<HTMLDivElement>(null);
     const graphRef = useRef<any>(null); // Store the G6 graph instance
-    const { ontology, loading, error, fetchOntology } = useOntologyStore();
+    const {ontology, loading, error, fetchOntology} = useOntologyStore();
 
     useEffect(() => {
         fetchOntology();
@@ -21,7 +21,7 @@ export const GraphExplorer: React.FC = () => {
                 graphRef.current.destroy(); // Destroy existing graph if any
             }
 
-            const data = getG6GraphData(ontology);
+            const data = getGraphData(ontology, 'Area', 'partOf');
 
             // Initialize G6 graph
             const graph = new G6.Graph({
@@ -92,16 +92,20 @@ export const GraphExplorer: React.FC = () => {
 
             graphRef.current = graph;
 
+            const adjustGraph = (contentRect: DOMRectReadOnly) => {
+                const {width, height} = contentRect;
+                graph.setSize(width, height);
+                graph.fitView();
+            }
+
             resizeObserver = new ResizeObserver(entries => {
                 for (const entry of entries) {
-                    const { width, height } = entry.contentRect;
-                    graph.setSize(width, height);
-                    graph.fitView();
+                    adjustGraph(entry.contentRect);
                 }
             });
             resizeObserver.observe(ref.current);
-
             await graph.render();
+            adjustGraph(ref.current.getBoundingClientRect());
         };
 
         const timer = setTimeout(initGraph, 0);
@@ -123,7 +127,8 @@ export const GraphExplorer: React.FC = () => {
     if (!ontology) return <div>No ontology data available.</div>;
 
     return (
-        <div ref={ref} className="graph-explorer" style={{ width: '100%', height: 'calc(100vh - 60px)', background: '#f5f5f5' }}></div>
+        <div ref={ref} className="graph-explorer"
+             style={{width: '100%', height: 'calc(100vh - 60px)', background: '#f5f5f5'}}></div>
     );
 };
 
