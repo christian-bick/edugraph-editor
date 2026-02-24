@@ -32,7 +32,7 @@ export const getGraphData = (
     });
 
     // Process relations to create edges, applying relationType filter
-    const relationTypes: Array<keyof OntologyRelations> = ['expands', 'partOf', 'implies'];
+    const relationTypes: Array<keyof OntologyRelations> = ['expands', 'partOf', 'implies', 'expandedBy', 'hasPart', 'impliedBy'];
     relationTypes.forEach(relationType => {
         if (filterRelationType && relationType !== filterRelationType) {
             return; // Skip if filterRelationType is set and doesn't match

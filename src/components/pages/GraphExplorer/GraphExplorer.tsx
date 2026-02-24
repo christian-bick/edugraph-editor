@@ -21,7 +21,7 @@ export const GraphExplorer: React.FC = () => {
                 graphRef.current.destroy(); // Destroy existing graph if any
             }
 
-            const data = getGraphData(ontology, 'Area', 'partOf');
+            const data = getGraphData(ontology, 'Area', 'hasPart');
 
             // Initialize G6 graph
             const graph = new G6.Graph({
@@ -34,59 +34,33 @@ export const GraphExplorer: React.FC = () => {
                     default: ['drag-canvas', 'zoom-canvas', 'drag-node'],
                 },
                 layout: {
-                    type: 'antv-dagre',
-                    rankdir: 'TB',
-                    align: 'UL',
-                    nodesep: 50,
-                    ranksep: 50,
-                    controlPoints: false,
+                    type: 'indented',
+                    direction: 'LR',
+                    indent: 80,
+                    getHeight: () => 16,
+                    getWidth: () => 32,
                 },
-                defaultNode: {
-                    type: 'circle',
-                    size: 60,
+                behaviors: ['drag-canvas', 'zoom-canvas', 'collapse-expand'],
+                node: {
                     style: {
-                        fill: '#C6E5FF',
-                        stroke: '#5B8EE4',
-                        lineWidth: 2,
-                        labelFill: '#000',
-                        labelFontSize: 12,
-                        labelFontWeight: 'bold',
-                        labelTextAlign: 'center',
-                        labelTextBaseline: 'middle',
+                        labelText: (d) => d.label,
+                        labelPlacement: 'right',
+                        labelBackground: true,
+                    },
+                    animation: {
+                        enter: false,
                     },
                 },
-                defaultEdge: {
-                    type: 'line-arrow',
+                edge: {
+                    type: 'polyline',
                     style: {
-                        stroke: '#333',
-                        lineWidth: 2,
-                        labelFill: '#555',
-                        labelFontSize: 10,
-                        labelFontWeight: 'bold',
-                        labelTextAlign: 'center',
-                        labelTextBaseline: 'middle',
-                        labelBackgroundFill: '#fff',
-                        labelBackgroundStroke: '#fff',
-                        labelBackgroundPadding: [2, 2, 2, 2],
-                        labelBackgroundRadius: 2,
-                        endArrow: {
-                            type: 'triangle',
-                            size: 6,
+                        radius: 4,
+                        router: {
+                            type: 'orth',
                         },
                     },
-                    labelAutoRotate: true,
-                },
-                nodeStateStyles: {
-                    hover: {
-                        fill: '#e2f0fe',
-                        stroke: '#348eec',
-                        lineWidth: 3,
-                    },
-                },
-                edgeStateStyles: {
-                    hover: {
-                        stroke: '#348eec',
-                        lineWidth: 2,
+                    animation: {
+                        enter: false,
                     },
                 },
             });
