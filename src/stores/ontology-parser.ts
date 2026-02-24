@@ -23,6 +23,8 @@ interface EntityTempInfo {
     name: string;
     natural_name: string;
     iri: string;
+    definition: string;
+    examples: string;
 }
 
 export const parseAndTransformOntology = async (turtleString: string): Promise<Ontology> => {
@@ -82,7 +84,9 @@ export const parseAndTransformOntology = async (turtleString: string): Promise<O
                     type: 'Ability', // Default, will be updated
                     name: subjectIRI.replace(EDU_BASE, ''),
                     natural_name: subjectIRI.replace(EDU_BASE, ''),
-                    iri: subjectIRI
+                    iri: subjectIRI,
+                    definition: '',
+                    examples: ''
                 });
             }
         }
@@ -102,6 +106,10 @@ export const parseAndTransformOntology = async (turtleString: string): Promise<O
                 if (objectValue === TYPE_ABILITY) entity.type = 'Ability';
                 else if (objectValue === TYPE_AREA) entity.type = 'Area';
                 else if (objectValue === TYPE_SCOPE) entity.type = 'Scope';
+            } else if (predicateIRI === RDFS_COMMENT && quad.object.termType === 'Literal') {
+                entity.examples = objectValue;
+            } else if (predicateIRI === RDFS_IS_DEFINED_BY && quad.object.termType === 'Literal') {
+                entity.definition = objectValue;
             }
         }
 
@@ -149,7 +157,22 @@ export const parseAndTransformOntology = async (turtleString: string): Promise<O
     return enrichOntology(newOntology);
 };
 
+const enrichOntology = (ontology: Ontology): Ontology => {
+    if (!ontology || !ontology.relations) return ontology;
 
+    const transitiveImplies = computeTransitiveClosure(ontology.relations.implies || {});
+
+    return {
+        ...ontology,
+        relations: {
+            ...ontology.relations,
+            implies: transitiveImplies,
+            expandedBy: computeInverse(ontology.relations.expands || {}),
+            hasPart: computeInverse(ontology.relations.partOf || {}),
+            impliedBy: computeInverse(transitiveImplies),
+        }
+    };
+};
 
 const computeInverse = (source: Record<string, string[]>) => {
     const inverse: Record<string, string[]> = {};
@@ -202,21 +225,4 @@ const computeTransitiveClosure = (source: Record<string, string[]>) => {
         result[key] = Array.from(closure[key]);
     });
     return result;
-};
-
-const enrichOntology = (ontology: Ontology): Ontology => {
-    if (!ontology || !ontology.relations) return ontology;
-
-    const transitiveImplies = computeTransitiveClosure(ontology.relations.implies || {});
-
-    return {
-        ...ontology,
-        relations: {
-            ...ontology.relations,
-            implies: transitiveImplies,
-            expandedBy: computeInverse(ontology.relations.expands || {}),
-            hasPart: computeInverse(ontology.relations.partOf || {}),
-            impliedBy: computeInverse(transitiveImplies),
-        }
-    };
 };
