@@ -3,8 +3,7 @@ import type {G6Edge, G6Node} from '../types/graph-types.ts';
 
 export const renderTaxonomyTree = async (
     container: HTMLElement,
-    data: { nodes: G6Node[]; edges: G6Edge[] },
-    onLayoutEnd?: () => void
+    data: { nodes: G6Node[]; edges: G6Edge[] }
 ): Promise<any> => {
     const graph = new G6.Graph({
         data,
@@ -48,10 +47,6 @@ export const renderTaxonomyTree = async (
         },
         behaviors: ['drag-canvas', 'zoom-canvas', 'collapse-expand-tree'],
     });
-
-    if (onLayoutEnd) {
-        graph.on('afterlayout', onLayoutEnd);
-    }
 
     await graph.render();
     return graph;

@@ -1,12 +1,12 @@
-import React, { useEffect, useRef } from 'react';
-import { getGraphData } from "../../../graphs/taxonomy.ts";
-import { useOntologyStore } from "../../../stores/ontology-store.ts";
-import { renderTaxonomyTree } from "../../../graphs/taxonomy-tree.ts";
+import React, {useEffect, useRef} from 'react';
+import {getGraphData} from "../../../graphs/taxonomy.ts";
+import {useOntologyStore} from "../../../stores/ontology-store.ts";
+import {renderTaxonomyMindmap} from "../../../graphs/taxonomy-mindmap.ts";
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const graphRef = useRef<any>(null); // Store the G6 graph instance
-    const { ontology, loading, error, fetchOntology } = useOntologyStore();
+    const {ontology, loading, error, fetchOntology} = useOntologyStore();
 
     useEffect(() => {
         fetchOntology();
@@ -22,7 +22,7 @@ export const GraphExplorer: React.FC = () => {
             const data = getGraphData(ontology, 'Area', 'hasPart');
 
             // Pass the container immediately
-            const graph = await renderTaxonomyTree(containerRef.current!, data);
+            const graph = await renderTaxonomyMindmap(containerRef.current!, data);
 
             // If unmounted while waiting for render to resolve, destroy immediately
             if (!isMounted) {
@@ -35,7 +35,7 @@ export const GraphExplorer: React.FC = () => {
             const adjustGraph = () => {
                 const currentGraph = graphRef.current;
                 if (currentGraph && containerRef.current) {
-                    const { width, height } = containerRef.current.getBoundingClientRect();
+                    const {width, height} = containerRef.current.getBoundingClientRect();
                     currentGraph.setSize(width, height);
                     currentGraph.fitView();
                 }
@@ -81,7 +81,7 @@ export const GraphExplorer: React.FC = () => {
         <div
             ref={containerRef}
             className="graph-explorer"
-            style={{ width: '100%', height: 'calc(100vh - 60px)', background: '#f5f5f5', overflow: 'hidden' }}
+            style={{width: '100%', height: 'calc(100vh - 60px)', background: '#f5f5f5', overflow: 'hidden'}}
         ></div>
     );
 };
