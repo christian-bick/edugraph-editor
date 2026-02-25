@@ -190,7 +190,7 @@ export const renderTaxonomyMindmap = async (
             direction: 'H',
             getHeight: () => 30,
             getWidth: (node: any) => getNodeWidth(node.data.label, node.id === rootId) + 20,
-            getVGap: () => 6,
+            getVGap: () => 14,
             getHGap: () => 60,
             animation: false,
         },
