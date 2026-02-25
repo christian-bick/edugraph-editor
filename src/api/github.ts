@@ -10,10 +10,16 @@ export const loadOntology = (branch = 'main') => {
 }
 
 export const loadBranches = async (): Promise<string[]> => {
-    const response = await fetch(`${PROXY_URL}${GITHUB_API_HOST}/repos/${REPO_NAME}/branches`, {
+    const cacheBuster = `t=${new Date().getTime()}`;
+    const url = `${PROXY_URL}${GITHUB_API_HOST}/repos/${REPO_NAME}/branches?${cacheBuster}`;
+    
+    const response = await fetch(url, {
         method: 'GET',
         headers: {
             'Accept': 'application/vnd.github.v3+json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
         }
     });
     if (!response.ok) {

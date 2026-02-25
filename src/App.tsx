@@ -9,15 +9,19 @@ import { useBranchStore } from './stores/branch-store.ts';
 
 export const App = () => {
     const fetchOntology = useOntologyStore(state => state.fetchOntology);
-    const ontology = useOntologyStore(state => state.ontology);
-    const fetchBranches = useBranchStore(state => state.fetchBranches);
+    const { activeBranch, fetchBranches } = useBranchStore();
 
+    // Fetch branches on initial load
     useEffect(() => {
-        if (!ontology) {
-            fetchOntology();
-        }
         fetchBranches();
-    }, [fetchOntology, ontology, fetchBranches]);
+    }, [fetchBranches]);
+
+    // Fetch ontology whenever the active branch changes
+    useEffect(() => {
+        if (activeBranch) {
+            fetchOntology(activeBranch);
+        }
+    }, [activeBranch, fetchOntology]);
 
     return (
         <BrowserRouter>
