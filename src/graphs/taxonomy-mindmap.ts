@@ -24,8 +24,8 @@ style.innerHTML = `@import url('${iconfont.css}');`;
 document.head.appendChild(style);
 
 const RootNodeStyle = {
-    fill: '#EFF0F0',
-    labelFill: '#262626',
+    fill: '#fb8500',
+    labelFill: '#fff',
     labelFontSize: 24,
     labelFontWeight: 600,
     labelOffsetY: 8,
@@ -69,7 +69,7 @@ const getNodeSize = (nodeId: string, isRoot: boolean): [number, number] => {
  * Custom helper to convert graph data to a tree structure.
  */
 const graphToTree = (graphData: { nodes: G6Node[]; edges: G6Edge[] }): any => {
-    const nodeMap = new Map(graphData.nodes.map(n => [n.id, { ...n, children: [] }]));
+    const nodeMap = new Map(graphData.nodes.map(n => [n.id, { ...n, data: {...n}, children: [] }]));
     const hasParent = new Set();
 
     // Iterate over edges to build the hierarchy
@@ -230,8 +230,7 @@ class MindmapEdge extends CubicHorizontal {
     getKeyPath(attributes: any) {
         const path = super.getKeyPath(attributes);
         if (!this.targetNode || !this.sourceNode) return path;
-        const isRoot = this.targetNode.id === this.rootId;
-        const labelWidth = getNodeWidth(this.targetNode.id, isRoot);
+        const labelWidth = this.targetNode.getBBox().width;
 
         const [, tp] = this.getEndpoints(attributes);
         const sign = this.sourceNode.getCenter()[0] < this.targetNode.getCenter()[0] ? 1 : -1;
@@ -300,6 +299,7 @@ export const renderTaxonomyMindmap = async (
 ): Promise<any> => {
 
     const treeData = graphToTree(graphData);
+
     if (!treeData) {
         console.error("Failed to convert graph data to tree data.");
         return null;
@@ -332,7 +332,7 @@ export const renderTaxonomyMindmap = async (
                     labelFontFamily: 'Gill Sans',
                     labelBackground: true,
                     labelBackgroundFill: 'transparent',
-                    labelPadding: direction === 'left' ? [2, 0, 10, 40] : [2, 40, 10, 0],
+                    labelPadding: direction === 'left' ? [2, 0, 10, 10] : [2, 10, 10, 0],
                     ...(isRoot ? RootNodeStyle : NodeStyle),
                 };
             },
@@ -341,14 +341,14 @@ export const renderTaxonomyMindmap = async (
             type: 'mindmap',
             style: {
                 lineWidth: 3,
-                stroke: '#99ADD1',
+                stroke: '#fb8500',
             },
         },
         layout: {
             type: 'mindmap',
             direction: 'H',
             getHeight: () => 30,
-            getWidth: (node: any) => getNodeWidth(node.id, node.id === rootId),
+            getWidth: (node: any) => getNodeWidth(node.data.label, node.id === rootId) + 20,
             getVGap: () => 6,
             getHGap: () => 60,
             animation: false,
