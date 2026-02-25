@@ -171,7 +171,6 @@ export const renderTaxonomyMindmap = async (
                     direction,
                     labelText: d.label,
                     size: getNodeSize(d.label, isRoot),
-                    labelFontFamily: 'Gill Sans',
                     labelBackground: true,
                     labelBackgroundFill: 'transparent',
                     labelPadding: direction === 'left' ? [2, 0, 10, 10] : [2, 10, 10, 0],
