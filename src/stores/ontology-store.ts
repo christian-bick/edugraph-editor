@@ -1,5 +1,4 @@
 import {create} from 'zustand'
-import {createJSONStorage, persist} from 'zustand/middleware'
 import {loadOntology} from '../api/github.ts'
 import type {Ontology} from "../types/ontology-types.ts";
 import {parseAndTransformOntology} from "./ontology-parser.ts";
@@ -15,36 +14,20 @@ interface OntologyAction {
     fetchOntology: (branch: string) => Promise<void>;
 }
 
-export const useOntologyStore = create<OntologyState & OntologyAction>()(
-    persist(
-        (set) => ({
-            ontology: null,
-            loading: false,
-            error: null,
-            setOntology: (ontology) => set({ontology: ontology}),
-            fetchOntology: async (branch: string) => {
-                set({loading: true, error: null});
-                try {
-                    const rawOntologyTurtle = await loadOntology(branch);
-                    const ontology = await parseAndTransformOntology(rawOntologyTurtle);
-                    set({ontology: ontology, loading: false});
-                } catch (error: any) {
-                    set({error: error.message, loading: false});
-                    console.error(error);
-                }
-            },
-        }),
-        {
-            name: 'ontology-storage',
-            storage: createJSONStorage(() => sessionStorage),
-            onRehydrateStorage: () => (state) => {
-                if (state && state.ontology) {
-                    state.setOntology(state.ontology);
-                }
-            },
+export const useOntologyStore = create<OntologyState & OntologyAction>()((set) => ({
+    ontology: null,
+    loading: false,
+    error: null,
+    setOntology: (ontology) => set({ontology: ontology}),
+    fetchOntology: async (branch: string) => {
+        set({loading: true, error: null});
+        try {
+            const rawOntologyTurtle = await loadOntology(branch);
+            const ontology = await parseAndTransformOntology(rawOntologyTurtle);
+            set({ontology: ontology, loading: false});
+        } catch (error: any) {
+            set({error: error.message, loading: false});
+            console.error(error);
         }
-    )
-)
-
-
-
+    },
+}));

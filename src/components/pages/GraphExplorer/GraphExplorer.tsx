@@ -2,15 +2,17 @@ import React, {useEffect, useRef} from 'react';
 import {getGraphData} from "../../../graphs/taxonomy.ts";
 import {useOntologyStore} from "../../../stores/ontology-store.ts";
 import {renderTaxonomyMindmap} from "../../../graphs/taxonomy-mindmap.ts";
+import {useBranchStore} from "../../../stores/branch-store.ts";
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const graphRef = useRef<any>(null); // Store the G6 graph instance
     const {ontology, loading, error, fetchOntology} = useOntologyStore();
+    const { activeBranch, isHydrated } = useBranchStore();
 
     useEffect(() => {
-        fetchOntology();
-    }, [fetchOntology]);
+        fetchOntology(activeBranch);
+    }, [fetchOntology, activeBranch, isHydrated]);
 
     useEffect(() => {
         if (!containerRef.current || !ontology || loading) return;

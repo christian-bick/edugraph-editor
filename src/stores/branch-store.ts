@@ -7,6 +7,7 @@ interface BranchState {
     activeBranch: string;
     loading: boolean;
     error: string | null;
+    isHydrated: boolean;
 }
 
 interface BranchAction {
@@ -21,6 +22,7 @@ export const useBranchStore = create<BranchState & BranchAction>()(
             activeBranch: 'main',
             loading: false,
             error: null,
+            isHydrated: false,
             setActiveBranch: (branch) => set({ activeBranch: branch }),
             fetchBranches: async () => {
                 set({ loading: true, error: null });
@@ -37,6 +39,9 @@ export const useBranchStore = create<BranchState & BranchAction>()(
             name: 'branch-storage', // unique name
             storage: createJSONStorage(() => sessionStorage), // use sessionStorage
             partialize: (state) => ({ activeBranch: state.activeBranch }), // only persist activeBranch
+            onRehydrateStorage: () => () => {
+                useBranchStore.setState({ isHydrated: true });
+            },
         }
     )
 );
