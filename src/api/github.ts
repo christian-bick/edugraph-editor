@@ -9,9 +9,12 @@ const REPO_NAME = 'christian-bick/edugraph-ontology'
  * @param options The fetch options.
  */
 const apiGet = async (url: string, options: RequestInit = {}): Promise<Response> => {
-    const proxiedUrl = `${PROXY_URL}${url}`;
     const cacheBuster = `t=${new Date().getTime()}`;
-    const finalUrl = url.includes('?') ? `${proxiedUrl}&${cacheBuster}` : `${proxiedUrl}?${cacheBuster}`;
+    // First, correctly append the cache buster to the actual API URL
+    const urlWithCacheBust = url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`;
+    
+    // Then, prepend the proxy to the final, correct URL
+    const finalUrl = `${PROXY_URL}${urlWithCacheBust}`;
 
     const newOptions: RequestInit = {
         ...options,
@@ -28,12 +31,25 @@ const apiGet = async (url: string, options: RequestInit = {}): Promise<Response>
 };
 
 export const loadOntology = async (branch = 'main'): Promise<string> => {
-    const url = `${GITHUB_HOST}/${REPO_NAME}/raw/refs/heads/${branch}/core-ontology.ttl`;
-    const response = await apiGet(url);
+    const url = `${GITHUB_API_HOST}/repos/${REPO_NAME}/contents/core-ontology.ttl?ref=${branch}`;
+    const response = await apiGet(url, {
+        headers: {
+            'Accept': 'application/vnd.github.v3+json',
+        }
+    });
+
     if (!response.ok) {
         throw new Error(`Failed to load ontology: ${response.statusText}`);
     }
-    return response.text();
+
+    const fileData = await response.json();
+
+    // The GitHub API returns file content as a base64 encoded string. We need to decode it.
+    if (fileData && fileData.content) {
+        return atob(fileData.content);
+    } else {
+        throw new Error('Ontology file content not found in API response.');
+    }
 }
 
 export const loadBranches = async (): Promise<string[]> => {
