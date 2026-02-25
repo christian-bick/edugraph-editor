@@ -70,25 +70,35 @@ const getNodeSize = (nodeId: string, isRoot: boolean): [number, number] => {
  */
 const graphToTree = (graphData: { nodes: G6Node[]; edges: G6Edge[] }): any => {
     const nodeMap = new Map(graphData.nodes.map(n => [n.id, { ...n, children: [] }]));
-    const roots: any[] = [];
+    const hasParent = new Set();
 
-    graphData.nodes.forEach(node => {
-        const parentEdge = graphData.edges.find(edge => edge.target === node.id);
-        if (parentEdge) {
-            const parent = nodeMap.get(parentEdge.source);
-            if (parent) {
-                // @ts-ignore
-                parent.children.push(nodeMap.get(node.id));
-            }
-        } else {
-            roots.push(nodeMap.get(node.id)!);
+    // Iterate over edges to build the hierarchy
+    graphData.edges.forEach(edge => {
+        const parent = nodeMap.get(edge.source);
+        const child = nodeMap.get(edge.target);
+
+        // IMPORTANT: Check if the child already has a parent assigned.
+        // This prevents creating duplicates if the graph is a DAG.
+        if (parent && child && !hasParent.has(child.id)) {
+            parent.children.push(child);
+            hasParent.add(child.id);
         }
     });
 
+    // Find the root nodes (nodes that were never a target)
+    const roots: any[] = [];
+    graphData.nodes.forEach(n => {
+        if (!hasParent.has(n.id)) {
+            roots.push(nodeMap.get(n.id));
+        }
+    });
+
+    // If there are multiple roots, create a virtual root for the mindmap
     if (roots.length > 1) {
-        // If there are multiple roots, create a virtual root.
         return { id: 'virtual-root', label: 'Mindmap', children: roots };
     }
+
+    // Return the single root
     return roots[0];
 };
 
