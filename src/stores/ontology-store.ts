@@ -1,6 +1,6 @@
 import {create} from 'zustand'
 import {createJSONStorage, persist} from 'zustand/middleware'
-import {loadOntology} from '../api/ontology.ts'
+import {loadOntology} from '../api/github.ts'
 import type {Ontology} from "../types/ontology-types.ts";
 import {parseAndTransformOntology} from "./ontology-parser.ts";
 
