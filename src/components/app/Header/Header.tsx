@@ -1,4 +1,5 @@
 import { BranchSelector } from './BranchSelector/BranchSelector';
+import { DimensionSelector } from './DimensionSelector/DimensionSelector';
 import './Header.scss';
 
 export const Header = () => (
@@ -9,6 +10,7 @@ export const Header = () => (
         </div>
         <div className="header-controls">
             <BranchSelector />
+            <DimensionSelector />
         </div>
     </header>
 );

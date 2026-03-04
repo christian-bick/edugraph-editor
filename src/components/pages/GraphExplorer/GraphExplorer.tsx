@@ -3,12 +3,13 @@ import {getGraphData} from "../../../graphs/taxonomy.ts";
 import {useOntologyStore} from "../../../stores/ontology-store.ts";
 import {renderTaxonomyMindmap} from "../../../graphs/taxonomy-mindmap.ts";
 import {useBranchStore} from "../../../stores/branch-store.ts";
+import './GraphExplorer.scss';
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const graphRef = useRef<any>(null); // Store the G6 graph instance
     const {ontology, loading, error, fetchOntology} = useOntologyStore();
-    const { activeBranch, isHydrated } = useBranchStore();
+    const { activeBranch, activeDimension, isHydrated } = useBranchStore();
 
     useEffect(() => {
         fetchOntology(activeBranch);
@@ -21,7 +22,7 @@ export const GraphExplorer: React.FC = () => {
         let isMounted = true;
 
         const initGraph = async () => {
-            const data = getGraphData(ontology, 'Area', 'hasPart');
+            const data = getGraphData(ontology, activeDimension, 'hasPart');
 
             // Pass the container immediately
             const graph = await renderTaxonomyMindmap(containerRef.current!, data);
@@ -73,18 +74,22 @@ export const GraphExplorer: React.FC = () => {
                 graphRef.current = null;
             }
         };
-    }, [ontology, loading]);
+    }, [ontology, loading, activeDimension]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;
     if (!ontology) return <div>No ontology data available.</div>;
 
     return (
-        <div
-            ref={containerRef}
-            className="graph-explorer"
-            style={{width: '100%', height: 'calc(100vh - 60px)', background: '#f5f5f5', overflow: 'hidden'}}
-        ></div>
+        <div className="graph-explorer-wrapper">
+            <div
+                ref={containerRef}
+                className="graph-explorer"
+            ></div>
+            <aside className="graph-explorer-sidebar">
+                {/* Sidebar content goes here */}
+            </aside>
+        </div>
     );
 };
 
