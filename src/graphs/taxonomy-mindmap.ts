@@ -139,44 +139,6 @@ class MindmapEdge extends CubicHorizontal {
 register(ExtensionCategory.NODE, 'mindmap', MindmapNode);
 register(ExtensionCategory.EDGE, 'mindmap', MindmapEdge);
 
-// --- END: Code adapted from user-provided example.js ---
-
-const balanceMindmapChildren = (rootChildren: any[]): Set<string> => {
-    const countNodes = (node: any): number => {
-        if (!node.children || node.children.length === 0) {
-            return 1;
-        }
-        return 1 + node.children.reduce((acc: number, child: any) => acc + countNodes(child), 0);
-    };
-
-    // Calculate subtree size for each child
-    const childrenWithSize = rootChildren.map((child: any) => ({
-        ...child,
-        subtreeSize: countNodes(child),
-    }));
-
-    // Sort children by subtree size in descending order
-    childrenWithSize.sort((a: any, b: any) => b.subtreeSize - a.subtreeSize);
-
-    const leftChildrenNodes: any[] = [];
-    const rightChildrenNodes: any[] = [];
-    let leftSize = 0;
-    let rightSize = 0;
-
-    // Distribute children to left and right groups
-    childrenWithSize.forEach((child: any) => {
-        if (leftSize <= rightSize) {
-            leftChildrenNodes.push(child);
-            leftSize += child.subtreeSize;
-        } else {
-            rightChildrenNodes.push(child);
-            rightSize += child.subtreeSize;
-        }
-    });
-
-    return new Set(leftChildrenNodes.map((child: any) => child.id));
-};
-
 export const renderTaxonomyMindmap = async (
     container: HTMLElement,
     graphData: { nodes: G6Node[]; edges: G6Edge[] },
@@ -190,15 +152,6 @@ export const renderTaxonomyMindmap = async (
         return null;
     }
     const rootId = treeData.id;
-    const rootChildren = treeData.children || [];
-    const leftChildren = balanceMindmapChildren(rootChildren);
-
-    const getNodeSide = (nodeId: string) => {
-        if (leftChildren.has(nodeId)) {
-            return 'left';
-        }
-        return 'right';
-    };
 
     const graph = new Graph({
         container,
@@ -207,14 +160,13 @@ export const renderTaxonomyMindmap = async (
             type: 'mindmap',
             style: function (d: any) {
                 const isRoot = d.id === rootId;
-                const direction = getNodeSide(d.id);
                 const rootNodeStyle = { ...RootNodeStyle, fill: dimensionColorMap[dimension] || RootNodeStyle.fill };
                 return {
                     labelText: d.label,
                     size: getNodeSize(d.label, isRoot),
                     labelBackground: true,
                     labelBackgroundFill: 'transparent',
-                    labelPadding: direction === 'left' ? [2, 0, 10, 10] : [2, 10, 10, 0],
+                    labelPadding: [0, 0, 0, 0],
                     ...(isRoot ? rootNodeStyle : NodeStyle),
                 };
             },
@@ -228,12 +180,11 @@ export const renderTaxonomyMindmap = async (
         },
         layout: {
             type: 'mindmap',
-            direction: 'H',
-            getSide: (node: any) => getNodeSide(node.id),
+            direction: 'LR',
             getHeight: () => 30,
             getWidth: (node: any) => getNodeWidth(node.data.label, node.id === rootId) + 20,
             getVGap: () => 14,
-            getHGap: () => 60,
+            getHGap: () => 80,
         },
         behaviors: ['drag-canvas', 'zoom-canvas'],
         animation: false,
