@@ -234,9 +234,8 @@ export const renderTaxonomyMindmap = async (
             getWidth: (node: any) => getNodeWidth(node.data.label, node.id === rootId) + 20,
             getVGap: () => 14,
             getHGap: () => 60,
-            animation: false,
         },
-        behaviors: ['drag-canvas', 'zoom-canvas', 'drag-node', 'collapse-expand-tree'],
+        behaviors: ['drag-canvas', 'zoom-canvas'],
         animation: false,
     });
     await graph.render();
