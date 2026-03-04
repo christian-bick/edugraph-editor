@@ -141,6 +141,42 @@ register(ExtensionCategory.EDGE, 'mindmap', MindmapEdge);
 
 // --- END: Code adapted from user-provided example.js ---
 
+const balanceMindmapChildren = (rootChildren: any[]): Set<string> => {
+    const countNodes = (node: any): number => {
+        if (!node.children || node.children.length === 0) {
+            return 1;
+        }
+        return 1 + node.children.reduce((acc: number, child: any) => acc + countNodes(child), 0);
+    };
+
+    // Calculate subtree size for each child
+    const childrenWithSize = rootChildren.map((child: any) => ({
+        ...child,
+        subtreeSize: countNodes(child),
+    }));
+
+    // Sort children by subtree size in descending order
+    childrenWithSize.sort((a: any, b: any) => b.subtreeSize - a.subtreeSize);
+
+    const leftChildrenNodes: any[] = [];
+    const rightChildrenNodes: any[] = [];
+    let leftSize = 0;
+    let rightSize = 0;
+
+    // Distribute children to left and right groups
+    childrenWithSize.forEach((child: any) => {
+        if (leftSize <= rightSize) {
+            leftChildrenNodes.push(child);
+            leftSize += child.subtreeSize;
+        } else {
+            rightChildrenNodes.push(child);
+            rightSize += child.subtreeSize;
+        }
+    });
+
+    return new Set(leftChildrenNodes.map((child: any) => child.id));
+};
+
 export const renderTaxonomyMindmap = async (
     container: HTMLElement,
     graphData: { nodes: G6Node[]; edges: G6Edge[] },
@@ -155,11 +191,10 @@ export const renderTaxonomyMindmap = async (
     }
     const rootId = treeData.id;
     const rootChildren = treeData.children || [];
-    const leftChildren = new Set(rootChildren.slice(0, rootChildren.length / 2).map((child: any) => child.id));
+    const leftChildren = balanceMindmapChildren(rootChildren);
 
-    const getNodeSide = (nodeId: string, parentModels: any[]) => {
-        const parentExists = parentModels && parentModels.length > 0;
-        if (parentExists && parentModels[0].id === rootId && leftChildren.has(nodeId)) {
+    const getNodeSide = (nodeId: string) => {
+        if (leftChildren.has(nodeId)) {
             return 'left';
         }
         return 'right';
@@ -171,12 +206,10 @@ export const renderTaxonomyMindmap = async (
         node: {
             type: 'mindmap',
             style: function (d: any) {
-                const parentModels = this.getParentData(d.id, 'tree');
-                const direction = getNodeSide(d.id, parentModels);
                 const isRoot = d.id === rootId;
+                const direction = getNodeSide(d.id);
                 const rootNodeStyle = { ...RootNodeStyle, fill: dimensionColorMap[dimension] || RootNodeStyle.fill };
                 return {
-                    direction,
                     labelText: d.label,
                     size: getNodeSize(d.label, isRoot),
                     labelBackground: true,
@@ -196,6 +229,7 @@ export const renderTaxonomyMindmap = async (
         layout: {
             type: 'mindmap',
             direction: 'H',
+            getSide: (node: any) => getNodeSide(node.id),
             getHeight: () => 30,
             getWidth: (node: any) => getNodeWidth(node.data.label, node.id === rootId) + 20,
             getVGap: () => 14,
