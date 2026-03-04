@@ -25,7 +25,7 @@ export const GraphExplorer: React.FC = () => {
             const data = getGraphData(ontology, activeDimension, 'hasPart');
 
             // Pass the container immediately
-            const graph = await renderTaxonomyMindmap(containerRef.current!, data);
+            const graph = await renderTaxonomyMindmap(containerRef.current!, data, activeDimension);
 
             // If unmounted while waiting for render to resolve, destroy immediately
             if (!isMounted) {

@@ -17,6 +17,12 @@ const style = document.createElement('style');
 style.innerHTML = `@import url('${iconfont.css}');`;
 document.head.appendChild(style);
 
+const dimensionColorMap: { [key: string]: string } = {
+    'Area': '#fb8500',
+    'Ability': '#219ebc',
+    'Scope': '#5cb85c',
+};
+
 const RootNodeStyle = {
     fill: '#fb8500',
     labelFill: '#fff',
@@ -57,7 +63,7 @@ const getNodeSize = (nodeId: string, isRoot: boolean): [number, number] => {
 /**
  * Custom helper to convert graph data to a tree structure.
  */
-const graphToTree = (graphData: { nodes: G6Node[]; edges: G6Edge[] }): any => {
+const graphToTree = (graphData: { nodes: G6Node[]; edges: G6Edge[] }, dimension: string): any => {
     const nodeMap = new Map(graphData.nodes.map(n => [n.id, {...n, data: {...n}, children: []}]));
     const hasParent = new Set();
 
@@ -84,7 +90,7 @@ const graphToTree = (graphData: { nodes: G6Node[]; edges: G6Edge[] }): any => {
 
     // If there are multiple roots, create a virtual root for the mindmap
     if (roots.length > 1) {
-        return {id: 'virtual-root', label: 'Mindmap', children: roots};
+        return {id: 'virtual-root', label: dimension, children: roots};
     }
 
     // Return the single root
@@ -138,9 +144,10 @@ register(ExtensionCategory.EDGE, 'mindmap', MindmapEdge);
 export const renderTaxonomyMindmap = async (
     container: HTMLElement,
     graphData: { nodes: G6Node[]; edges: G6Edge[] },
+    dimension: string,
 ): Promise<any> => {
 
-    const treeData = graphToTree(graphData);
+    const treeData = graphToTree(graphData, dimension);
 
     if (!treeData) {
         console.error("Failed to convert graph data to tree data.");
@@ -167,6 +174,7 @@ export const renderTaxonomyMindmap = async (
                 const parentModels = this.getParentData(d.id, 'tree');
                 const direction = getNodeSide(d.id, parentModels);
                 const isRoot = d.id === rootId;
+                const rootNodeStyle = { ...RootNodeStyle, fill: dimensionColorMap[dimension] || RootNodeStyle.fill };
                 return {
                     direction,
                     labelText: d.label,
@@ -174,7 +182,7 @@ export const renderTaxonomyMindmap = async (
                     labelBackground: true,
                     labelBackgroundFill: 'transparent',
                     labelPadding: direction === 'left' ? [2, 0, 10, 10] : [2, 10, 10, 0],
-                    ...(isRoot ? RootNodeStyle : NodeStyle),
+                    ...(isRoot ? rootNodeStyle : NodeStyle),
                 };
             },
         },
@@ -182,7 +190,7 @@ export const renderTaxonomyMindmap = async (
             type: 'mindmap',
             style: {
                 lineWidth: 3,
-                stroke: '#fb8500',
+                stroke: dimensionColorMap[dimension] || '#fb8500',
             },
         },
         layout: {
