@@ -13,11 +13,3 @@
     position: relative;
     /* Add any specific styling for the graph container here */
 }
-
-.graph-explorer-sidebar {
-    width: 300px;
-    flex-shrink: 0;
-    box-sizing: border-box;
-    background-color: colors.$container-background;
-    padding: 1rem;
-}

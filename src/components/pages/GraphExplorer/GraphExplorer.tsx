@@ -6,13 +6,14 @@ import {useBranchStore} from "../../../stores/branch-store.ts";
 import './GraphExplorer.scss';
 import {useSelectedEntityStore} from "../../../stores/selected-entity-store.ts";
 import {OntologyEntity} from "../../../types/ontology-types.ts";
+import {Sidebar} from "./Sidebar/Sidebar.tsx";
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const graphRef = useRef<any>(null); // Store the G6 graph instance
     const {ontology, loading, error, fetchOntology} = useOntologyStore();
     const { activeBranch, activeDimension, isHydrated } = useBranchStore();
-    const { selectedEntity, setSelectedEntity } = useSelectedEntityStore();
+    const { setSelectedEntity } = useSelectedEntityStore();
 
     const handleNodeClick = useCallback((entityIri: string) => {
         if (!ontology) return;
@@ -111,16 +112,7 @@ export const GraphExplorer: React.FC = () => {
                 ref={containerRef}
                 className="graph-explorer"
             ></div>
-            <aside className="graph-explorer-sidebar">
-                {selectedEntity ? (
-                    <>
-                        <h3>{selectedEntity.natural_name}</h3>
-                        <p>{selectedEntity.definition}</p>
-                    </>
-                ) : (
-                    <div>Select a node to see details.</div>
-                )}
-            </aside>
+            <Sidebar />
         </div>
     );
 };

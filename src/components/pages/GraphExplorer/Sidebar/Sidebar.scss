@@ -1,0 +1,14 @@
+@use "/src/colors.scss" as colors;
+
+.graph-explorer-sidebar {
+    width: 300px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    background-color: colors.$container-background;
+    padding: 1rem;
+
+    h3 {
+        padding-top: 0;
+        margin-top: 0;
+    }
+}
