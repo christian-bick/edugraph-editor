@@ -139,6 +139,21 @@ class MindmapEdge extends CubicHorizontal {
 register(ExtensionCategory.NODE, 'mindmap', MindmapNode);
 register(ExtensionCategory.EDGE, 'mindmap', MindmapEdge);
 
+const markSiblingNodes = (node: any) => {
+    if (node.children && node.children.length > 0) {
+        node.children.forEach((child: any, index: number) => {
+            if (!child.data) child.data = {};
+            if (index === 0) {
+                child.data.isFirstSibling = true;
+            }
+            if (index === node.children.length - 1) {
+                child.data.isLastSibling = true;
+            }
+            markSiblingNodes(child);
+        });
+    }
+};
+
 export const renderTaxonomyMindmap = async (
     container: HTMLElement,
     graphData: { nodes: G6Node[]; edges: G6Edge[] },
@@ -152,6 +167,8 @@ export const renderTaxonomyMindmap = async (
         return null;
     }
     const rootId = treeData.id;
+
+    markSiblingNodes(treeData);
 
     const graph = new Graph({
         container,
@@ -183,7 +200,12 @@ export const renderTaxonomyMindmap = async (
             direction: 'LR',
             getHeight: () => 30,
             getWidth: (node: any) => getNodeWidth(node.data.label, node.id === rootId) + 20,
-            getVGap: () => 14,
+            getVGap: (d: any) => {
+                if (d.data.isLastSibling) {
+                    return 25;
+                }
+                return 10;
+            },
             getHGap: () => 80,
         },
         behaviors: ['drag-canvas', 'zoom-canvas'],
