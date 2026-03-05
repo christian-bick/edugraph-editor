@@ -14,7 +14,7 @@ export const Sidebar: React.FC = () => {
 
                     {selectedEntity.relations.partOf && (
                         <>
-                            <h4>Part Of</h4>
+                            <h4>Parents</h4>
                             <ul>
                                 {selectedEntity.relations.partOf.map(e => <li key={e.iri}>{e.natural_name}</li>)}
                             </ul>
@@ -23,7 +23,7 @@ export const Sidebar: React.FC = () => {
 
                     {selectedEntity.relations.hasPart && (
                         <>
-                            <h4>Has Part</h4>
+                            <h4>Children</h4>
                             <ul>
                                 {selectedEntity.relations.hasPart.map(e => <li key={e.iri}>{e.natural_name}</li>)}
                             </ul>
