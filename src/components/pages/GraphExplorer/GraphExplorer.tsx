@@ -1,15 +1,40 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import {getGraphData} from "../../../graphs/taxonomy.ts";
 import {useOntologyStore} from "../../../stores/ontology-store.ts";
 import {renderTaxonomyMindmap} from "../../../graphs/taxonomy-mindmap.ts";
 import {useBranchStore} from "../../../stores/branch-store.ts";
 import './GraphExplorer.scss';
+import {useSelectedEntityStore} from "../../../stores/selected-entity-store.ts";
+import {OntologyEntity} from "../../../types/ontology-types.ts";
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const graphRef = useRef<any>(null); // Store the G6 graph instance
     const {ontology, loading, error, fetchOntology} = useOntologyStore();
     const { activeBranch, activeDimension, isHydrated } = useBranchStore();
+    const { selectedEntity, setSelectedEntity } = useSelectedEntityStore();
+
+    const handleNodeClick = useCallback((entityIri: string) => {
+        if (!ontology) return;
+
+        const allEntities = Object.values(ontology.entities).flat();
+        const entity = allEntities.find(e => e.iri === entityIri);
+
+        if (entity) {
+            const entityRelations: { [relationName: string]: OntologyEntity[] } = {};
+            for (const rel in ontology.relations) {
+                const relTyped = rel as keyof typeof ontology.relations;
+                if (ontology.relations[relTyped]?.[entity.name]) {
+                    entityRelations[relTyped] = ontology.relations[relTyped]![entity.name].map(relName => allEntities.find(e => e.name === relName)!);
+                }
+            }
+
+            setSelectedEntity({
+                ...entity,
+                relations: entityRelations,
+            });
+        }
+    }, [ontology, setSelectedEntity]);
 
     useEffect(() => {
         fetchOntology(activeBranch);
@@ -25,7 +50,7 @@ export const GraphExplorer: React.FC = () => {
             const data = getGraphData(ontology, activeDimension, 'hasPart');
 
             // Pass the container immediately
-            const graph = await renderTaxonomyMindmap(containerRef.current!, data, activeDimension);
+            const graph = await renderTaxonomyMindmap(containerRef.current!, data, activeDimension, handleNodeClick);
 
             // If unmounted while waiting for render to resolve, destroy immediately
             if (!isMounted) {
@@ -74,7 +99,7 @@ export const GraphExplorer: React.FC = () => {
                 graphRef.current = null;
             }
         };
-    }, [ontology, loading, activeDimension]);
+    }, [ontology, loading, activeDimension, handleNodeClick]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;
@@ -87,7 +112,14 @@ export const GraphExplorer: React.FC = () => {
                 className="graph-explorer"
             ></div>
             <aside className="graph-explorer-sidebar">
-                {/* Sidebar content goes here */}
+                {selectedEntity ? (
+                    <>
+                        <h3>{selectedEntity.natural_name}</h3>
+                        <p>{selectedEntity.definition}</p>
+                    </>
+                ) : (
+                    <div>Select a node to see details.</div>
+                )}
             </aside>
         </div>
     );

@@ -158,6 +158,7 @@ export const renderTaxonomyMindmap = async (
     container: HTMLElement,
     graphData: { nodes: G6Node[]; edges: G6Edge[] },
     dimension: string,
+    onNodeClick: (id: string) => void,
 ): Promise<any> => {
 
     const treeData = graphToTree(graphData, dimension);
@@ -211,6 +212,12 @@ export const renderTaxonomyMindmap = async (
         behaviors: ['drag-canvas', 'zoom-canvas'],
         animation: false,
     });
+
+    graph.on('node:click', (event) => {
+        const { id } = event.target;
+        onNodeClick(id);
+    });
+
     await graph.render();
     return graph;
 };
