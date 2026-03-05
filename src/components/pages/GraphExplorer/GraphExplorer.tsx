@@ -25,8 +25,9 @@ export const GraphExplorer: React.FC = () => {
             const entityRelations: { [relationName: string]: OntologyEntity[] } = {};
             for (const rel in ontology.relations) {
                 const relTyped = rel as keyof typeof ontology.relations;
-                if (ontology.relations[relTyped]?.[entity.name]) {
-                    entityRelations[relTyped] = ontology.relations[relTyped]![entity.name].map(relName => allEntities.find(e => e.name === relName)!);
+                if (ontology.relations[relTyped]?.[entity.iri]) {
+                    const relatedIris = ontology.relations[relTyped]![entity.iri];
+                    entityRelations[relTyped] = relatedIris.map(iri => allEntities.find(e => e.iri === iri)!).filter(Boolean) as OntologyEntity[];
                 }
             }
 
