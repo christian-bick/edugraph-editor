@@ -43,6 +43,10 @@ export const GraphExplorer: React.FC = () => {
     }, [fetchOntology, activeBranch, isHydrated]);
 
     useEffect(() => {
+        setSelectedEntity(null);
+    }, [activeBranch, activeDimension, setSelectedEntity]);
+
+    useEffect(() => {
         if (!containerRef.current || !ontology || loading) return;
 
         let resizeObserver: ResizeObserver | null = null;
