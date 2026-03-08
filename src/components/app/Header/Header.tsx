@@ -1,5 +1,6 @@
 import { BranchSelector } from './BranchSelector/BranchSelector';
 import { DimensionSelector } from './DimensionSelector/DimensionSelector';
+import { PerspectiveSelector } from "./PerspectiveSelector/PerspectiveSelector.tsx";
 import './Header.scss';
 
 export const Header = () => (
@@ -11,6 +12,7 @@ export const Header = () => (
         <div className="header-controls">
             <BranchSelector />
             <DimensionSelector />
+            <PerspectiveSelector />
         </div>
     </header>
 );
