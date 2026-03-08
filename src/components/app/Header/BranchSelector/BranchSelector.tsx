@@ -27,17 +27,17 @@ export const BranchSelector = () => {
     }, []);
 
     return (
-        <div className="branch-selector" ref={selectorRef}>
-            <div className="branch-selector__active" onClick={() => setIsOpen(!isOpen)}>
+        <div className="branch-selector custom-selector" ref={selectorRef}>
+            <div className="custom-selector__active" onClick={() => setIsOpen(!isOpen)}>
                 <span>{activeBranch}</span>
                 <i className={clsx('arrow', isOpen ? 'up' : 'down')}></i>
             </div>
             {isOpen && (
-                <ul className="branch-selector__list">
+                <ul className="custom-selector__list">
                     {branches.map((branch) => (
                         <li
                             key={branch}
-                            className={clsx('branch-selector__item', branch === activeBranch && 'selected')}
+                            className={clsx('custom-selector__item', branch === activeBranch && 'selected')}
                             onClick={() => handleSelect(branch)}
                         >
                             {branch}

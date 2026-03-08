@@ -28,17 +28,17 @@ export const PerspectiveSelector = () => {
     }, []);
 
     return (
-        <div className="perspective-selector" ref={selectorRef}>
-            <div className="perspective-selector__active" onClick={() => setIsOpen(!isOpen)}>
+        <div className="perspective-selector custom-selector" ref={selectorRef}>
+            <div className="custom-selector__active" onClick={() => setIsOpen(!isOpen)}>
                 <span>{activePerspective}</span>
                 <i className={clsx('arrow', isOpen ? 'up' : 'down')}></i>
             </div>
             {isOpen && (
-                <ul className="perspective-selector__list">
+                <ul className="custom-selector__list">
                     {perspectives.map((perspective) => (
                         <li
                             key={perspective}
-                            className={clsx('perspective-selector__item', perspective === activePerspective && 'selected')}
+                            className={clsx('custom-selector__item', perspective === activePerspective && 'selected')}
                             onClick={() => handleSelect(perspective)}
                         >
                             {perspective}

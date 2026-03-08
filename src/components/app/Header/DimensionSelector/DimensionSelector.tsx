@@ -28,17 +28,17 @@ export const DimensionSelector = () => {
     }, []);
 
     return (
-        <div className="dimension-selector" ref={selectorRef}>
-            <div className="dimension-selector__active" onClick={() => setIsOpen(!isOpen)}>
+        <div className="dimension-selector custom-selector" ref={selectorRef}>
+            <div className="custom-selector__active" onClick={() => setIsOpen(!isOpen)}>
                 <span>{activeDimension}</span>
                 <i className={clsx('arrow', isOpen ? 'up' : 'down')}></i>
             </div>
             {isOpen && (
-                <ul className="dimension-selector__list">
+                <ul className="custom-selector__list">
                     {dimensions.map((dimension) => (
                         <li
                             key={dimension}
-                            className={clsx('dimension-selector__item', dimension === activeDimension && 'selected')}
+                            className={clsx('custom-selector__item', dimension === activeDimension && 'selected')}
                             onClick={() => handleSelect(dimension)}
                         >
                             {dimension}
