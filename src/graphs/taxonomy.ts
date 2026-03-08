@@ -4,7 +4,8 @@ import type {Ontology, OntologyEntities, OntologyRelations} from "../types/ontol
 export const getGraphData = (
     ontology: Ontology | null,
     filterEntityType: keyof OntologyEntities | null = null,
-    filterRelationType: keyof OntologyRelations | null = null
+    filterRelationType: keyof OntologyRelations | null = null,
+    filterOrphanNodes = false
 ) => {
     const nodes: G6Node[] = [];
     const edges: G6Edge[] = [];
@@ -65,6 +66,17 @@ export const getGraphData = (
             });
         }
     });
+
+    if (filterOrphanNodes) {
+        const participatingNodeIRIs = new Set<string>();
+        edges.forEach(edge => {
+            participatingNodeIRIs.add(edge.source);
+            participatingNodeIRIs.add(edge.target);
+        });
+
+        const connectedNodes = nodes.filter(node => participatingNodeIRIs.has(node.id));
+        return { nodes: connectedNodes, edges };
+    }
 
     return { nodes, edges };
 };

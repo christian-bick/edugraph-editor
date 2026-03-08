@@ -8,11 +8,13 @@ import {useSelectedEntityStore} from "../../../stores/selected-entity-store.ts";
 import {OntologyEntity} from "../../../types/ontology-types.ts";
 import {Sidebar} from "./Sidebar/Sidebar.tsx";
 
+import {renderTaxonomyDagre} from "../../../graphs/taxonomy-dagre.ts";
+
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const graphRef = useRef<any>(null); // Store the G6 graph instance
     const {ontology, loading, error, fetchOntology} = useOntologyStore();
-    const { activeBranch, activeDimension, isHydrated } = useBranchStore();
+    const { activeBranch, activeDimension, activePerspective, isHydrated } = useBranchStore();
     const { setSelectedEntity } = useSelectedEntityStore();
 
     const handleNodeClick = useCallback((entityIri: string) => {
@@ -44,7 +46,7 @@ export const GraphExplorer: React.FC = () => {
 
     useEffect(() => {
         setSelectedEntity(null);
-    }, [activeBranch, activeDimension, setSelectedEntity]);
+    }, [activeBranch, activeDimension, activePerspective, setSelectedEntity]);
 
     useEffect(() => {
         if (!containerRef.current || !ontology || loading) return;
@@ -53,10 +55,15 @@ export const GraphExplorer: React.FC = () => {
         let isMounted = true;
 
         const initGraph = async () => {
-            const data = getGraphData(ontology, activeDimension, 'hasPart');
+            let data, graph;
 
-            // Pass the container immediately
-            const graph = await renderTaxonomyMindmap(containerRef.current!, data, activeDimension, handleNodeClick);
+            if (activePerspective === 'Progression') {
+                data = getGraphData(ontology, activeDimension, 'expandedBy', true);
+                graph = await renderTaxonomyDagre(containerRef.current!, data, handleNodeClick);
+            } else {
+                data = getGraphData(ontology, activeDimension, 'hasPart');
+                graph = await renderTaxonomyMindmap(containerRef.current!, data, activeDimension, handleNodeClick);
+            }
 
             // If unmounted while waiting for render to resolve, destroy immediately
             if (!isMounted) {
@@ -105,7 +112,7 @@ export const GraphExplorer: React.FC = () => {
                 graphRef.current = null;
             }
         };
-    }, [ontology, loading, activeDimension, handleNodeClick]);
+    }, [ontology, loading, activeDimension, activePerspective, handleNodeClick]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;
