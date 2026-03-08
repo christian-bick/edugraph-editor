@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useRef} from 'react';
 import {getGraphData} from "../../../graphs/taxonomy.ts";
 import {useOntologyStore} from "../../../stores/ontology-store.ts";
-import {renderTaxonomyMindmap} from "../../../graphs/taxonomy-mindmap.ts";
+import {renderTaxonomyCompactBox} from "../../../graphs/taxonomy-compact-box.ts";
 import {useBranchStore} from "../../../stores/branch-store.ts";
 import './GraphExplorer.scss';
 import {useSelectedEntityStore} from "../../../stores/selected-entity-store.ts";
@@ -62,7 +62,7 @@ export const GraphExplorer: React.FC = () => {
                 graph = await renderTaxonomyDagre(containerRef.current!, data, handleNodeClick);
             } else {
                 data = getGraphData(ontology, activeDimension, 'hasPart');
-                graph = await renderTaxonomyMindmap(containerRef.current!, data, activeDimension, handleNodeClick);
+                graph = await renderTaxonomyCompactBox(containerRef.current!, data, activeDimension, handleNodeClick);
             }
 
             // If unmounted while waiting for render to resolve, destroy immediately
