@@ -18,7 +18,7 @@ const PREDICATE_EXPANDS = EDU_BASE + 'expands';
 const PREDICATE_PARTOF = EDU_BASE + 'partOf';
 const PREDICATE_INCLUDES = EDU_BASE + 'includes';
 
-interface EntityTempInfo {
+export interface EntityTempInfo {
     type: keyof OntologyEntities;
     name: string;
     natural_name: string;
@@ -33,46 +33,29 @@ const toNaturalName = (name: string): string => {
         .replace(/([A-Za-z])([0-9])/g, '$1 $2');
 };
 
-export const parseAndTransformOntology = async (turtleString: string): Promise<Ontology> => {
+export const getQuadsFromString = async (turtleString: string): Promise<Quad[]> => {
     const parser = new Parser();
-
-    const quads: Quad[] = await new Promise((resolve, reject) => {
-        const parsedQuads: Quad[] = [];
+    const quads: Quad[] = [];
+    return new Promise((resolve, reject) => {
         parser.parse(turtleString, (error, quad) => {
             if (error) {
                 return reject(error);
             }
             if (quad) {
-                parsedQuads.push(quad);
+                quads.push(quad);
             } else {
-                resolve(parsedQuads);
+                resolve(quads);
             }
         });
     });
+};
 
-    const newOntology: Ontology = {
-        entities: {
-            Ability: [],
-            Area: [],
-            Scope: [],
-        },
-        relations: {
-            expands: {},
-            partOf: {},
-            includes: {},
-        },
-    };
+export const createEntityInfoMap = (quads: Quad[]): Map<string, EntityTempInfo> => {
+    const entityInfoMap = new Map<string, EntityTempInfo>();
 
-    const entityInfoMap = new Map<string, EntityTempInfo>(); // Key is IRI
-
-    // First pass: Identify entities (NamedIndividuals) and their types
     quads.forEach(quad => {
-        const subjectIRI = quad.subject.value;
-        const predicateIRI = quad.predicate.value;
-        const objectValue = quad.object.value;
-
-        if (predicateIRI === RDF_TYPE && objectValue === OWL_NAMED_INDIVIDUAL) {
-            // Initialize entity with default name, will refine type in second pass
+        if (quad.predicate.value === RDF_TYPE && quad.object.value === OWL_NAMED_INDIVIDUAL) {
+            const subjectIRI = quad.subject.value;
             if (!entityInfoMap.has(subjectIRI)) {
                 const name = subjectIRI.replace(EDU_INDIVIDUAL_BASE, '');
                 entityInfoMap.set(subjectIRI, {
@@ -86,7 +69,14 @@ export const parseAndTransformOntology = async (turtleString: string): Promise<O
             }
         }
     });
+    return entityInfoMap;
+};
 
+export const populateOntologyFromQuads = (
+    ontology: Ontology,
+    quads: Quad[],
+    entityInfoMap: Map<string, EntityTempInfo>
+) => {
     // Second pass: Populate types, natural names, and relations
     quads.forEach(quad => {
         const subjectIRI = quad.subject.value;
@@ -114,20 +104,20 @@ export const parseAndTransformOntology = async (turtleString: string): Promise<O
             const objectName = quad.object.value;
 
             if (predicateIRI === PREDICATE_EXPANDS) {
-                if (!newOntology.relations.expands[subjectName]) {
-                    newOntology.relations.expands[subjectName] = [];
+                if (!ontology.relations.expands[subjectName]) {
+                    ontology.relations.expands[subjectName] = [];
                 }
-                newOntology.relations.expands[subjectName].push(objectName);
+                ontology.relations.expands[subjectName].push(objectName);
             } else if (predicateIRI === PREDICATE_PARTOF) {
-                if (!newOntology.relations.partOf[subjectName]) {
-                    newOntology.relations.partOf[subjectName] = [];
+                if (!ontology.relations.partOf[subjectName]) {
+                    ontology.relations.partOf[subjectName] = [];
                 }
-                newOntology.relations.partOf[subjectName].push(objectName);
+                ontology.relations.partOf[subjectName].push(objectName);
             } else if (predicateIRI === PREDICATE_INCLUDES) {
-                if (!newOntology.relations.includes[subjectName]) {
-                    newOntology.relations.includes[subjectName] = [];
+                if (!ontology.relations.includes[subjectName]) {
+                    ontology.relations.includes[subjectName] = [];
                 }
-                newOntology.relations.includes[subjectName].push(objectName);
+                ontology.relations.includes[subjectName].push(objectName);
             }
         }
     });
@@ -136,20 +126,22 @@ export const parseAndTransformOntology = async (turtleString: string): Promise<O
     entityInfoMap.forEach(info => {
         // Ensure entity is of one of the expected types before adding
         if (['Ability', 'Area', 'Scope'].includes(info.type)) {
-            newOntology.entities[info.type].push({
-                iri: info.iri,
-                name: info.name,
-                natural_name: info.natural_name,
-                definition: info.definition,
-                examples: info.examples,
-            });
+            // Avoid duplicates
+            if (!ontology.entities[info.type].some(e => e.iri === info.iri)) {
+                ontology.entities[info.type].push({
+                    iri: info.iri,
+                    name: info.name,
+                    natural_name: info.natural_name,
+                    definition: info.definition,
+                    examples: info.examples,
+                });
+            }
         }
     });
-
-    return enrichOntology(newOntology);
 };
 
-const enrichOntology = (ontology: Ontology): Ontology => {
+
+export const enrichOntology = (ontology: Ontology): Ontology => {
     if (!ontology || !ontology.relations) return ontology;
 
     const transitiveIncludes = computeTransitiveClosure(ontology.relations.includes || {});

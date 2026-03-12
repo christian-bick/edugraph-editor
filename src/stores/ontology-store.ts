@@ -1,7 +1,12 @@
 import {create} from 'zustand'
-import {loadOntology} from '../api/github.ts'
+import {loadOntologyFile} from '../api/github.ts'
 import type {Ontology} from "../types/ontology-types.ts";
-import {parseAndTransformOntology} from "./ontology-parser.ts";
+import {
+    createEntityInfoMap,
+    enrichOntology,
+    getQuadsFromString,
+    populateOntologyFromQuads
+} from "./ontology-parser.ts";
 
 interface OntologyState {
     ontology: Ontology | null;
@@ -22,9 +27,34 @@ export const useOntologyStore = create<OntologyState & OntologyAction>()((set) =
     fetchOntology: async (branch: string) => {
         set({loading: true, error: null});
         try {
-            const rawOntologyTurtle = await loadOntology(branch);
-            const ontology = await parseAndTransformOntology(rawOntologyTurtle);
-            set({ontology: ontology, loading: false});
+            const files = ["core-abilities.ttl", "core-areas-math.ttl", "core-scopes-math.ttl"];
+            const turtlePromises = files.map(file => loadOntologyFile(file, branch));
+            const rawOntologyTurtles = await Promise.all(turtlePromises);
+
+            const quadPromises = rawOntologyTurtles.map(getQuadsFromString);
+            const quadsPerFile = await Promise.all(quadPromises);
+            const allQuads = quadsPerFile.flat();
+
+            const entityInfoMap = createEntityInfoMap(allQuads);
+
+            const newOntology: Ontology = {
+                entities: {
+                    Ability: [],
+                    Area: [],
+                    Scope: [],
+                },
+                relations: {
+                    expands: {},
+                    partOf: {},
+                    includes: {},
+                },
+            };
+
+            populateOntologyFromQuads(newOntology, allQuads, entityInfoMap);
+
+            const finalOntology = enrichOntology(newOntology);
+
+            set({ontology: finalOntology, loading: false});
         } catch (error: any) {
             set({error: error.message, loading: false});
             console.error(error);

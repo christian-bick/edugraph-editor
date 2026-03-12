@@ -30,8 +30,8 @@ const apiGet = async (url: string, options: RequestInit = {}): Promise<Response>
     return fetch(finalUrl, newOptions);
 };
 
-export const loadOntology = async (branch = 'main'): Promise<string> => {
-    const url = `${GITHUB_API_HOST}/repos/${REPO_NAME}/contents/core-instances.ttl?ref=${branch}`;
+export const loadOntologyFile = async (file: string, branch = 'main'): Promise<string> => {
+    const url = `${GITHUB_API_HOST}/repos/${REPO_NAME}/contents/${file}?ref=${branch}`;
     const response = await apiGet(url, {
         headers: {
             'Accept': 'application/vnd.github.v3+json',
@@ -39,7 +39,7 @@ export const loadOntology = async (branch = 'main'): Promise<string> => {
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to load ontology: ${response.statusText}`);
+        throw new Error(`Failed to load ontology file ${file}: ${response.statusText}`);
     }
 
     const fileData = await response.json();
@@ -48,7 +48,7 @@ export const loadOntology = async (branch = 'main'): Promise<string> => {
     if (fileData && fileData.content) {
         return atob(fileData.content);
     } else {
-        throw new Error('Ontology file content not found in API response.');
+        throw new Error(`Ontology file content not found for ${file}.`);
     }
 }
 
