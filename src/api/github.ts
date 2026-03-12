@@ -12,7 +12,7 @@ const apiGet = async (url: string, options: RequestInit = {}): Promise<Response>
     const cacheBuster = `t=${new Date().getTime()}`;
     // First, correctly append the cache buster to the actual API URL
     const urlWithCacheBust = url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`;
-    
+
     // Then, prepend the proxy to the final, correct URL
     const finalUrl = `${PROXY_URL}${urlWithCacheBust}`;
 
@@ -31,7 +31,7 @@ const apiGet = async (url: string, options: RequestInit = {}): Promise<Response>
 };
 
 export const loadOntology = async (branch = 'main'): Promise<string> => {
-    const url = `${GITHUB_API_HOST}/repos/${REPO_NAME}/contents/core-ontology.ttl?ref=${branch}`;
+    const url = `${GITHUB_API_HOST}/repos/${REPO_NAME}/contents/core-instances.ttl?ref=${branch}`;
     const response = await apiGet(url, {
         headers: {
             'Accept': 'application/vnd.github.v3+json',

@@ -15,10 +15,10 @@ export interface OntologyEntities {
 export interface OntologyRelations {
     expands: Record<string, string[]>;
     partOf: Record<string, string[]>;
-    implies: Record<string, string[]>;
+    includes: Record<string, string[]>;
     expandedBy?: Record<string, string[]>;
     hasPart?: Record<string, string[]>;
-    impliedBy?: Record<string, string[]>;
+    includedBy?: Record<string, string[]>;
 }
 
 export interface Ontology {
