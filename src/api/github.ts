@@ -1,3 +1,5 @@
+import {useAuthStore} from "../stores/auth-store.ts";
+
 const PROXY_URL = 'https://corsproxy.io/?'
 const GITHUB_HOST = 'https://github.com'
 const GITHUB_API_HOST = 'https://api.github.com';
@@ -16,11 +18,18 @@ const apiGet = async (url: string, options: RequestInit = {}): Promise<Response>
     // Then, prepend the proxy to the final, correct URL
     const finalUrl = `${PROXY_URL}${urlWithCacheBust}`;
 
+    const token = useAuthStore.getState().token;
+    const authHeaders: Record<string, string> = {};
+    if (token) {
+        authHeaders['Authorization'] = `token ${token}`;
+    }
+
     const newOptions: RequestInit = {
         ...options,
         method: 'GET', // Ensure method is GET
         headers: {
             ...options.headers,
+            ...authHeaders,
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
             'Expires': '0',
