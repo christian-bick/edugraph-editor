@@ -1,8 +1,11 @@
 import {useAuthStore} from "../stores/auth-store.ts";
 
-const PROXY_URL = 'https://corsproxy.io/?'
-const GITHUB_HOST = 'https://github.com'
-const GITHUB_API_HOST = 'https://api.github.com';
+const USE_VITE_PROXY = true; // Set to false to call GitHub API directly
+
+const GITHUB_API_DIRECT_HOST = 'https://api.github.com';
+const GITHUB_API_PROXY_HOST = '/github-api';
+
+const GITHUB_API_HOST = USE_VITE_PROXY ? GITHUB_API_PROXY_HOST : GITHUB_API_DIRECT_HOST;
 const REPO_NAME = 'christian-bick/edugraph-ontology'
 
 /**
@@ -12,11 +15,7 @@ const REPO_NAME = 'christian-bick/edugraph-ontology'
  */
 const apiGet = async (url: string, options: RequestInit = {}): Promise<Response> => {
     const cacheBuster = `t=${new Date().getTime()}`;
-    // First, correctly append the cache buster to the actual API URL
-    const urlWithCacheBust = url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`;
-
-    // Then, prepend the proxy to the final, correct URL
-    const finalUrl = `${PROXY_URL}${urlWithCacheBust}`;
+    const finalUrl = url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`;
 
     const token = useAuthStore.getState().token;
     const authHeaders: Record<string, string> = {};
