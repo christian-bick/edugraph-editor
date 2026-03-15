@@ -12,14 +12,15 @@ const REPO_NAME = 'christian-bick/edugraph-ontology'
  * A generalized GET helper that applies the proxy and cache-busting logic.
  * @param url The target URL (without the proxy).
  * @param options The fetch options.
+ * @param auth Use auth token
  */
-const apiGet = async (url: string, options: RequestInit = {}): Promise<Response> => {
+const apiGet = async (url: string, options: RequestInit = {}, auth: boolean = true): Promise<Response> => {
     const cacheBuster = `t=${new Date().getTime()}`;
     const finalUrl = url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`;
 
     const token = useAuthStore.getState().token;
     const authHeaders: Record<string, string> = {};
-    if (token) {
+    if (auth && token) {
         authHeaders['Authorization'] = `token ${token}`;
     }
 
@@ -44,7 +45,7 @@ export const loadOntologyFile = async (file: string, branch = 'main'): Promise<s
         headers: {
             'Accept': 'application/vnd.github.v3+json',
         }
-    });
+    }, false);
 
     if (!response.ok) {
         throw new Error(`Failed to load ontology file ${file}: ${response.statusText}`);
@@ -64,10 +65,38 @@ export const loadBranches = async (): Promise<string[]> => {
     const url = `${GITHUB_API_HOST}/repos/${REPO_NAME}/branches`;
     const response = await apiGet(url, {
         headers: { 'Accept': 'application/vnd.github.v3+json' }
-    });
+    }, false);
     if (!response.ok) {
         throw new Error(`Failed to fetch branches: ${response.statusText}`);
     }
     const branches: { name: string }[] = await response.json();
     return branches.map(branch => branch.name);
 }
+
+export const verifyToken = async (token: string): Promise<boolean> => {
+    if (!token) return false;
+
+    // Use the repo metadata endpoint. It's accessible with repo-scoped tokens.
+    const baseUrl = `${GITHUB_API_HOST}/repos/${REPO_NAME}`;
+    const cacheBuster = `t=${new Date().getTime()}`;
+    const url = `${baseUrl}?${cacheBuster}`;
+
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            }
+        });
+
+        // A successful request with a valid token will include this header.
+        // An anonymous request to a public repo will succeed but won't have this header.
+        return response.ok && response.headers.has('x-accepted-github-permissions');
+    } catch (error) {
+        console.error("Token verification failed:", error);
+        return false;
+    }
+};

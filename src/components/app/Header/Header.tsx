@@ -3,11 +3,14 @@ import { DimensionSelector } from './DimensionSelector/DimensionSelector';
 import { PerspectiveSelector } from "./PerspectiveSelector/PerspectiveSelector.tsx";
 import './Header.scss';
 import GithubIcon from '../../../assets/icons/github.svg';
+import GithubDarkGreenIcon from '../../../assets/icons/github-dark-green.svg';
 import {TokenManager} from "../TokenManager/TokenManager.tsx";
 import {useState} from "react";
+import {useAuthStore} from "../../../stores/auth-store.ts";
 
 export const Header = () => {
     const [showTokenManager, setShowTokenManager] = useState(false);
+    const { token } = useAuthStore();
 
     return (
         <header className="header">
@@ -21,7 +24,7 @@ export const Header = () => {
                 <PerspectiveSelector/>
                 <div className="github-token-manager">
                     <button className="github-icon" onClick={() => setShowTokenManager(!showTokenManager)}>
-                        <img src={GithubIcon} alt="GitHub Token"/>
+                        <img src={token ? GithubDarkGreenIcon : GithubIcon} alt="GitHub Token"/>
                     </button>
                     {showTokenManager && (
                         <div className="token-manager-container">
