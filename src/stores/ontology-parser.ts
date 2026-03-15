@@ -1,5 +1,5 @@
 import { Parser, Quad } from 'n3';
-import type {Ontology, OntologyEntities} from "../types/ontology-types.ts";
+import type {Ontology} from "../types/ontology-types.ts";
 
 // RDF URIs based on core-ontology.ttl
 const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
@@ -19,7 +19,7 @@ const PREDICATE_PARTOF = EDU_BASE + 'partOf';
 const PREDICATE_INCLUDES = EDU_BASE + 'includes';
 
 export interface EntityTempInfo {
-    type: keyof OntologyEntities;
+    type: 'Ability' | 'Area' | 'Scope';
     name: string;
     natural_name: string;
     iri: string;
@@ -124,18 +124,15 @@ export const populateOntologyFromQuads = (
 
     // Finally, add all collected entities to the newOntology.entities structure
     entityInfoMap.forEach(info => {
-        // Ensure entity is of one of the expected types before adding
-        if (['Ability', 'Area', 'Scope'].includes(info.type)) {
-            // Avoid duplicates
-            if (!ontology.entities[info.type].some(e => e.iri === info.iri)) {
-                ontology.entities[info.type].push({
-                    iri: info.iri,
-                    name: info.name,
-                    natural_name: info.natural_name,
-                    definition: info.definition,
-                    examples: info.examples,
-                });
-            }
+        // Avoid duplicates
+        if (!ontology.entities.some(e => e.iri === info.iri)) {
+            ontology.entities.push({
+                iri: info.iri,
+                name: info.name,
+                natural_name: info.natural_name,
+                definition: info.definition,
+                examples: info.examples,
+            });
         }
     });
 };

@@ -1,11 +1,11 @@
-import React, {useCallback, useEffect, useRef} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef} from 'react';
 import {getGraphData} from "../../../graphs/taxonomy.ts";
 import {useOntologyStore} from "../../../stores/ontology-store.ts";
 import {renderTaxonomyCompactBox} from "../../../graphs/taxonomy-compact-box.ts";
 import {useBranchStore} from "../../../stores/branch-store.ts";
 import './GraphExplorer.scss';
 import {useSelectedEntityStore} from "../../../stores/selected-entity-store.ts";
-import {OntologyEntity} from "../../../types/ontology-types.ts";
+import {Ontology, OntologyEntity} from "../../../types/ontology-types.ts";
 import {Sidebar} from "./Sidebar/Sidebar.tsx";
 
 import {renderTaxonomyDagre} from "../../../graphs/taxonomy-dagre.ts";
@@ -13,14 +13,18 @@ import {renderTaxonomyDagre} from "../../../graphs/taxonomy-dagre.ts";
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const graphRef = useRef<any>(null); // Store the G6 graph instance
-    const {ontology, loading, error} = useOntologyStore();
+    const {ontologies, loading, error} = useOntologyStore();
     const { activeBranch, activeDimension, activePerspective } = useBranchStore();
     const { setSelectedEntity } = useSelectedEntityStore();
+
+    const ontology = useMemo(() => {
+        return ontologies[activeDimension as keyof typeof ontologies];
+    }, [ontologies, activeDimension]);
 
     const handleNodeClick = useCallback((entityIri: string) => {
         if (!ontology) return;
 
-        const allEntities = Object.values(ontology.entities).flat();
+        const allEntities = ontology.entities;
         const entity = allEntities.find(e => e.iri === entityIri);
 
         if (entity) {

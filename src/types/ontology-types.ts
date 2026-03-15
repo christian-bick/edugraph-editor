@@ -6,12 +6,6 @@ export interface OntologyEntity {
     examples: string;
 }
 
-export interface OntologyEntities {
-    Ability: OntologyEntity[];
-    Area: OntologyEntity[];
-    Scope: OntologyEntity[];
-}
-
 export interface OntologyRelations {
     expands: Record<string, string[]>;
     partOf: Record<string, string[]>;
@@ -22,6 +16,7 @@ export interface OntologyRelations {
 }
 
 export interface Ontology {
-    entities: OntologyEntities;
+    entities: OntologyEntity[];
     relations: OntologyRelations;
 }
+
