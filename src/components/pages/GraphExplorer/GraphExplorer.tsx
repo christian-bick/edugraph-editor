@@ -13,8 +13,8 @@ import {renderTaxonomyDagre} from "../../../graphs/taxonomy-dagre.ts";
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const graphRef = useRef<any>(null); // Store the G6 graph instance
-    const {ontology, loading, error, fetchOntology} = useOntologyStore();
-    const { activeBranch, activeDimension, activePerspective, isHydrated } = useBranchStore();
+    const {ontology, loading, error} = useOntologyStore();
+    const { activeBranch, activeDimension, activePerspective } = useBranchStore();
     const { setSelectedEntity } = useSelectedEntityStore();
 
     const handleNodeClick = useCallback((entityIri: string) => {
@@ -39,10 +39,6 @@ export const GraphExplorer: React.FC = () => {
             });
         }
     }, [ontology, setSelectedEntity]);
-
-    useEffect(() => {
-        fetchOntology(activeBranch);
-    }, [fetchOntology, activeBranch, isHydrated]);
 
     useEffect(() => {
         setSelectedEntity(null);

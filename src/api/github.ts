@@ -1,102 +1,106 @@
-import {useAuthStore} from "../stores/auth-store.ts";
+import { useAuthStore } from "../stores/auth-store.ts";
+import { Octokit } from "@octokit/rest";
 
 const USE_VITE_PROXY = true; // Set to false to call GitHub API directly
+const REPO_OWNER = 'christian-bick';
+const REPO_NAME = 'edugraph-ontology';
 
-const GITHUB_API_DIRECT_HOST = 'https://api.github.com';
-const GITHUB_API_PROXY_HOST = '/github-api';
+const getOctokit = (overrideToken?: string) => {
+    const tokenToUse = overrideToken ?? useAuthStore.getState().token;
 
-const GITHUB_API_HOST = USE_VITE_PROXY ? GITHUB_API_PROXY_HOST : GITHUB_API_DIRECT_HOST;
-const REPO_NAME = 'christian-bick/edugraph-ontology'
+    const options: { auth?: string, baseUrl?: string } = { auth: tokenToUse };
 
-/**
- * A generalized GET helper that applies the proxy and cache-busting logic.
- * @param url The target URL (without the proxy).
- * @param options The fetch options.
- * @param auth Use auth token
- */
-const apiGet = async (url: string, options: RequestInit = {}, auth: boolean = true): Promise<Response> => {
-    const cacheBuster = `t=${new Date().getTime()}`;
-    const finalUrl = url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`;
-
-    const token = useAuthStore.getState().token;
-    const authHeaders: Record<string, string> = {};
-    if (auth && token) {
-        authHeaders['Authorization'] = `token ${token}`;
+    if (USE_VITE_PROXY) {
+        // For Octokit, we need to provide the full base URL for the proxy during development.
+        // Assuming the dev server runs on localhost:5173 (default for Vite).
+        // In a real app, this should be handled by environment variables.
+        options.baseUrl = '/github-api';
     }
 
-    const newOptions: RequestInit = {
-        ...options,
-        method: 'GET', // Ensure method is GET
-        headers: {
-            ...options.headers,
-            ...authHeaders,
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-        }
-    };
-
-    return fetch(finalUrl, newOptions);
+    return new Octokit(options);
 };
 
 export const loadOntologyFile = async (file: string, branch = 'main'): Promise<string> => {
-    const url = `${GITHUB_API_HOST}/repos/${REPO_NAME}/contents/${file}?ref=${branch}`;
-    const response = await apiGet(url, {
-        headers: {
-            'Accept': 'application/vnd.github.v3+json',
-        }
-    }, false);
+    const octokit = getOctokit();
+    const response = await octokit.repos.getContent({
+        owner: REPO_OWNER,
+        repo: REPO_NAME,
+        path: file,
+        ref: branch,
+    });
 
-    if (!response.ok) {
-        throw new Error(`Failed to load ontology file ${file}: ${response.statusText}`);
+    // Type guard to ensure we have a file response
+    if (Array.isArray(response.data) || !('content' in response.data)) {
+        throw new Error(`Could not retrieve file content for ${file}.`);
     }
 
-    const fileData = await response.json();
-
-    // The GitHub API returns file content as a base64 encoded string. We need to decode it.
-    if (fileData && fileData.content) {
-        return atob(fileData.content);
-    } else {
-        throw new Error(`Ontology file content not found for ${file}.`);
-    }
-}
+    return atob(response.data.content);
+};
 
 export const loadBranches = async (): Promise<string[]> => {
-    const url = `${GITHUB_API_HOST}/repos/${REPO_NAME}/branches`;
-    const response = await apiGet(url, {
-        headers: { 'Accept': 'application/vnd.github.v3+json' }
-    }, false);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch branches: ${response.statusText}`);
-    }
-    const branches: { name: string }[] = await response.json();
-    return branches.map(branch => branch.name);
-}
+    const octokit = getOctokit();
+    const response = await octokit.repos.listBranches({
+        owner: REPO_OWNER,
+        repo: REPO_NAME,
+    });
+    return response.data.map(branch => branch.name);
+};
 
 export const verifyToken = async (token: string): Promise<boolean> => {
     if (!token) return false;
-
-    // Use the repo metadata endpoint. It's accessible with repo-scoped tokens.
-    const baseUrl = `${GITHUB_API_HOST}/repos/${REPO_NAME}`;
-    const cacheBuster = `t=${new Date().getTime()}`;
-    const url = `${baseUrl}?${cacheBuster}`;
-
+    const octokit = getOctokit(token);
     try {
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `token ${token}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0',
-            }
+        const response = await octokit.repos.get({
+            owner: REPO_OWNER,
+            repo: REPO_NAME,
         });
 
         // A successful request with a valid token will include this header.
-        // An anonymous request to a public repo will succeed but won't have this header.
-        return response.ok && response.headers.has('x-accepted-github-permissions');
+        return response.status === 200 && response.headers['x-accepted-github-permissions'] !== undefined;
     } catch (error) {
         console.error("Token verification failed:", error);
         return false;
     }
+};
+
+export const loadOntologyFiles = async (files: string[], branch = 'main'): Promise<string[]> => {
+    const octokit = getOctokit();
+
+    const expressions = files.reduce((obj, file, index) => {
+        obj[`expression${index}`] = `${branch}:${file}`;
+        return obj;
+    }, {} as Record<string, string>);
+
+    const query = `
+        query GetOntologyFiles(
+            $owner: String!, 
+            $name: String!, 
+            ${files.map((_, index) => `$expression${index}: String!`).join(', ')}
+        ) {
+            repository(owner: $owner, name: $name) {
+                ${files.map((_, index) => `
+                    file${index}: object(expression: $expression${index}) {
+                        ... on Blob {
+                            text
+                        }
+                    }
+                `).join('\n')}
+            }
+        }
+    `;
+
+    const response: any = await octokit.graphql(query, {
+        owner: REPO_OWNER,
+        name: REPO_NAME,
+        ...expressions,
+    });
+
+    return files.map((_, index) => {
+        const fileContent = response.repository[`file${index}`];
+        if (fileContent && fileContent.text) {
+            return fileContent.text;
+        }
+        // Handle cases where a file might not be found
+        throw new Error(`Content for file ${files[index]} not found in GraphQL response.`);
+    });
 };

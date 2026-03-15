@@ -11,10 +11,19 @@ export const App = () => {
     const fetchOntology = useOntologyStore(state => state.fetchOntology);
     const { activeBranch, fetchBranches, isHydrated } = useBranchStore();
 
-    // Fetch branches on initial load
+    // Fetch branches once the store is rehydrated
     useEffect(() => {
-        fetchBranches();
-    }, [fetchBranches]);
+        if (isHydrated) {
+            fetchBranches();
+        }
+    }, [isHydrated, fetchBranches]);
+
+    // Fetch ontology whenever the active branch changes and is valid
+    useEffect(() => {
+        if (isHydrated && activeBranch) {
+            fetchOntology(activeBranch);
+        }
+    }, [isHydrated, activeBranch, fetchOntology]);
 
     return (
         <BrowserRouter>

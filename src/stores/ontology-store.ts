@@ -1,5 +1,5 @@
 import {create} from 'zustand'
-import {loadOntologyFile} from '../api/github.ts'
+import {loadOntologyFiles} from '../api/github.ts'
 import type {Ontology} from "../types/ontology-types.ts";
 import {
     createEntityInfoMap,
@@ -19,17 +19,18 @@ interface OntologyAction {
     fetchOntology: (branch: string) => Promise<void>;
 }
 
-export const useOntologyStore = create<OntologyState & OntologyAction>()((set) => ({
+export const useOntologyStore = create<OntologyState & OntologyAction>()((set, get) => ({
     ontology: null,
     loading: false,
     error: null,
     setOntology: (ontology) => set({ontology: ontology}),
     fetchOntology: async (branch: string) => {
+        if (get().loading) return; // Prevent concurrent fetches
+
         set({loading: true, error: null});
         try {
             const files = ["core-abilities.ttl", "core-areas-math.ttl", "core-scopes-math.ttl"];
-            const turtlePromises = files.map(file => loadOntologyFile(file, branch));
-            const rawOntologyTurtles = await Promise.all(turtlePromises);
+            const rawOntologyTurtles = await loadOntologyFiles(files, branch);
 
             const quadPromises = rawOntologyTurtles.map(getQuadsFromString);
             const quadsPerFile = await Promise.all(quadPromises);
