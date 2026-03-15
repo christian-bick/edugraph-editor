@@ -14,6 +14,11 @@ interface OntologyState {
         Ability: Ontology | null;
         Scope: Ontology | null;
     };
+    ontologiesOriginal: {
+        Area: Ontology | null;
+        Ability: Ontology | null;
+        Scope: Ontology | null;
+    };
     loading: boolean;
     error: string | null;
 }
@@ -24,6 +29,11 @@ interface OntologyAction {
 
 export const useOntologyStore = create<OntologyState & OntologyAction>()((set, get) => ({
     ontologies: {
+        Area: null,
+        Ability: null,
+        Scope: null,
+    },
+    ontologiesOriginal: {
         Area: null,
         Ability: null,
         Scope: null,
@@ -71,7 +81,11 @@ export const useOntologyStore = create<OntologyState & OntologyAction>()((set, g
                 finalOntologies[type] = finalOntology;
             }
 
-            set({ ontologies: finalOntologies, loading: false });
+            set({
+                ontologies: structuredClone(finalOntologies),
+                ontologiesOriginal: finalOntologies,
+                loading: false
+            });
 
         } catch (error: any) {
             set({error: error.message, loading: false});
