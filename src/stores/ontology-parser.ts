@@ -148,24 +148,8 @@ export const enrichOntology = (ontology: Ontology): Ontology => {
         relations: {
             ...ontology.relations,
             includes: transitiveIncludes,
-            expandedBy: computeInverse(ontology.relations.expands || {}),
-            hasPart: computeInverse(ontology.relations.partOf || {}),
-            includedBy: computeInverse(transitiveIncludes),
         }
     };
-};
-
-const computeInverse = (source: Record<string, string[]>) => {
-    const inverse: Record<string, string[]> = {};
-    for (const [key, values] of Object.entries(source)) {
-        for (const value of values) {
-            if (!inverse[value]) {
-                inverse[value] = [];
-            }
-            inverse[value].push(key);
-        }
-    }
-    return inverse;
 };
 
 const computeTransitiveClosure = (source: Record<string, string[]>) => {

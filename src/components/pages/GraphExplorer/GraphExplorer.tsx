@@ -5,9 +5,7 @@ import {renderTaxonomyCompactBox} from "../../../graphs/taxonomy-compact-box.ts"
 import {useBranchStore} from "../../../stores/branch-store.ts";
 import './GraphExplorer.scss';
 import {useSelectedEntityStore} from "../../../stores/selected-entity-store.ts";
-import {Ontology, OntologyEntity} from "../../../types/ontology-types.ts";
 import {Sidebar} from "./Sidebar/Sidebar.tsx";
-
 import {renderTaxonomyDagre} from "../../../graphs/taxonomy-dagre.ts";
 
 export const GraphExplorer: React.FC = () => {
@@ -23,29 +21,12 @@ export const GraphExplorer: React.FC = () => {
 
     const handleNodeClick = useCallback((entityIri: string) => {
         if (!ontology) return;
-
-        const allEntities = ontology.entities;
-        const entity = allEntities.find(e => e.iri === entityIri);
-
-        if (entity) {
-            const entityRelations: { [relationName: string]: OntologyEntity[] } = {};
-            for (const rel in ontology.relations) {
-                const relTyped = rel as keyof typeof ontology.relations;
-                if (ontology.relations[relTyped]?.[entity.iri]) {
-                    const relatedIris = ontology.relations[relTyped]![entity.iri];
-                    entityRelations[relTyped] = relatedIris.map(iri => allEntities.find(e => e.iri === iri)!).filter(Boolean) as OntologyEntity[];
-                }
-            }
-
-            setSelectedEntity({
-                ...entity,
-                relations: entityRelations,
-            });
-        }
+        const entity = ontology.entities.find(e => e.iri === entityIri);
+        setSelectedEntity(entity || null, ontology);
     }, [ontology, setSelectedEntity]);
 
     useEffect(() => {
-        setSelectedEntity(null);
+        setSelectedEntity(null, null);
     }, [activeBranch, activeDimension, activePerspective, setSelectedEntity]);
 
     useEffect(() => {
@@ -58,7 +39,7 @@ export const GraphExplorer: React.FC = () => {
             let data, graph;
 
             if (activePerspective === 'Progression') {
-                data = getGraphData(ontology, activeDimension, 'expandedBy', true);
+                data = getGraphData(ontology, activeDimension, 'expands', true);
                 graph = await renderTaxonomyDagre(containerRef.current!, data, handleNodeClick);
             } else {
                 data = getGraphData(ontology, activeDimension, 'hasPart');
