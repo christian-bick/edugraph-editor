@@ -1,7 +1,7 @@
 @use "/src/colors.scss" as colors;
 
 .graph-explorer-sidebar {
-    width: 300px;
+    width: 400px;
     flex-shrink: 0;
     box-sizing: border-box;
     background-color: colors.$container-background;
