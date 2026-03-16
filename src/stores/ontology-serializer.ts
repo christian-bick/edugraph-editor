@@ -68,37 +68,38 @@ export const serializeOntology = async (ontology: Ontology, dimension: 'Area' | 
                 literal(entity.definition)
             );
         }
+
+        // Add relations where this entity is the subject
+        const relationKeys = Object.keys(ontology.relations) as Array<keyof OntologyRelations>;
+        relationKeys.sort(); // Consistent order for relation types
+
+        relationKeys.forEach(relationType => {
+            const subjects = ontology.relations[relationType];
+            if (subjects && subjects[entity.iri]) { // Check if this entity is a subject for this relationType
+                const objectIris = subjects[entity.iri];
+                [...objectIris].sort().forEach(objectIri => { // Sort object IRIs without mutating original
+                    writer.addQuad(
+                        entityNode, // Subject is the current entityNode
+                        namedNode(`http://edugraph.io/edu#${relationType}`),
+                        namedNode(objectIri)
+                    );
+                });
+            }
+        });
     });
-
-    // Add relations
-    const relationKeys = Object.keys(ontology.relations) as Array<keyof OntologyRelations>;
-    relationKeys.sort(); // Sort relation types for consistent output
-
-    relationKeys.forEach(relationType => {
-        const subjects = ontology.relations[relationType];
-        if (subjects) {
-            Object.keys(subjects).sort().forEach(subjectIri => { // Sort subject IRIs
-                const objectIris = subjects[subjectIri];
-                if (objectIris) {
-                    [...objectIris].sort().forEach(objectIri => { // Sort object IRIs without mutating original
-                        writer.addQuad(
-                            namedNode(subjectIri),
-                            namedNode(`http://edugraph.io/edu#${relationType}`),
-                            namedNode(objectIri)
-                        );
-                    });
-                }
-            });
-        }
-    });
-
     return new Promise<string>((resolve, reject) => {
         writer.end((error, result) => {
             if (error) {
+                console.error("N3.js Writer Error:", error);
                 return reject(error);
             }
-            // Normalize the output to match GitHub's standard for TTL files
-            resolve(normalizeToGithubStandard(result || ''));
+            console.log("N3.js Writer Result (type, value):", typeof result, result);
+            try {
+                resolve(normalizeToGithubStandard(result || ''));
+            } catch (e) {
+                console.error("Error in normalizeToGithubStandard:", e);
+                reject(e);
+            }
         });
     });
 };
