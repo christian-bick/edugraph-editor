@@ -50,13 +50,6 @@
         align-items: center;
         gap: 1rem;
         padding: 0 1rem;
-        
-        .undo-redo-controls {
-            display: flex;
-            gap: 0.5rem;
-            padding-right: 1rem;
-            border-right: 1px solid colors.$light-border-color;
-        }
 
         .github-icon {
             background: none;
