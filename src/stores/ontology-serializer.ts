@@ -16,7 +16,6 @@ const PREFIXES = {
 };
 
 export const serializeOntology = async (ontology: Ontology, dimension: 'Area' | 'Ability' | 'Scope'): Promise<string> => {
-    console.log("Ontology received for serialization:", ontology);
     const writer = new Writer({ prefixes: PREFIXES, base: BASE_IRI });
 
     // Add ontology declaration as a quad (equivalent to the old header part)
@@ -93,7 +92,6 @@ export const serializeOntology = async (ontology: Ontology, dimension: 'Area' | 
                 console.error("N3.js Writer Error:", error);
                 return reject(error);
             }
-            console.log("N3.js Writer Result (type, value):", typeof result, result);
             try {
                 resolve(normalizeToGithubStandard(result || ''));
             } catch (e) {
