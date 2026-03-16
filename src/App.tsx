@@ -6,10 +6,13 @@ import {Content} from "./components/app/Content/Content.tsx";
 import {Footer} from "./components/app/Footer/Footer.tsx";
 import {GraphExplorer} from "./components/pages/GraphExplorer/GraphExplorer.tsx";
 import { useBranchStore } from './stores/branch-store.ts';
+import { useViewStore } from './stores/view-store.ts';
+import { DiffViewer } from './components/pages/DiffViewer/DiffViewer.tsx';
 
 export const App = () => {
     const fetchOntology = useOntologyStore(state => state.fetchOntology);
     const { activeBranch, fetchBranches, isHydrated } = useBranchStore();
+    const { view } = useViewStore();
 
     // Fetch branches once the store is rehydrated
     useEffect(() => {
@@ -29,9 +32,7 @@ export const App = () => {
         <BrowserRouter>
             <Header/>
             <Content>
-                <Routes>
-                    <Route index element={<GraphExplorer/>}/>
-                </Routes>
+                {view === 'graph' ? <GraphExplorer /> : <DiffViewer />}
             </Content>
             <Footer/>
         </BrowserRouter>

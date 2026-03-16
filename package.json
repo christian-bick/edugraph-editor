@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@antv/g6": "^5.0.51",
+    "@git-diff-view/file": "^0.1.2",
+    "@git-diff-view/react": "^0.1.2",
     "@octokit/rest": "^22.0.1",
     "clsx": "^2.1.1",
     "immer": "^11.1.4",
