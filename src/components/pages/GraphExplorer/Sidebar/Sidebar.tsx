@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelectedEntityStore } from '../../../../stores/selected-entity-store';
 import { useBranchStore } from '../../../../stores/branch-store.ts';
 import './Sidebar.scss';
+import EditIcon from '../../../../assets/icons/edit.svg';
+import { EditEntity } from '../EditEntity/EditEntity.tsx';
 
 export const Sidebar: React.FC = () => {
     const { selectedEntity } = useSelectedEntityStore();
     const { activePerspective } = useBranchStore();
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const renderRelations = () => {
         if (!selectedEntity) return null;
@@ -57,17 +60,29 @@ export const Sidebar: React.FC = () => {
     };
 
     return (
-        <aside className="graph-explorer-sidebar">
-            {selectedEntity ? (
-                <>
-                    <h3>{selectedEntity.natural_name}</h3>
-                    <p>{selectedEntity.definition}</p>
-                    {renderRelations()}
-                </>
-            ) : (
-                <div>Select a node to see details.</div>
-            )}
-        </aside>
+        <>
+            <aside className="graph-explorer-sidebar">
+                {selectedEntity ? (
+                    <>
+                        <div className="sidebar-header">
+                            <h3>{selectedEntity.natural_name}</h3>
+                            <button className="edit-btn" onClick={() => setIsEditModalOpen(true)}>
+                                <img src={EditIcon} alt="Edit Entity"/>
+                            </button>
+                        </div>
+                        <p>{selectedEntity.definition}</p>
+                        {renderRelations()}
+                    </>
+                ) : (
+                    <div className="sidebar-placeholder">Select a node to see details.</div>
+                )}
+            </aside>
+            <EditEntity
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                entity={selectedEntity}
+            />
+        </>
     );
 };
 

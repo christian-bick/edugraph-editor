@@ -10,18 +10,48 @@
     color: colors.$dark-text;
     overflow-y: auto;
 
-    h3 {
-        margin-top: 0;
-        margin-bottom: 0.5rem;
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
-        font-size: 1.2rem;
+    .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         border-top: 1px solid colors.$light-border-color;
         border-bottom: 1px solid colors.$light-border-color;
+        
+        h3 {
+            margin: 0;
+            padding: 0.5rem 0;
+            font-size: 1.2rem;
+            border: none;
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .edit-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            
+            &:hover {
+                background-color: colors.$light-hover-background;
+            }
+
+            img {
+                width: 20px;
+                height: 20px;
+            }
+        }
     }
 
     p {
-        margin-top: 0;
+        margin-top: 1rem;
         margin-bottom: 1.5rem;
         line-height: 1.5;
     }
@@ -50,7 +80,7 @@
         }
     }
 
-    div { // for the "Select a node" message
+    .sidebar-placeholder {
         display: flex;
         justify-content: center;
         align-items: center;
