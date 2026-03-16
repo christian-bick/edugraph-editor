@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useOntologyStore } from './ontology-store';
+import { useOntologyStore, useCurrentOntologyStore } from './ontology-store';
 import { Ontology } from '../types/ontology-types';
 
 const mockAreaOntology: Ontology = {
@@ -18,28 +18,33 @@ const mockAreaOntology: Ontology = {
 describe('Ontology Store', () => {
 
     beforeEach(() => {
-        // Reset the store to its initial state
+        // Reset both stores to their initial states
         useOntologyStore.setState({
-            ontologies: { Area: null, Ability: null, Scope: null },
             ontologiesOriginal: { Area: null, Ability: null, Scope: null },
             loading: false,
             error: null,
         });
-        // This is important: we need to clear the temporal history between tests
-        useOntologyStore.temporal.getState().clear();
+        useCurrentOntologyStore.setState({
+            ontologies: { Area: null, Ability: null, Scope: null },
+        });
+        // Clear the temporal history for the current ontology store
+        useCurrentOntologyStore.temporal.getState().clear();
     });
 
     it('should update an entity and all its relations', () => {
         const initialOntology = structuredClone(mockAreaOntology);
-        useOntologyStore.setState({ ontologies: { Area: initialOntology, Ability: null, Scope: null } });
+        useCurrentOntologyStore.setState({ ontologies: { Area: initialOntology, Ability: null, Scope: null } });
+        // Clear history after setting initial test state
+        useCurrentOntologyStore.temporal.getState().clear();
 
         const originalEntity = initialOntology.entities[0];
         const newId = 'A_renamed';
         const newDefinition = 'New Def A';
 
-        useOntologyStore.getState().updateEntity('Area', originalEntity, newId, newDefinition);
+        // Call the action on the correct store
+        useCurrentOntologyStore.getState().updateEntity('Area', originalEntity, newId, newDefinition);
 
-        const updatedOntology = useOntologyStore.getState().ontologies.Area;
+        const updatedOntology = useCurrentOntologyStore.getState().ontologies.Area;
         const newIri = `http://edugraph.io/edu/${newId}`;
 
         const updatedEntity = updatedOntology?.entities.find(e => e.iri === newIri);
@@ -52,7 +57,7 @@ describe('Ontology Store', () => {
         expect(updatedOntology?.relations.expands[originalEntity.iri]).toBeUndefined();
         expect(updatedOntology?.relations.expands[newIri]).toContain('http://edugraph.io/edu/B');
 
-        // The initial setState and the updateEntity call should be in the history
-        expect((useOntologyStore.temporal.getState().pastStates)).toHaveLength(2);
+        // Only the updateEntity call should be in the history
+        expect(useCurrentOntologyStore.temporal.getState().pastStates).toHaveLength(1);
     });
 });

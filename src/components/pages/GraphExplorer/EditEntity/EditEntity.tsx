@@ -1,42 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Modal } from '../../../global/Modal/Modal';
-import { SelectedEntity, useSelectedEntityStore } from '../../../../stores/selected-entity-store';
+import { useSelectedEntityStore } from '../../../../stores/selected-entity-store';
 import './EditEntity.scss';
 import { toNaturalName } from '../../../../stores/utils';
-import { useOntologyStore } from '../../../../stores/ontology-store';
+import { useCurrentOntologyStore, useOntologyStore } from '../../../../stores/ontology-store';
 import { useBranchStore } from '../../../../stores/branch-store';
 
 interface EditEntityProps {
     isOpen: boolean;
     onClose: () => void;
-    entity: SelectedEntity | null;
 }
 
 const IRI_NAMESPACE = 'http://edugraph.io/edu/';
 
-export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose, entity }) => {
+export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
+    const { ontologiesOriginal } = useOntologyStore();
+    const { updateEntity } = useCurrentOntologyStore();
+    const { selectedEntityIri, setSelectedEntityIri } = useSelectedEntityStore();
+    const { activeDimension } = useBranchStore();
+
+    const originalEntity = useMemo(() => {
+        if (!selectedEntityIri) return null;
+        const ontology = ontologiesOriginal[activeDimension as keyof typeof ontologiesOriginal];
+        return ontology?.entities.find(e => e.iri === selectedEntityIri) || null;
+    }, [selectedEntityIri, ontologiesOriginal, activeDimension]);
+    
     const [id, setId] = useState('');
     const [definition, setDefinition] = useState('');
-    const { updateEntity } = useOntologyStore();
-    const { activeDimension } = useBranchStore();
-    const { setSelectedEntityIri } = useSelectedEntityStore();
 
     useEffect(() => {
-        if (entity) {
-            setId(entity.name);
-            setDefinition(entity.definition);
+        if (originalEntity) {
+            setId(originalEntity.name);
+            setDefinition(originalEntity.definition);
         }
-    }, [entity]);
-
+    }, [originalEntity]);
+    
     const handleSave = () => {
-        if (entity) {
-            const newIri = updateEntity(activeDimension as 'Area' | 'Ability' | 'Scope', entity, id, definition);
-            setSelectedEntityIri(newIri);
+        if (originalEntity) {
+            const newIri = updateEntity(activeDimension as 'Area' | 'Ability' | 'Scope', originalEntity, id, definition);
+            setSelectedEntityIri(newIri || null);
             onClose();
         }
     };
 
-    if (!entity) {
+    if (!isOpen || !originalEntity) {
         return null;
     }
 
@@ -78,4 +85,3 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose, entity 
         </Modal>
     );
 };
-

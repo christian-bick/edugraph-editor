@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useRef} from 'react';
 import {getGraphData} from "../../../graphs/taxonomy.ts";
-import {useOntologyStore} from "../../../stores/ontology-store.ts";
+import {useCurrentOntologyStore, useOntologyStore} from "../../../stores/ontology-store.ts";
 import {renderTaxonomyCompactBox} from "../../../graphs/taxonomy-compact-box.ts";
 import {useBranchStore} from "../../../stores/branch-store.ts";
 import './GraphExplorer.scss';
@@ -11,7 +11,8 @@ import {renderTaxonomyDagre} from "../../../graphs/taxonomy-dagre.ts";
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const graphRef = useRef<any>(null); // Store the G6 graph instance
-    const {ontologies, loading, error} = useOntologyStore();
+    const { loading, error } = useOntologyStore();
+    const { ontologies } = useCurrentOntologyStore();
     const { activeBranch, activeDimension, activePerspective } = useBranchStore();
     const { setSelectedEntityIri } = useSelectedEntityStore();
 
@@ -44,7 +45,6 @@ export const GraphExplorer: React.FC = () => {
                 graph = await renderTaxonomyCompactBox(containerRef.current!, data, activeDimension, handleNodeClick);
             }
 
-            // If unmounted while waiting for render to resolve, destroy immediately
             if (!isMounted) {
                 graph.destroy();
                 return;
@@ -61,7 +61,6 @@ export const GraphExplorer: React.FC = () => {
                 }
             };
 
-            // Set up resize observer once layout is done and variables are assigned
             graph.on('afterlayout', () => {
                 if (!isMounted || !containerRef.current) return;
                 adjustGraph();
@@ -74,7 +73,6 @@ export const GraphExplorer: React.FC = () => {
                 }
             });
 
-            // Force an initial adjustment in case afterlayout was missed
             adjustGraph();
         };
 

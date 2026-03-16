@@ -12,98 +12,25 @@ import {produce} from 'immer';
 
 const IRI_NAMESPACE = 'http://edugraph.io/edu/';
 
-interface OntologyState {
+// Store for the "live" or "draft" version of the ontology, with undo/redo
+interface CurrentOntologyState {
     ontologies: {
         Area: Ontology | null;
         Ability: Ontology | null;
         Scope: Ontology | null;
     };
-    ontologiesOriginal: {
-        Area: Ontology | null;
-        Ability: Ontology | null;
-        Scope: Ontology | null;
-    };
-    loading: boolean;
-    error: string | null;
-    fetchOntology: (branch: string) => Promise<void>;
     updateEntity: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newId: string, newDefinition: string) => string | undefined;
+    setOntologies: (ontologies: CurrentOntologyState['ontologies']) => void;
 }
 
-export const useOntologyStore = create<OntologyState>()(
-    temporal(
-        (set, get) => ({
-            ontologies: {
-                Area: null,
-                Ability: null,
-                Scope: null,
-            },
-            ontologiesOriginal: {
-                Area: null,
-                Ability: null,
-                Scope: null,
-            },
-            loading: false,
-            error: null,
-            fetchOntology: async (branch: string) => {
-                if (get().loading) return;
-
-                set({loading: true, error: null}, false, 'FETCH');
-                try {
-                    const fileMapping: Record<string, 'Area' | 'Ability' | 'Scope'> = {
-                        "core-areas-math.ttl": "Area",
-                        "core-abilities.ttl": "Ability",
-                        "core-scopes-math.ttl": "Scope",
-                    };
-                    const files = Object.keys(fileMapping);
-                    const rawTurtles = await loadOntologyFiles(files, branch);
-
-                    const finalOntologies: {
-                        Area: Ontology | null,
-                        Ability: Ontology | null,
-                        Scope: Ontology | null
-                    } = {
-                        Area: null,
-                        Ability: null,
-                        Scope: null,
-                    };
-
-                    for (let i = 0; i < files.length; i++) {
-                        const fileName = files[i];
-                        const rawTurtle = rawTurtles[i];
-                        const type = fileMapping[fileName];
-
-                        const quads = await getQuadsFromString(rawTurtle);
-                        const entityInfoMap = createEntityInfoMap(quads);
-
-                        const newOntology: Ontology = {
-                            entities: [],
-                            relations: {
-                                expands: {},
-                                partOf: {},
-                                includes: {},
-                            },
-                        };
-
-                        populateOntologyFromQuads(newOntology, quads, entityInfoMap);
-                        const finalOntology = enrichOntology(newOntology);
-                        finalOntologies[type] = finalOntology;
-                    }
-                    useOntologyStore.temporal.getState().pause()
-                    set({
-                        ontologies: structuredClone(finalOntologies),
-                        ontologiesOriginal: finalOntologies,
-                        loading: false
-                    });
-                    useOntologyStore.temporal.getState().resume()
-
-                } catch (error: any) {
-                    set({error: error.message, loading: false});
-                    console.error(error);
-                }
-            },
+export const useCurrentOntologyStore = create(
+    temporal<CurrentOntologyState>(
+        (set) => ({
+            ontologies: { Area: null, Ability: null, Scope: null },
+            setOntologies: (ontologies) => set({ ontologies }),
             updateEntity: (dimension, originalEntity, newId, newDefinition) => {
                 let newIri: string | undefined;
-                set(produce((draft: OntologyState) => {
+                set(state => produce(state, (draft) => {
                     const ontology = draft.ontologies[dimension];
                     if (!ontology) return;
 
@@ -134,7 +61,70 @@ export const useOntologyStore = create<OntologyState>()(
             },
         }),
         {
-            partialize: (state) => ({ontologies: state.ontologies}),
+            partialize: (state) => ({ ontologies: state.ontologies }),
         }
     )
 );
+
+// Store for the stable, original ontology data and fetching logic
+interface OntologyState {
+    ontologiesOriginal: {
+        Area: Ontology | null;
+        Ability: Ontology | null;
+        Scope: Ontology | null;
+    };
+    loading: boolean;
+    error: string | null;
+    fetchOntology: (branch: string) => Promise<void>;
+}
+
+export const useOntologyStore = create<OntologyState>()((set, get) => ({
+    ontologiesOriginal: { Area: null, Ability: null, Scope: null },
+    loading: false,
+    error: null,
+    fetchOntology: async (branch: string) => {
+        if (get().loading) return;
+
+        set({ loading: true, error: null });
+        try {
+            const fileMapping: Record<string, 'Area' | 'Ability' | 'Scope'> = {
+                "core-areas-math.ttl": "Area",
+                "core-abilities.ttl": "Ability",
+                "core-scopes-math.ttl": "Scope",
+            };
+            const files = Object.keys(fileMapping);
+            const rawTurtles = await loadOntologyFiles(files, branch);
+
+            const finalOntologies: { Area: Ontology | null; Ability: Ontology | null; Scope: Ontology | null } = {
+                Area: null,
+                Ability: null,
+                Scope: null,
+            };
+
+            for (let i = 0; i < files.length; i++) {
+                const fileName = files[i];
+                const rawTurtle = rawTurtles[i];
+                const type = fileMapping[fileName];
+
+                const quads = await getQuadsFromString(rawTurtle);
+                const entityInfoMap = createEntityInfoMap(quads);
+
+                const newOntology: Ontology = {
+                    entities: [],
+                    relations: { expands: {}, partOf: {}, includes: {} },
+                };
+
+                populateOntologyFromQuads(newOntology, quads, entityInfoMap);
+                finalOntologies[type] = enrichOntology(newOntology);
+            }
+
+            set({ ontologiesOriginal: finalOntologies, loading: false });
+            useCurrentOntologyStore.getState().setOntologies(structuredClone(finalOntologies));
+            useCurrentOntologyStore.temporal.getState().clear();
+
+        } catch (error: any) {
+            set({ error: error.message, loading: false });
+            console.error(error);
+        }
+    },
+}));

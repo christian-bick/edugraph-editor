@@ -5,12 +5,12 @@ import './Sidebar.scss';
 import EditIcon from '../../../../assets/icons/edit.svg';
 import {EditEntity} from '../EditEntity/EditEntity.tsx';
 import {invertRelations, toNaturalName} from '../../../../stores/utils.ts';
-import {useOntologyStore} from "../../../../stores/ontology-store.ts";
+import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
 import {OntologyEntity} from "../../../../types/ontology-types.ts";
 
 export const Sidebar: React.FC = () => {
     const { selectedEntityIri } = useSelectedEntityStore();
-    const { ontologies } = useOntologyStore();
+    const { ontologies } = useCurrentOntologyStore();
     const { activeDimension, activePerspective } = useBranchStore();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -123,7 +123,6 @@ export const Sidebar: React.FC = () => {
             <EditEntity
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
-                entity={selectedEntity}
             />
         </>
     );

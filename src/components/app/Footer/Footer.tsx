@@ -1,8 +1,8 @@
 import './Footer.scss';
-import { useOntologyStore } from '../../../stores/ontology-store';
+import { useCurrentOntologyStore } from '../../../stores/ontology-store';
 
 export const Footer = () => {
-    const { undo, redo, futureStates, pastStates } = useOntologyStore.temporal.getState();
+    const { undo, redo, futureStates, pastStates } = useCurrentOntologyStore.temporal.getState();
 
     return (
         <footer className="footer">
