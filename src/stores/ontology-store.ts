@@ -13,16 +13,12 @@ import { produce } from 'immer';
 
 const IRI_NAMESPACE = 'http://edugraph.io/edu/';
 
-interface OntologyTemporalState {
+interface OntologyState {
     ontologies: {
         Area: Ontology | null;
         Ability: Ontology | null;
         Scope: Ontology | null;
     };
-    setOntologies: (ontologies: OntologyTemporalState['ontologies']) => void;
-}
-
-interface OntologyState extends Omit<OntologyTemporalState, 'setOntologies'> {
     ontologiesOriginal: {
         Area: Ontology | null;
         Ability: Ontology | null;
@@ -30,136 +26,113 @@ interface OntologyState extends Omit<OntologyTemporalState, 'setOntologies'> {
     };
     loading: boolean;
     error: string | null;
-}
-
-interface OntologyAction {
     fetchOntology: (branch: string) => Promise<void>;
     updateEntity: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newId: string, newDefinition: string) => string | undefined;
 }
 
-type OntologyStore = OntologyState & OntologyAction;
-
-export const useTemporalOntologyStore = create(
-    temporal<OntologyTemporalState>(
-        (set) => ({
-            ontologies: {
-                Area: null,
-                Ability: null,
-                Scope: null,
-            },
-            setOntologies: (ontologies) => set({ ontologies }),
-        }),
-        {
-            partialize: (state) => ({ ontologies: state.ontologies }),
-        }
-    )
-);
-
-export const useOntologyStore = create<OntologyStore>()(
-    devtools((set, get) => ({
-        ...useTemporalOntologyStore.getState(),
-        ontologiesOriginal: {
-            Area: null,
-            Ability: null,
-            Scope: null,
-        },
-        loading: false,
-        error: null,
-        fetchOntology: async (branch: string) => {
-            if (get().loading) return;
-
-            set({ loading: true, error: null });
-            try {
-                const fileMapping: Record<string, 'Area' | 'Ability' | 'Scope'> = {
-                    "core-areas-math.ttl": "Area",
-                    "core-abilities.ttl": "Ability",
-                    "core-scopes-math.ttl": "Scope",
-                };
-                const files = Object.keys(fileMapping);
-                const rawTurtles = await loadOntologyFiles(files, branch);
-
-                const finalOntologies: { Area: Ontology | null, Ability: Ontology | null, Scope: Ontology | null } = {
+export const useOntologyStore = create<OntologyState>()(
+    devtools(
+        temporal(
+            (set, get) => ({
+                ontologies: {
                     Area: null,
                     Ability: null,
                     Scope: null,
-                };
+                },
+                ontologiesOriginal: {
+                    Area: null,
+                    Ability: null,
+                    Scope: null,
+                },
+                loading: false,
+                error: null,
+                fetchOntology: async (branch: string) => {
+                    if (get().loading) return;
 
-                for (let i = 0; i < files.length; i++) {
-                    const fileName = files[i];
-                    const rawTurtle = rawTurtles[i];
-                    const type = fileMapping[fileName];
+                    set({ loading: true, error: null }, false, 'FETCH');
+                    try {
+                        const fileMapping: Record<string, 'Area' | 'Ability' | 'Scope'> = {
+                            "core-areas-math.ttl": "Area",
+                            "core-abilities.ttl": "Ability",
+                            "core-scopes-math.ttl": "Scope",
+                        };
+                        const files = Object.keys(fileMapping);
+                        const rawTurtles = await loadOntologyFiles(files, branch);
 
-                    const quads = await getQuadsFromString(rawTurtle);
-                    const entityInfoMap = createEntityInfoMap(quads);
+                        const finalOntologies: { Area: Ontology | null, Ability: Ontology | null, Scope: Ontology | null } = {
+                            Area: null,
+                            Ability: null,
+                            Scope: null,
+                        };
 
-                    const newOntology: Ontology = {
-                        entities: [],
-                        relations: {
-                            expands: {},
-                            partOf: {},
-                            includes: {},
-                        },
-                    };
+                        for (let i = 0; i < files.length; i++) {
+                            const fileName = files[i];
+                            const rawTurtle = rawTurtles[i];
+                            const type = fileMapping[fileName];
 
-                    populateOntologyFromQuads(newOntology, quads, entityInfoMap);
-                    const finalOntology = enrichOntology(newOntology);
-                    finalOntologies[type] = finalOntology;
-                }
+                            const quads = await getQuadsFromString(rawTurtle);
+                            const entityInfoMap = createEntityInfoMap(quads);
 
-                useTemporalOntologyStore.getState().setOntologies(structuredClone(finalOntologies));
-                
-                set({
-                    ontologiesOriginal: finalOntologies,
-                    loading: false
-                });
+                            const newOntology: Ontology = {
+                                entities: [],
+                                relations: {
+                                    expands: {},
+                                    partOf: {},
+                                    includes: {},
+                                },
+                            };
 
-                useTemporalOntologyStore.temporal.getState().clear();
-
-            } catch (error: any) {
-                set({ error: error.message, loading: false });
-                console.error(error);
-            }
-        },
-        updateEntity: (dimension, originalEntity, newId, newDefinition) => {
-            const currentOntologies = useTemporalOntologyStore.getState().ontologies;
-            let newIri: string | undefined;
-
-            const newOntologies = produce(currentOntologies, draft => {
-                const ontology = draft[dimension];
-                if (!ontology) return;
-
-                const oldIri = originalEntity.iri;
-                newIri = `${IRI_NAMESPACE}${newId}`;
-
-                const entityToUpdate = ontology.entities.find(e => e.iri === oldIri);
-                if (entityToUpdate) {
-                    entityToUpdate.iri = newIri;
-                    entityToUpdate.name = newId;
-                    entityToUpdate.definition = newDefinition;
-                }
-
-                Object.values(ontology.relations).forEach(relationMap => {
-                    if (relationMap[oldIri]) {
-                        relationMap[newIri] = relationMap[oldIri];
-                        delete relationMap[oldIri];
-                    }
-                    Object.keys(relationMap).forEach(subjectIri => {
-                        const index = relationMap[subjectIri].indexOf(oldIri);
-                        if (index !== -1) {
-                            relationMap[subjectIri][index] = newIri;
+                            populateOntologyFromQuads(newOntology, quads, entityInfoMap);
+                            const finalOntology = enrichOntology(newOntology);
+                            finalOntologies[type] = finalOntology;
                         }
-                    });
-                });
-            });
-            useTemporalOntologyStore.getState().setOntologies(newOntologies);
-            return newIri;
-        },
-    }))
-);
+                        set({
+                            ontologies: structuredClone(finalOntologies),
+                            ontologiesOriginal: finalOntologies,
+                            loading: false
+                        }, false, 'FETCH');
+                        useOntologyStore.temporal.getState().clear()
 
-// Subscribe to the temporal store and update the main store
-useTemporalOntologyStore.subscribe(
-    (state) => {
-        useOntologyStore.setState({ ontologies: state.ontologies });
-    }
+                    } catch (error: any) {
+                        set({ error: error.message, loading: false }, false, 'FETCH');
+                        console.error(error);
+                    }
+                },
+                updateEntity: (dimension, originalEntity, newId, newDefinition) => {
+                    let newIri: string | undefined;
+                    set(produce((draft: OntologyState) => {
+                        const ontology = draft.ontologies[dimension];
+                        if (!ontology) return;
+
+                        const oldIri = originalEntity.iri;
+                        newIri = `${IRI_NAMESPACE}${newId}`;
+
+                        const entityToUpdate = ontology.entities.find(e => e.iri === oldIri);
+                        if (entityToUpdate) {
+                            entityToUpdate.iri = newIri;
+                            entityToUpdate.name = newId;
+                            entityToUpdate.definition = newDefinition;
+                        }
+
+                        Object.values(ontology.relations).forEach(relationMap => {
+                            if (relationMap[oldIri]) {
+                                relationMap[newIri] = relationMap[oldIri];
+                                delete relationMap[oldIri];
+                            }
+                            Object.keys(relationMap).forEach(subjectIri => {
+                                const index = relationMap[subjectIri].indexOf(oldIri);
+                                if (index !== -1) {
+                                    relationMap[subjectIri][index] = newIri;
+                                }
+                            });
+                        });
+                    }));
+                    return newIri;
+                },
+            }),
+            {
+                partialize: (state) => ({ ontologies: state.ontologies }),
+            }
+        )
+    )
 );
