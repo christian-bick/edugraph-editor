@@ -1,4 +1,4 @@
-import type { Ontology, OntologyEntity, OntologyRelations } from "../types/ontology-types.ts";
+import type { Ontology, OntologyRelations } from "../types/ontology-types.ts";
 import { Writer, DataFactory } from "n3";
 
 const { namedNode, literal, quad } = DataFactory;
