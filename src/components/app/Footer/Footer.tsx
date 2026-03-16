@@ -3,6 +3,7 @@ import {type CurrentOntologyState, useCurrentOntologyStore} from '../../../store
 import type {TemporalState} from "zundo";
 import {useStore} from "zustand";
 import { useViewStore } from '../../../stores/view-store';
+import clsx from 'clsx';
 
 const useTemporalStore = <T, >(
     selector: (state: TemporalState<CurrentOntologyState>) => T,
@@ -15,12 +16,20 @@ export const Footer = () => {
     );
     const { view, toggleView } = useViewStore();
 
+    const isDiffActive = view === 'diff';
+
     return (
         <footer className="footer">
             <div className="undo-redo-controls">
-                <button onClick={() => undo()} disabled={!pastStates.length}>Undo</button>
-                <button onClick={toggleView}>{view === 'graph' ? 'Show Diff' : 'Show Graph'}</button>
-                <button onClick={() => redo()} disabled={!futureStates.length}>Redo</button>
+                <button onClick={() => undo()} disabled={!pastStates.length || isDiffActive}>Undo</button>
+                <button
+                    onClick={toggleView}
+                    disabled={!pastStates.length}
+                    className={clsx({ active: isDiffActive })}
+                >
+                    Diff
+                </button>
+                <button onClick={() => redo()} disabled={!futureStates.length || isDiffActive}>Redo</button>
             </div>
         </footer>
     );
