@@ -8,6 +8,7 @@
     background-color: colors.$container-background;
     width: 100%;
     height: 3rem;
+    box-sizing: border-box;
     border-top: 1px solid colors.$light-border-color;
 
     position: sticky;
