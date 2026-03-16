@@ -23,13 +23,6 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose, entity 
         }
     }, [entity]);
 
-    const handleReset = () => {
-        if (entity) {
-            setId(entity.name);
-            setDefinition(entity.definition);
-        }
-    };
-
     if (!entity) {
         return null;
     }
@@ -37,7 +30,7 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose, entity 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <h2>Edit Entity</h2>
-            
+
             <div className="form-group">
                 <label>ID</label>
                 <div className="prefixed-input">
@@ -52,7 +45,7 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose, entity 
 
             <div className="form-group">
                 <label>Natural Name</label>
-                <p className="natural-name-display">{toNaturalName(entity.name)}</p>
+                <p className="natural-name-display">{toNaturalName(id)}</p>
             </div>
 
             <div className="form-group">
@@ -66,9 +59,10 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose, entity 
             </div>
 
             <div className="form-actions">
-                <button onClick={handleReset}>Reset</button>
+                <button onClick={onClose}>Cancel</button>
                 <button className="primary">Save Changes</button>
             </div>
         </Modal>
     );
 };
+
