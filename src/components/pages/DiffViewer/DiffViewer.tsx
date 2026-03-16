@@ -5,11 +5,13 @@ import {DiffModeEnum, DiffView} from '@git-diff-view/react';
 import {generateDiffFile} from "@git-diff-view/file";
 import "@git-diff-view/react/styles/diff-view-pure.css";
 import './DiffViewer.scss';
+import { useViewStore } from '../../../stores/view-store';
 
 export const DiffViewer = () => {
     const { ontologies } = useCurrentOntologyStore();
     const { ontologiesOriginal } = useOntologyStore();
     const { activeDimension } = useBranchStore();
+    const { toggleView } = useViewStore();
 
     const dim = activeDimension as 'Area' | 'Ability' | 'Scope';
 
@@ -33,6 +35,10 @@ export const DiffViewer = () => {
 
     return (
         <div className="diff-viewer-container">
+            <div className="diff-viewer-header">
+                <button onClick={toggleView}>Cancel</button>
+                <button className="primary">Confirm</button>
+            </div>
             <DiffView diffFile={file}
                       diffViewTheme={"light"}
                       diffViewHighlight={true}
@@ -41,3 +47,4 @@ export const DiffViewer = () => {
         </div>
     );
 };
+
