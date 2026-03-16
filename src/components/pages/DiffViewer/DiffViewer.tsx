@@ -62,7 +62,7 @@ export const DiffViewer = () => {
         switch (dimension) {
             case 'Area': return 'core-areas-math.ttl'; // Assuming this is dynamic if the actual file varies
             case 'Ability': return 'core-abilities.ttl';
-            case 'Scope': return 'core-scopes.ttl';
+            case 'Scope': return 'core-scopes-math.ttl';
             default: throw new Error(`Unknown dimension: ${dimension}`);
         }
     };
