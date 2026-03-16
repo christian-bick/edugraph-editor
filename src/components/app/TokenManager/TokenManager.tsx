@@ -39,21 +39,22 @@ export const TokenManager: React.FC = () => {
                 Provide a GitHub Personal Access Token to edit files and access private repositories.
                 The token is stored in local storage.
             </p>
-            <input
-                type="password"
-                value={inputValue}
-                onChange={(e) => {
-                    setInputValue(e.target.value);
-                    setError(null);
-                    setSuccess(null);
-                }}
-                placeholder="Enter your GitHub token"
-                style={{ width: '300px', marginRight: '10px' }}
-            />
-            <button onClick={handleSave} disabled={isLoading}>
-                {isLoading ? 'Verifying...' : 'Save'}
-            </button>
-            <button onClick={handleClear}>Clear</button>
+            <div className="form-section">
+                <input
+                    type="password"
+                    value={inputValue}
+                    onChange={(e) => {
+                        setInputValue(e.target.value);
+                        setError(null);
+                        setSuccess(null);
+                    }}
+                    placeholder="Enter your GitHub token"
+                />
+                <button onClick={handleSave} disabled={isLoading} className="primary">
+                    {isLoading ? 'Verifying...' : 'Save'}
+                </button>
+                <button onClick={handleClear}>Clear</button>
+            </div>
 
             <div className="token-manager-feedback">
                 {isLoading && <p className="loading">Verifying token...</p>}

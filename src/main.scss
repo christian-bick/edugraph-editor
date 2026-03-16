@@ -29,3 +29,60 @@ body {
   flex-direction: column;
   align-items: center;
 }
+
+/* === Global Form & Button Styles === */
+
+/* Default input and textarea styles */
+input[type="text"],
+input[type="password"],
+textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: "Shanti", sans-serif;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  vertical-align: middle;
+
+  &:focus {
+    outline: none;
+    border-color: #888;
+    box-shadow: 0 0 0 2px rgba(136, 136, 136, 0.2);
+  }
+}
+
+/* Default button styles */
+button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+  font-family: "Shanti", sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+  vertical-align: middle;
+  
+  &:hover {
+    background-color: #e0e0e0;
+    border-color: #bbb;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+/* Primary button style */
+button.primary {
+  background-color: #28603b; // Using a green from the project
+  color: white;
+  border-color: #28603b;
+
+  &:hover {
+    background-color: #1e4a2e;
+    border-color: #1e4a2e;
+  }
+}

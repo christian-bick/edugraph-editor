@@ -7,6 +7,7 @@ import GithubDarkGreenIcon from '../../../assets/icons/github-dark-green.svg';
 import {TokenManager} from "../TokenManager/TokenManager.tsx";
 import {useState} from "react";
 import {useAuthStore} from "../../../stores/auth-store.ts";
+import {Modal} from "../../global/Modal/Modal.tsx";
 
 export const Header = () => {
     const [showTokenManager, setShowTokenManager] = useState(false);
@@ -22,16 +23,12 @@ export const Header = () => {
                 <BranchSelector/>
                 <DimensionSelector/>
                 <PerspectiveSelector/>
-                <div className="github-token-manager">
-                    <button className="github-icon" onClick={() => setShowTokenManager(!showTokenManager)}>
-                        <img src={token ? GithubDarkGreenIcon : GithubIcon} alt="GitHub Token"/>
-                    </button>
-                    {showTokenManager && (
-                        <div className="token-manager-container">
-                            <TokenManager />
-                        </div>
-                    )}
-                </div>
+                <button className="github-icon" onClick={() => setShowTokenManager(true)}>
+                    <img src={token ? GithubDarkGreenIcon : GithubIcon} alt="GitHub Token"/>
+                </button>
+                <Modal isOpen={showTokenManager} onClose={() => setShowTokenManager(false)}>
+                    <TokenManager />
+                </Modal>
             </div>
         </header>
     );
