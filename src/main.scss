@@ -44,6 +44,7 @@ textarea {
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
   vertical-align: middle;
+  box-sizing: border-box;
 
   &:focus {
     outline: none;
