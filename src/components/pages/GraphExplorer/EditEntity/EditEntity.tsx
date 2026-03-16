@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal } from '../../../global/Modal/Modal';
 import { SelectedEntity } from '../../../../stores/selected-entity-store';
 import './EditEntity.scss';
+import { toNaturalName } from '../../../../stores/utils';
 
 interface EditEntityProps {
     isOpen: boolean;
@@ -51,7 +52,7 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose, entity 
 
             <div className="form-group">
                 <label>Natural Name</label>
-                <p className="natural-name-display">{entity.natural_name}</p>
+                <p className="natural-name-display">{toNaturalName(entity.name)}</p>
             </div>
 
             <div className="form-group">

@@ -1,7 +1,6 @@
 export interface OntologyEntity {
     iri: string;
     name: string;
-    natural_name: string;
     definition: string;
     examples: string;
 }

@@ -21,17 +21,10 @@ const PREDICATE_INCLUDES = EDU_BASE + 'includes';
 export interface EntityTempInfo {
     type: 'Ability' | 'Area' | 'Scope';
     name: string;
-    natural_name: string;
     iri: string;
     definition: string;
     examples: string;
 }
-
-const toNaturalName = (name: string): string => {
-    return name
-        .replace(/([a-z])([A-Z])/g, '$1 $2')
-        .replace(/([A-Za-z])([0-9])/g, '$1 $2');
-};
 
 export const getQuadsFromString = async (turtleString: string): Promise<Quad[]> => {
     const parser = new Parser();
@@ -61,7 +54,6 @@ export const createEntityInfoMap = (quads: Quad[]): Map<string, EntityTempInfo> 
                 entityInfoMap.set(subjectIRI, {
                     type: 'Ability', // Default, will be updated
                     name,
-                    natural_name: toNaturalName(name),
                     iri: subjectIRI,
                     definition: '',
                     examples: ''
@@ -129,7 +121,6 @@ export const populateOntologyFromQuads = (
             ontology.entities.push({
                 iri: info.iri,
                 name: info.name,
-                natural_name: info.natural_name,
                 definition: info.definition,
                 examples: info.examples,
             });

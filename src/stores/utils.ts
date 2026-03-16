@@ -10,3 +10,9 @@ export const invertRelations = (source: Record<string, string[]>) => {
     }
     return inverse;
 };
+
+export const toNaturalName = (name: string): string => {
+    return name
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/([A-Za-z])([0-9])/g, '$1 $2');
+};

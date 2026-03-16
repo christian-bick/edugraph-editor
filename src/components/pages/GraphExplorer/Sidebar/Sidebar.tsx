@@ -4,6 +4,7 @@ import { useBranchStore } from '../../../../stores/branch-store.ts';
 import './Sidebar.scss';
 import EditIcon from '../../../../assets/icons/edit.svg';
 import { EditEntity } from '../EditEntity/EditEntity.tsx';
+import { toNaturalName } from '../../../../stores/utils.ts';
 
 export const Sidebar: React.FC = () => {
     const { selectedEntity } = useSelectedEntityStore();
@@ -20,7 +21,7 @@ export const Sidebar: React.FC = () => {
                         <>
                             <h4>Expands</h4>
                             <ul>
-                                {selectedEntity.relations.expands.map(e => <li key={e.iri}>{e.natural_name}</li>)}
+                                {selectedEntity.relations.expands.map(e => <li key={e.iri}>{toNaturalName(e.name)}</li>)}
                             </ul>
                         </>
                     )}
@@ -28,7 +29,7 @@ export const Sidebar: React.FC = () => {
                         <>
                             <h4>Expanded By</h4>
                             <ul>
-                                {selectedEntity.relations.expandedBy.map(e => <li key={e.iri}>{e.natural_name}</li>)}
+                                {selectedEntity.relations.expandedBy.map(e => <li key={e.iri}>{toNaturalName(e.name)}</li>)}
                             </ul>
                         </>
                     )}
@@ -41,7 +42,7 @@ export const Sidebar: React.FC = () => {
                         <>
                             <h4>Parents</h4>
                             <ul>
-                                {selectedEntity.relations.partOf.map(e => <li key={e.iri}>{e.natural_name}</li>)}
+                                {selectedEntity.relations.partOf.map(e => <li key={e.iri}>{toNaturalName(e.name)}</li>)}
                             </ul>
                         </>
                     )}
@@ -50,7 +51,7 @@ export const Sidebar: React.FC = () => {
                         <>
                             <h4>Children</h4>
                             <ul>
-                                {selectedEntity.relations.hasPart.map(e => <li key={e.iri}>{e.natural_name}</li>)}
+                                {selectedEntity.relations.hasPart.map(e => <li key={e.iri}>{toNaturalName(e.name)}</li>)}
                             </ul>
                         </>
                     )}
@@ -65,7 +66,7 @@ export const Sidebar: React.FC = () => {
                 {selectedEntity ? (
                     <>
                         <div className="sidebar-header">
-                            <h3>{selectedEntity.natural_name}</h3>
+                            <h3>{toNaturalName(selectedEntity.name)}</h3>
                             <button className="edit-btn" onClick={() => setIsEditModalOpen(true)}>
                                 <img src={EditIcon} alt="Edit Entity"/>
                             </button>

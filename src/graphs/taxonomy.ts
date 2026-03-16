@@ -1,6 +1,6 @@
 import type {G6Edge, G6Node} from "../types/graph-types.ts";
 import type {Ontology, OntologyRelations} from "../types/ontology-types.ts";
-import {invertRelations} from "../stores/utils.ts";
+import {invertRelations, toNaturalName} from "../stores/utils.ts";
 
 export const getGraphData = (
     ontology: Ontology | null,
@@ -19,7 +19,7 @@ export const getGraphData = (
         entityIRItoIdMap.set(entity.iri, id);
         nodes.push({
             id: id,
-            label: entity.natural_name || entity.name,
+            label: toNaturalName(entity.name),
             entityType: activeDimension,
         });
     });
