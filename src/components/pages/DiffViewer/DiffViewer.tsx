@@ -7,7 +7,7 @@ import "@git-diff-view/react/styles/diff-view-pure.css";
 import './DiffViewer.scss';
 import { useViewStore } from '../../../stores/view-store';
 import { pushOntologyFile } from '../../../api/github'; // Assuming relative path
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export const DiffViewer = () => {
     const { ontologies: currentOntologyData } = useCurrentOntologyStore();
@@ -18,10 +18,45 @@ export const DiffViewer = () => {
     const [isPushing, setIsPushing] = useState(false);
     const [pushError, setPushError] = useState<string | null>(null);
 
+    const [originalText, setOriginalText] = useState<string | null>(null);
+    const [currentText, setCurrentText] = useState<string | null>(null);
+    const [isLoadingDiff, setIsLoadingDiff] = useState<boolean>(true);
+    const [diffSerializationError, setDiffSerializationError] = useState<string | null>(null);
+
     const dim = activeDimension as 'Area' | 'Ability' | 'Scope';
 
     const originalOntology = originalOntologyData[dim];
     const currentOntology = currentOntologyData[dim];
+
+    useEffect(() => {
+        const generateDiffContent = async () => {
+            if (!originalOntology || !currentOntology) {
+                setDiffSerializationError("No ontology data available for comparison.");
+                setIsLoadingDiff(false);
+                setOriginalText(null);
+                setCurrentText(null);
+                return;
+            }
+            setIsLoadingDiff(true);
+            setDiffSerializationError(null);
+            try {
+                const serializedOriginal = await serializeOntology(originalOntology, dim);
+                const serializedCurrent = await serializeOntology(currentOntology, dim);
+                setOriginalText(serializedOriginal);
+                setCurrentText(serializedCurrent);
+            } catch (error) {
+                console.error("Error serializing ontologies:", error);
+                setDiffSerializationError(`Error generating diff: ${(error as Error).message}`);
+                setOriginalText(null);
+                setCurrentText(null);
+            } finally {
+                setIsLoadingDiff(false);
+            }
+        };
+
+        generateDiffContent();
+    }, [originalOntology, currentOntology, dim]);
+
 
     const getOntologyFilePath = (dimension: 'Area' | 'Ability' | 'Scope') => {
         switch (dimension) {
@@ -37,10 +72,13 @@ export const DiffViewer = () => {
         setIsPushing(true);
         try {
             const filePath = getOntologyFilePath(dim);
-            const serializedContent = serializeOntology(currentOntology, dim);
+            // Ensure currentText is not null before pushing
+            if (currentText === null) {
+                 throw new Error("Serialized current ontology is not available.");
+            }
             const commitMessage = `feat: update ${dim} ontology`;
 
-            await pushOntologyFile(filePath, serializedContent, activeBranch, commitMessage);
+            await pushOntologyFile(filePath, currentText, activeBranch, commitMessage);
 
             // On success:
             // 1. Reset original ontology by re-fetching
@@ -61,12 +99,18 @@ export const DiffViewer = () => {
     };
 
 
-    if (!originalOntology || !currentOntology) {
-        return <div className="diff-viewer-placeholder">No data to compare.</div>;
+    if (isLoadingDiff) {
+        return <div className="diff-viewer-placeholder">Loading diff...</div>;
     }
 
-    const originalText = serializeOntology(originalOntology, dim);
-    const currentText = serializeOntology(currentOntology, dim);
+    if (diffSerializationError) {
+        return <div className="diff-viewer-placeholder error">Error: {diffSerializationError}</div>;
+    }
+
+    // If we reach here, originalText and currentText should be valid strings.
+    if (originalText === null || currentText === null) {
+        return <div className="diff-viewer-placeholder">No diff content to display.</div>;
+    }
 
     const file = generateDiffFile(
         "old.ts", originalText,
@@ -81,7 +125,7 @@ export const DiffViewer = () => {
             <div className="diff-viewer-header">
                 {pushError && <span className="push-error">{pushError}</span>}
                 <button onClick={toggleView} disabled={isPushing}>Cancel</button>
-                <button className="primary" onClick={onConfirm} disabled={isPushing}>
+                <button className="primary" onClick={onConfirm} disabled={isPushing || isLoadingDiff || diffSerializationError !== null}>
                     {isPushing ? 'Pushing...' : 'Confirm'}
                 </button>
             </div>
