@@ -107,11 +107,13 @@ export const useOntologyStore = create<OntologyStore>()(
                 }
 
                 useTemporalOntologyStore.getState().setOntologies(structuredClone(finalOntologies));
-
+                
                 set({
                     ontologiesOriginal: finalOntologies,
                     loading: false
                 });
+
+                useTemporalOntologyStore.temporal.getState().clear();
 
             } catch (error: any) {
                 set({ error: error.message, loading: false });

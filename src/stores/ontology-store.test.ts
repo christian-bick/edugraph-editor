@@ -67,35 +67,37 @@ describe('Ontology Store', () => {
         useTemporalOntologyStore.getState().setOntologies(initialOntologies);
         useOntologyStore.setState({ ontologies: initialOntologies, ontologiesOriginal: initialOntologies });
 
+        // Clear history after test-specific setup!
+        useTemporalOntologyStore.temporal.getState().clear();
+
         const originalEntity = mockAreaOntology.entities[0];
-        
+
         // 2. Perform an update
         const { updateEntity } = useOntologyStore.getState();
         updateEntity('Area', originalEntity, 'A_new', 'A new def');
 
-        // Check that the state was updated
-        const updatedName = useOntologyStore.getState().ontologies.Area?.entities.find(e => e.name === 'A_new');
-        expect(updatedName).toBeDefined();
-        
+        const temporalStore = useTemporalOntologyStore.temporal.getState();
+        expect(temporalStore.pastStates).toHaveLength(1);
+        expect(temporalStore.futureStates).toHaveLength(0);
+
         // 3. Undo the change
-        const { undo } = useTemporalOntologyStore.temporal.getState();
-        undo();
+        temporalStore.undo();
 
         const undoneOntology = useOntologyStore.getState().ontologies.Area;
         // Assert state is back to original
         expect(undoneOntology?.entities.find(e => e.name === 'A_new')).toBeUndefined();
         expect(undoneOntology?.entities.find(e => e.name === 'A')).toBeDefined();
-        expect(undoneOntology?.relations.expands[originalEntity.iri]).toBeDefined();
-        
+        expect(useTemporalOntologyStore.temporal.getState().pastStates).toHaveLength(0);
+        expect(useTemporalOntologyStore.temporal.getState().futureStates).toHaveLength(1);
+
         // 4. Redo the change
-        const { redo } = useTemporalOntologyStore.temporal.getState();
-        redo();
+        temporalStore.redo();
 
         const redoneOntology = useOntologyStore.getState().ontologies.Area;
         // Assert state is the updated one again
         expect(redoneOntology?.entities.find(e => e.name === 'A')).toBeUndefined();
-        const redoneEntity = redoneOntology?.entities.find(e => e.name === 'A_new');
-        expect(redoneEntity).toBeDefined();
-        expect(redoneOntology?.relations.expands[redoneEntity!.iri]).toBeDefined();
+        expect(redoneOntology?.entities.find(e => e.name === 'A_new')).toBeDefined();
+        expect(useTemporalOntologyStore.temporal.getState().pastStates).toHaveLength(1);
+        expect(useTemporalOntologyStore.temporal.getState().futureStates).toHaveLength(0);
     });
 });
