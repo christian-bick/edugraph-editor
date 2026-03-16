@@ -1,15 +1,57 @@
-import React, { useState } from 'react';
-import { useSelectedEntityStore } from '../../../../stores/selected-entity-store';
-import { useBranchStore } from '../../../../stores/branch-store.ts';
+import React, {useMemo, useState} from 'react';
+import {useSelectedEntityStore} from '../../../../stores/selected-entity-store';
+import {useBranchStore} from '../../../../stores/branch-store.ts';
 import './Sidebar.scss';
 import EditIcon from '../../../../assets/icons/edit.svg';
-import { EditEntity } from '../EditEntity/EditEntity.tsx';
-import { toNaturalName } from '../../../../stores/utils.ts';
+import {EditEntity} from '../EditEntity/EditEntity.tsx';
+import {invertRelations, toNaturalName} from '../../../../stores/utils.ts';
+import {useOntologyStore} from "../../../../stores/ontology-store.ts";
+import {OntologyEntity} from "../../../../types/ontology-types.ts";
 
 export const Sidebar: React.FC = () => {
-    const { selectedEntity } = useSelectedEntityStore();
-    const { activePerspective } = useBranchStore();
+    const { selectedEntityIri } = useSelectedEntityStore();
+    const { ontologies } = useOntologyStore();
+    const { activeDimension, activePerspective } = useBranchStore();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    const selectedEntity = useMemo(() => {
+        if (!selectedEntityIri) return null;
+        const ontology = ontologies[activeDimension as keyof typeof ontologies];
+        if (!ontology) return null;
+
+        const entity = ontology.entities.find(e => e.iri === selectedEntityIri);
+        if (!entity) return null;
+
+        const allEntities = ontology.entities;
+        const directRelations: { [relationName: string]: OntologyEntity[] } = {};
+        for (const rel in ontology.relations) {
+            const relTyped = rel as keyof typeof ontology.relations;
+            if (ontology.relations[relTyped]?.[entity.iri]) {
+                const relatedIris = ontology.relations[relTyped]![entity.iri];
+                directRelations[relTyped] = relatedIris.map(iri => allEntities.find(e => e.iri === iri)!).filter(Boolean) as OntologyEntity[];
+            }
+        }
+
+        const inverseRelations = {
+            expandedBy: invertRelations(ontology.relations.expands),
+            hasPart: invertRelations(ontology.relations.partOf),
+            includedBy: invertRelations(ontology.relations.includes),
+        };
+
+        const allRelations: { [key: string]: OntologyEntity[] } = { ...directRelations };
+        for (const rel in inverseRelations) {
+            const relTyped = rel as keyof typeof inverseRelations;
+            if (inverseRelations[relTyped]?.[entity.iri]) {
+                const relatedIris = inverseRelations[relTyped]![entity.iri];
+                allRelations[relTyped] = relatedIris.map(iri => allEntities.find(e => e.iri === iri)!).filter(Boolean) as OntologyEntity[];
+            }
+        }
+
+        return {
+            ...entity,
+            relations: allRelations,
+        };
+    }, [selectedEntityIri, ontologies, activeDimension]);
 
     const renderRelations = () => {
         if (!selectedEntity) return null;

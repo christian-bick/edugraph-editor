@@ -13,21 +13,19 @@ export const GraphExplorer: React.FC = () => {
     const graphRef = useRef<any>(null); // Store the G6 graph instance
     const {ontologies, loading, error} = useOntologyStore();
     const { activeBranch, activeDimension, activePerspective } = useBranchStore();
-    const { setSelectedEntity } = useSelectedEntityStore();
+    const { setSelectedEntityIri } = useSelectedEntityStore();
 
     const ontology = useMemo(() => {
         return ontologies[activeDimension as keyof typeof ontologies];
     }, [ontologies, activeDimension]);
 
     const handleNodeClick = useCallback((entityIri: string) => {
-        if (!ontology) return;
-        const entity = ontology.entities.find(e => e.iri === entityIri);
-        setSelectedEntity(entity || null, ontology);
-    }, [ontology, setSelectedEntity]);
+        setSelectedEntityIri(entityIri);
+    }, [setSelectedEntityIri]);
 
     useEffect(() => {
-        setSelectedEntity(null, null);
-    }, [activeBranch, activeDimension, activePerspective, setSelectedEntity]);
+        setSelectedEntityIri(null);
+    }, [activeBranch, activeDimension, activePerspective, setSelectedEntityIri]);
 
     useEffect(() => {
         if (!containerRef.current || !ontology || loading) return;

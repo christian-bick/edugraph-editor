@@ -1,6 +1,6 @@
 import {create} from 'zustand'
 import {loadOntologyFiles} from '../api/github.ts'
-import type {Ontology} from "../types/ontology-types.ts";
+import type {Ontology, OntologyEntity} from "../types/ontology-types.ts";
 import {
     createEntityInfoMap,
     enrichOntology,
@@ -9,6 +9,9 @@ import {
 } from "./ontology-parser.ts";
 import { temporal } from 'zundo';
 import { devtools } from 'zustand/middleware';
+import { produce } from 'immer';
+
+const IRI_NAMESPACE = 'http://edugraph.io/edu/';
 
 interface OntologyTemporalState {
     ontologies: {
@@ -16,9 +19,10 @@ interface OntologyTemporalState {
         Ability: Ontology | null;
         Scope: Ontology | null;
     };
+    setOntologies: (ontologies: OntologyTemporalState['ontologies']) => void;
 }
 
-interface OntologyState extends OntologyTemporalState {
+interface OntologyState extends Omit<OntologyTemporalState, 'setOntologies'> {
     ontologiesOriginal: {
         Area: Ontology | null;
         Ability: Ontology | null;
@@ -30,6 +34,7 @@ interface OntologyState extends OntologyTemporalState {
 
 interface OntologyAction {
     fetchOntology: (branch: string) => Promise<void>;
+    updateEntity: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newId: string, newDefinition: string) => string | undefined;
 }
 
 type OntologyStore = OntologyState & OntologyAction;
@@ -42,7 +47,7 @@ export const useTemporalOntologyStore = create(
                 Ability: null,
                 Scope: null,
             },
-            setOntologies: (ontologies: OntologyTemporalState['ontologies']) => set({ ontologies }),
+            setOntologies: (ontologies) => set({ ontologies }),
         }),
         {
             partialize: (state) => ({ ontologies: state.ontologies }),
@@ -112,6 +117,40 @@ export const useOntologyStore = create<OntologyStore>()(
                 set({ error: error.message, loading: false });
                 console.error(error);
             }
+        },
+        updateEntity: (dimension, originalEntity, newId, newDefinition) => {
+            const currentOntologies = useTemporalOntologyStore.getState().ontologies;
+            let newIri: string | undefined;
+
+            const newOntologies = produce(currentOntologies, draft => {
+                const ontology = draft[dimension];
+                if (!ontology) return;
+
+                const oldIri = originalEntity.iri;
+                newIri = `${IRI_NAMESPACE}${newId}`;
+
+                const entityToUpdate = ontology.entities.find(e => e.iri === oldIri);
+                if (entityToUpdate) {
+                    entityToUpdate.iri = newIri;
+                    entityToUpdate.name = newId;
+                    entityToUpdate.definition = newDefinition;
+                }
+
+                Object.values(ontology.relations).forEach(relationMap => {
+                    if (relationMap[oldIri]) {
+                        relationMap[newIri] = relationMap[oldIri];
+                        delete relationMap[oldIri];
+                    }
+                    Object.keys(relationMap).forEach(subjectIri => {
+                        const index = relationMap[subjectIri].indexOf(oldIri);
+                        if (index !== -1) {
+                            relationMap[subjectIri][index] = newIri;
+                        }
+                    });
+                });
+            });
+            useTemporalOntologyStore.getState().setOntologies(newOntologies);
+            return newIri;
         },
     }))
 );

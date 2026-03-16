@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Modal } from '../../../global/Modal/Modal';
-import { SelectedEntity } from '../../../../stores/selected-entity-store';
+import { SelectedEntity, useSelectedEntityStore } from '../../../../stores/selected-entity-store';
 import './EditEntity.scss';
 import { toNaturalName } from '../../../../stores/utils';
+import { useOntologyStore } from '../../../../stores/ontology-store';
+import { useBranchStore } from '../../../../stores/branch-store';
 
 interface EditEntityProps {
     isOpen: boolean;
@@ -15,6 +17,9 @@ const IRI_NAMESPACE = 'http://edugraph.io/edu/';
 export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose, entity }) => {
     const [id, setId] = useState('');
     const [definition, setDefinition] = useState('');
+    const { updateEntity } = useOntologyStore();
+    const { activeDimension } = useBranchStore();
+    const { setSelectedEntityIri } = useSelectedEntityStore();
 
     useEffect(() => {
         if (entity) {
@@ -22,6 +27,14 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose, entity 
             setDefinition(entity.definition);
         }
     }, [entity]);
+
+    const handleSave = () => {
+        if (entity) {
+            const newIri = updateEntity(activeDimension as 'Area' | 'Ability' | 'Scope', entity, id, definition);
+            setSelectedEntityIri(newIri);
+            onClose();
+        }
+    };
 
     if (!entity) {
         return null;
@@ -60,7 +73,7 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose, entity 
 
             <div className="form-actions">
                 <button onClick={onClose}>Cancel</button>
-                <button className="primary">Save Changes</button>
+                <button onClick={handleSave} className="primary">Save Changes</button>
             </div>
         </Modal>
     );
