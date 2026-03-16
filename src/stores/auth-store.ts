@@ -1,4 +1,5 @@
-import {create} from 'zustand';
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface AuthState {
     token: string | null;
@@ -7,14 +8,15 @@ interface AuthState {
 
 const TOKEN_STORAGE_KEY = 'github_api_token';
 
-export const useAuthStore = create<AuthState>((set) => ({
-    token: localStorage.getItem(TOKEN_STORAGE_KEY) || null,
-    setToken: (token: string | null) => {
-        if (token) {
-            localStorage.setItem(TOKEN_STORAGE_KEY, token);
-        } else {
-            localStorage.removeItem(TOKEN_STORAGE_KEY);
+export const useAuthStore = create<AuthState>()(
+    persist(
+        (set) => ({
+            token: null,
+            setToken: (token: string | null) => set({ token }),
+        }),
+        {
+            name: TOKEN_STORAGE_KEY,
+            storage: createJSONStorage(() => localStorage),
         }
-        set({ token });
-    },
-}));
+    )
+);

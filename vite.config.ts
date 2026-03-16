@@ -26,6 +26,7 @@ export default defineConfig({
             {
                 name: 'unit',
                 include: ['src/**/*.test.ts'],
+                setupFiles: ['src/vitest.setup.ts'],
             },
             {
                 name: 'storybook',
