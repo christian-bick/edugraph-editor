@@ -39,10 +39,10 @@ export const GraphExplorer: React.FC = () => {
             let data, graph;
 
             if (activePerspective === 'Progression') {
-                data = getGraphData(ontology, activeDimension, 'expands', true);
+                data = getGraphData(ontology, activeDimension, 'expands', true, true);
                 graph = await renderTaxonomyDagre(containerRef.current!, data, handleNodeClick);
             } else {
-                data = getGraphData(ontology, activeDimension, 'hasPart');
+                data = getGraphData(ontology, activeDimension, 'partOf', false, true);
                 graph = await renderTaxonomyCompactBox(containerRef.current!, data, activeDimension, handleNodeClick);
             }
 

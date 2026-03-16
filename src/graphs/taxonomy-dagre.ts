@@ -44,7 +44,7 @@ export const renderTaxonomyDagre = async (
         },
         layout: {
             type: 'antv-dagre',
-            rankdir: 'RL',
+            rankdir: 'LR',
             ranksep: 40,
             nodesep: 40,
             ranker: 'network-simplex',

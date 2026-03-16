@@ -1,11 +1,13 @@
 import type {G6Edge, G6Node} from "../types/graph-types.ts";
 import type {Ontology, OntologyRelations} from "../types/ontology-types.ts";
+import {invertRelations} from "../stores/utils.ts";
 
 export const getGraphData = (
     ontology: Ontology | null,
     activeDimension: string,
     filterRelationType: keyof OntologyRelations | null = null,
-    filterOrphanNodes = false
+    filterOrphanNodes = false,
+    inverse = false
 ) => {
     const nodes: G6Node[] = [];
     const edges: G6Edge[] = [];
@@ -22,7 +24,11 @@ export const getGraphData = (
         });
     });
 
-    const relations = ontology.relations[filterRelationType];
+    let relations = ontology.relations[filterRelationType];
+    if (inverse) {
+        relations = invertRelations(relations);
+    }
+    
     if (relations) {
         Object.entries(relations).forEach(([subjectIRI, objectIRIs]) => {
             const sourceId = entityIRItoIdMap.get(subjectIRI);
