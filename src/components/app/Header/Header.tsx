@@ -8,10 +8,12 @@ import {TokenManager} from "../TokenManager/TokenManager.tsx";
 import {useState} from "react";
 import {useAuthStore} from "../../../stores/auth-store.ts";
 import {Modal} from "../../global/Modal/Modal.tsx";
+import { useTemporalOntologyStore } from '../../../stores/ontology-store';
 
 export const Header = () => {
     const [showTokenManager, setShowTokenManager] = useState(false);
     const { token } = useAuthStore();
+    const { undo, redo, futureStates, pastStates } = useTemporalOntologyStore.temporal.getState();
 
     return (
         <header className="header">
@@ -20,6 +22,10 @@ export const Header = () => {
                 <a href="/">EduGraph Editor</a>
             </div>
             <div className="header-controls">
+                <div className="undo-redo-controls">
+                    <button onClick={undo} disabled={!pastStates.length}>Undo</button>
+                    <button onClick={redo} disabled={!futureStates.length}>Redo</button>
+                </div>
                 <BranchSelector/>
                 <DimensionSelector/>
                 <PerspectiveSelector/>
