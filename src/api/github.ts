@@ -73,8 +73,8 @@ export const loadOntologyFiles = async (files: string[], branch = 'main'): Promi
 
     const query = `
         query GetOntologyFiles(
-            $owner: String!, 
-            $name: String!, 
+            $owner: String!,
+            $name: String!,
             ${files.map((_, index) => `$expression${index}: String!`).join(', ')}
         ) {
             repository(owner: $owner, name: $name) {
@@ -103,4 +103,51 @@ export const loadOntologyFiles = async (files: string[], branch = 'main'): Promi
         // Handle cases where a file might not be found
         throw new Error(`Content for file ${files[index]} not found in GraphQL response.`);
     });
+};
+
+export const getFileSha = async (filePath: string, branch = 'main'): Promise<string> => {
+    const octokit = getOctokit();
+    const response = await octokit.repos.getContent({
+        owner: REPO_OWNER,
+        repo: REPO_NAME,
+        path: filePath,
+        ref: branch,
+    });
+
+    if (Array.isArray(response.data) || !('sha' in response.data)) {
+        throw new Error(`Could not retrieve file SHA for ${filePath}.`);
+    }
+    return response.data.sha;
+};
+
+
+export const pushOntologyFile = async (
+    filePath: string,
+    content: string, // Unencoded content
+    branch: string,
+    commitMessage: string,
+): Promise<string> => {
+    const octokit = getOctokit();
+
+    // Get the current SHA of the file
+    const currentFileSha = await getFileSha(filePath, branch);
+
+    const response = await octokit.repos.createOrUpdateFileContents({
+        owner: REPO_OWNER,
+        repo: REPO_NAME,
+        path: filePath,
+        message: commitMessage,
+        content: toBase64(content), // Content must be base64 encoded
+        sha: currentFileSha, // Required for updates
+        branch: branch,
+    });
+
+    return response.data.commit.sha; // Return the SHA of the new commit
+};
+
+// Helper to handle Unicode safely
+const toBase64 = (str: string) => {
+    const bytes = new TextEncoder().encode(str);
+    const binString = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
+    return btoa(binString);
 };

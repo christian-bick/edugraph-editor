@@ -9,12 +9,19 @@
         position: sticky;
         top: 0;
         z-index: 5;
+        background-color: colors.$container-background;
         padding: 10px 0;
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 1rem; // Add some gap between buttons
         border-bottom: 1px solid colors.$light-border-color;
+
+        .push-error {
+            color: #dc3545; /* Red color for errors */
+            margin-right: 1rem;
+            font-weight: bold;
+        }
         }
     [data-diff-view] {
         // The DiffView component might not fill the container by default
