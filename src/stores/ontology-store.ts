@@ -13,7 +13,7 @@ import {produce} from 'immer';
 const IRI_NAMESPACE = 'http://edugraph.io/edu/';
 
 // Store for the "live" or "draft" version of the ontology, with undo/redo
-interface CurrentOntologyState {
+export interface CurrentOntologyState {
     ontologies: {
         Area: Ontology | null;
         Ability: Ontology | null;
