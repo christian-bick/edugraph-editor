@@ -34,7 +34,7 @@ const serializeEntity = (entity: OntologyEntity, relations: OntologyRelations, d
 
     const relationKeys = Object.keys(relations) as Array<keyof OntologyRelations>;
     relationKeys.sort();
-    
+
     for (const relationKey of relationKeys) {
         const subjects = relations[relationKey];
         if (subjects && subjects[entity.iri]) {
@@ -48,7 +48,7 @@ const serializeEntity = (entity: OntologyEntity, relations: OntologyRelations, d
             });
         }
     }
-    
+
     const sortedPredicates = Object.keys(groupedRelations).sort();
 
     sortedPredicates.forEach(pred => {
