@@ -35,13 +35,15 @@ export const Header = () => {
                 <a href="/">EduGraph Editor</a>
             </div>
             <div className="header-controls">
-                <button
-                    onClick={() => setView('diff')}
-                    disabled={!pastStates.length}
-                    className={clsx({ active: pastStates.length })}
-                >
-                    Push
-                </button>
+                {token && (
+                    <button
+                        onClick={() => setView('diff')}
+                        disabled={!pastStates.length}
+                        className={clsx({ active: pastStates.length })}
+                    >
+                        Push
+                    </button>
+                )}
                 <BranchSelector/>
                 <DimensionSelector/>
                 <PerspectiveSelector/>
