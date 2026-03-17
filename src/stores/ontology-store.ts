@@ -19,7 +19,6 @@ export interface CurrentOntologyState {
         Ability: Ontology | null;
         Scope: Ontology | null;
     };
-    updateEntity: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newId: string, newDefinition: string) => string | undefined;
     updateIri: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newId: string) => string | undefined;
     updateDefinition: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newDefinition: string) => void;
     setOntologies: (ontologies: CurrentOntologyState['ontologies']) => void;
@@ -30,52 +29,6 @@ export const useCurrentOntologyStore = create(
         (set) => ({
             ontologies: { Area: null, Ability: null, Scope: null },
             setOntologies: (ontologies) => set({ ontologies }),
-            updateEntity: (dimension, originalEntity, newId, newDefinition) => {
-                let newIri: string | undefined;
-                set(state => produce(state, (draft) => {
-                    const ontology = draft.ontologies[dimension];
-                    if (!ontology) return;
-
-                    const oldIri = originalEntity.iri;
-                    newIri = `${IRI_NAMESPACE}${newId}`;
-
-                    // 1. Update the entity itself
-                    const entityToUpdate = ontology.entities.find(e => e.iri === oldIri);
-                    if (entityToUpdate) {
-                        entityToUpdate.iri = newIri;
-                        entityToUpdate.name = newId;
-                        entityToUpdate.definition = newDefinition;
-                    }
-
-                    // 2. Update relations where oldIri is involved (as subject or object)
-                    Object.values(ontology.relations).forEach(relationMap => {
-                        // a) Handle oldIri as a SUBJECT key
-                        if (relationMap[oldIri]) {
-                            if (oldIri !== newIri) { // Only rename if IRI actually changes
-                                relationMap[newIri] = [...relationMap[oldIri]];
-                                delete relationMap[oldIri];
-                            } else { // If IRI is the same, just ensure Immer tracks array changes
-                                relationMap[oldIri] = [...relationMap[oldIri]];
-                            }
-                        }
-
-                        // b) Handle oldIri as an OBJECT in any subject's array
-                        // Iterate through current subject keys (which might now include newIri)
-                        Object.keys(relationMap).forEach(subjectIri => {
-                            // Map over the object IRIs to replace all occurrences of oldIri with newIri
-                            const updatedObjectIris = relationMap[subjectIri].map(objIri =>
-                                objIri === oldIri ? newIri : objIri
-                            );
-                            // Only update if changes were made to avoid unnecessary immer tracking
-                            // And ensure we don't accidentally replace the original array if nothing changed
-                            if (updatedObjectIris.some((val, idx) => val !== relationMap[subjectIri][idx])) {
-                                relationMap[subjectIri] = updatedObjectIris;
-                            }
-                        });
-                    });
-                }));
-                return newIri;
-            },
             updateIri: (dimension, originalEntity, newId) => {
                 let newIri: string | undefined;
                 set(state => produce(state, (draft) => {
