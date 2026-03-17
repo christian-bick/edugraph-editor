@@ -84,7 +84,10 @@ export const Sidebar: React.FC = () => {
                                 </button>
                             </div>
                             <div className="section-content-wrapper">
-                                <p className="iri-display">{selectedEntity.iri}</p>
+                                <div className="iri-display">
+                                    <span className="iri-id">:</span>
+                                    <span className="iri-id">{selectedEntity.name}</span>
+                                </div>
                             </div>
                         </div>
 

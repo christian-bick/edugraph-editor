@@ -60,18 +60,29 @@
         .section-content-wrapper {
             border-top: 1px solid colors.$light-border-color;
 
-            p {
+            > * {
                 padding: 0.5rem 0;
                 border-bottom: 1px solid colors.$light-border-color;
                 margin: 0;
+            }
+
+            p {
                 line-height: 1.5;
             }
-        }
 
-        .iri-display {
-            word-break: break-all;
-            font-family: monospace;
-            color: black;
+            .iri-display {
+                word-break: break-all;
+                font-family: monospace;
+                color: black;
+
+                .iri-namespace {
+                    font-size: 0.7rem;
+                }
+
+                .iri-id {
+                    font-size: 1rem;
+                }
+            }
         }
 
         ul {
