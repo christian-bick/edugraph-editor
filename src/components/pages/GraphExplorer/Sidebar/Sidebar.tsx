@@ -8,6 +8,19 @@ import {invertRelations, toNaturalName} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
 import {OntologyEntity} from "../../../../types/ontology-types.ts";
 
+const renderRelationSection = (title: string, entities: OntologyEntity[] | undefined) => {
+    if (!entities || entities.length === 0) return null;
+    return (
+        <div className="sidebar-section">
+            <div className="sidebar-header">
+                <h3>{title}</h3>
+            </div>
+            <ul>
+                {entities.map(e => <li key={e.iri}>{toNaturalName(e.name)}</li>)}
+            </ul>
+        </div>
+    );
+}
 export const Sidebar: React.FC = () => {
     const { selectedEntityIri } = useSelectedEntityStore();
     const { ontologies } = useCurrentOntologyStore();
@@ -54,75 +67,48 @@ export const Sidebar: React.FC = () => {
         };
     }, [selectedEntityIri, ontologies, activeDimension]);
 
-    const renderRelations = () => {
-        if (!selectedEntity) return null;
-
-        if (activePerspective === 'Progression') {
-            return (
-                <>
-                    {selectedEntity.relations.expands && (
-                        <>
-                            <h4>Expands</h4>
-                            <ul>
-                                {selectedEntity.relations.expands.map(e => <li key={e.iri}>{toNaturalName(e.name)}</li>)}
-                            </ul>
-                        </>
-                    )}
-                    {selectedEntity.relations.expandedBy && (
-                        <>
-                            <h4>Expanded By</h4>
-                            <ul>
-                                {selectedEntity.relations.expandedBy.map(e => <li key={e.iri}>{toNaturalName(e.name)}</li>)}
-                            </ul>
-                        </>
-                    )}
-                </>
-            );
-        } else {
-            return (
-                <>
-                    {selectedEntity.relations.partOf && (
-                        <>
-                            <h4>Parents</h4>
-                            <ul>
-                                {selectedEntity.relations.partOf.map(e => <li key={e.iri}>{toNaturalName(e.name)}</li>)}
-                            </ul>
-                        </>
-                    )}
-
-                    {selectedEntity.relations.hasPart && (
-                        <>
-                            <h4>Children</h4>
-                            <ul>
-                                {selectedEntity.relations.hasPart.map(e => <li key={e.iri}>{toNaturalName(e.name)}</li>)}
-                            </ul>
-                        </>
-                    )}
-                </>
-            );
-        }
-    };
-
     return (
         <>
             <aside className="graph-explorer-sidebar">
                 {selectedEntity ? (
                     <>
-                        <div className="sidebar-header">
-                            <h3>{toNaturalName(selectedEntity.name)}</h3>
-                            <button className="edit-btn" onClick={() => setIsEditIriOpen(true)}>
-                                <img src={EditIcon} alt="Edit IRI"/>
-                            </button>
+                        <h2>{toNaturalName(selectedEntity.name)}</h2>
+
+                        <div className="sidebar-section">
+                            <div className="sidebar-header">
+                                <h3>IRI</h3>
+                                <button className="edit-btn" onClick={() => setIsEditIriOpen(true)}>
+                                    <img src={EditIcon} alt="Edit IRI"/>
+                                </button>
+                            </div>
+                            <div className="section-content-wrapper">
+                                <p className="iri-display">{selectedEntity.iri}</p>
+                            </div>
                         </div>
 
-                        <div className="sidebar-header">
-                            <h4>Description</h4>
-                            <button className="edit-btn" onClick={() => setIsEditDefinitionOpen(true)}>
-                                <img src={EditIcon} alt="Edit Definition"/>
-                            </button>
+                        <div className="sidebar-section">
+                            <div className="sidebar-header">
+                                <h3>Description</h3>
+                                <button className="edit-btn" onClick={() => setIsEditDefinitionOpen(true)}>
+                                    <img src={EditIcon} alt="Edit Definition"/>
+                                </button>
+                            </div>
+                            <div className="section-content-wrapper">
+                                <p>{selectedEntity.definition}</p>
+                            </div>
                         </div>
-                        <p>{selectedEntity.definition}</p>
-                        {renderRelations()}
+
+                        {activePerspective === 'Progression' ? (
+                            <>
+                                {renderRelationSection('Expands', selectedEntity.relations.expands)}
+                                {renderRelationSection('Expanded By', selectedEntity.relations.expandedBy)}
+                            </>
+                        ) : (
+                            <>
+                                {renderRelationSection('Parents', selectedEntity.relations.partOf)}
+                                {renderRelationSection('Children', selectedEntity.relations.hasPart)}
+                            </>
+                        )}
                     </>
                 ) : (
                     <div className="sidebar-placeholder">Select a node to see details.</div>
@@ -139,4 +125,3 @@ export const Sidebar: React.FC = () => {
         </>
     );
 };
-
