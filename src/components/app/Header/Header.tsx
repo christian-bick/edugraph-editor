@@ -3,7 +3,6 @@ import { DimensionSelector } from './DimensionSelector/DimensionSelector';
 import { PerspectiveSelector } from "./PerspectiveSelector/PerspectiveSelector.tsx";
 import './Header.scss';
 import GithubIcon from '../../../assets/icons/github.svg';
-import GithubDarkGreenIcon from '../../../assets/icons/github-dark-green.svg';
 import {TokenManager} from "../TokenManager/TokenManager.tsx";
 import {useState} from "react";
 import {useAuthStore} from "../../../stores/auth-store.ts";
@@ -46,8 +45,8 @@ export const Header = () => {
                 <BranchSelector/>
                 <DimensionSelector/>
                 <PerspectiveSelector/>
-                <button className="github-icon" onClick={() => setShowTokenManager(true)}>
-                    <img src={token ? GithubDarkGreenIcon : GithubIcon} alt="GitHub Token"/>
+                <button className={clsx('github-icon', { 'token-present': token })} onClick={() => setShowTokenManager(true)}>
+                    <img src={GithubIcon} alt="GitHub Token"/>
                 </button>
                 <Modal isOpen={showTokenManager} onClose={() => setShowTokenManager(false)}>
                     <TokenManager />
