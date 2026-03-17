@@ -3,7 +3,7 @@ import { Modal } from '../../../global/Modal/Modal';
 import { useSelectedEntityStore } from '../../../../stores/selected-entity-store';
 import './EditEntity.scss';
 import { toNaturalName } from '../../../../stores/utils';
-import { useCurrentOntologyStore, useOntologyStore } from '../../../../stores/ontology-store';
+import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
 import { useBranchStore } from '../../../../stores/branch-store';
 
 interface EditEntityProps {
@@ -14,16 +14,15 @@ interface EditEntityProps {
 const IRI_NAMESPACE = 'http://edugraph.io/edu/';
 
 export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
-    const { ontologiesOriginal } = useOntologyStore();
-    const { updateEntity } = useCurrentOntologyStore();
+    const { ontologies } = useCurrentOntologyStore();
     const { selectedEntityIri, setSelectedEntityIri } = useSelectedEntityStore();
     const { activeDimension } = useBranchStore();
 
     const originalEntity = useMemo(() => {
         if (!selectedEntityIri) return null;
-        const ontology = ontologiesOriginal[activeDimension as keyof typeof ontologiesOriginal];
+        const ontology = ontologies[activeDimension as keyof typeof ontologies];
         return ontology?.entities.find(e => e.iri === selectedEntityIri) || null;
-    }, [selectedEntityIri, ontologiesOriginal, activeDimension]);
+    }, [selectedEntityIri, ontologies, activeDimension]);
     
     const [id, setId] = useState('');
     const [definition, setDefinition] = useState('');
@@ -37,8 +36,7 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
     
     const handleSave = () => {
         if (originalEntity) {
-            const newIri = updateEntity(activeDimension as 'Area' | 'Ability' | 'Scope', originalEntity, id, definition);
-            setSelectedEntityIri(newIri || null);
+            // No-op for now, or create a new entity
             onClose();
         }
     };
@@ -86,16 +84,15 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
     );
 };
 export const EditIri: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
-    const { ontologiesOriginal } = useOntologyStore();
-    const { updateIri } = useCurrentOntologyStore();
+    const { ontologies, updateIri } = useCurrentOntologyStore();
     const { selectedEntityIri, setSelectedEntityIri } = useSelectedEntityStore();
     const { activeDimension } = useBranchStore();
 
     const originalEntity = useMemo(() => {
         if (!selectedEntityIri) return null;
-        const ontology = ontologiesOriginal[activeDimension as keyof typeof ontologiesOriginal];
+        const ontology = ontologies[activeDimension as keyof typeof ontologies];
         return ontology?.entities.find(e => e.iri === selectedEntityIri) || null;
-    }, [selectedEntityIri, ontologiesOriginal, activeDimension]);
+    }, [selectedEntityIri, ontologies, activeDimension]);
 
     const [id, setId] = useState('');
 
@@ -103,7 +100,7 @@ export const EditIri: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
         if (originalEntity) {
             setId(originalEntity.name);
         }
-    }, [originalEntity]);
+    }, [originalEntity, isOpen]);
 
     const handleSave = () => {
         if (originalEntity) {
@@ -147,16 +144,15 @@ export const EditIri: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
 };
 
 export const EditDefinition: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
-    const { ontologiesOriginal } = useOntologyStore();
-    const { updateDefinition } = useCurrentOntologyStore();
+    const { ontologies, updateDefinition } = useCurrentOntologyStore();
     const { selectedEntityIri } = useSelectedEntityStore();
     const { activeDimension } = useBranchStore();
 
     const originalEntity = useMemo(() => {
         if (!selectedEntityIri) return null;
-        const ontology = ontologiesOriginal[activeDimension as keyof typeof ontologiesOriginal];
+        const ontology = ontologies[activeDimension as keyof typeof ontologies];
         return ontology?.entities.find(e => e.iri === selectedEntityIri) || null;
-    }, [selectedEntityIri, ontologiesOriginal, activeDimension]);
+    }, [selectedEntityIri, ontologies, activeDimension]);
 
     const [definition, setDefinition] = useState('');
 
@@ -164,7 +160,7 @@ export const EditDefinition: React.FC<EditEntityProps> = ({ isOpen, onClose }) =
         if (originalEntity) {
             setDefinition(originalEntity.definition);
         }
-    }, [originalEntity]);
+    }, [originalEntity, isOpen]);
 
     const handleSave = () => {
         if (originalEntity) {
