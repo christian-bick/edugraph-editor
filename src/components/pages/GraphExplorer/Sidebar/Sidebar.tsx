@@ -72,7 +72,9 @@ export const Sidebar: React.FC = () => {
             <aside className="graph-explorer-sidebar">
                 {selectedEntity ? (
                     <>
-                        <h2>{toNaturalName(selectedEntity.name)}</h2>
+                        <div className="sidebar-section">
+                            <h2>{toNaturalName(selectedEntity.name)}</h2>
+                        </div>
 
                         <div className="sidebar-section">
                             <div className="sidebar-header">
