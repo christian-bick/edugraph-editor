@@ -3,7 +3,7 @@ import {useSelectedEntityStore} from '../../../../stores/selected-entity-store';
 import {useBranchStore} from '../../../../stores/branch-store.ts';
 import './Sidebar.scss';
 import EditIcon from '../../../../assets/icons/edit.svg';
-import {EditEntity} from '../EditEntity/EditEntity.tsx';
+import {EditDefinition, EditIri} from '../EditEntity/EditEntity.tsx';
 import {invertRelations, toNaturalName} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
 import {OntologyEntity} from "../../../../types/ontology-types.ts";
@@ -12,7 +12,8 @@ export const Sidebar: React.FC = () => {
     const { selectedEntityIri } = useSelectedEntityStore();
     const { ontologies } = useCurrentOntologyStore();
     const { activeDimension, activePerspective } = useBranchStore();
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isEditIriOpen, setIsEditIriOpen] = useState(false);
+    const [isEditDefinitionOpen, setIsEditDefinitionOpen] = useState(false);
 
     const selectedEntity = useMemo(() => {
         if (!selectedEntityIri) return null;
@@ -109,8 +110,15 @@ export const Sidebar: React.FC = () => {
                     <>
                         <div className="sidebar-header">
                             <h3>{toNaturalName(selectedEntity.name)}</h3>
-                            <button className="edit-btn" onClick={() => setIsEditModalOpen(true)}>
-                                <img src={EditIcon} alt="Edit Entity"/>
+                            <button className="edit-btn" onClick={() => setIsEditIriOpen(true)}>
+                                <img src={EditIcon} alt="Edit IRI"/>
+                            </button>
+                        </div>
+
+                        <div className="sidebar-header">
+                            <h4>Description</h4>
+                            <button className="edit-btn" onClick={() => setIsEditDefinitionOpen(true)}>
+                                <img src={EditIcon} alt="Edit Definition"/>
                             </button>
                         </div>
                         <p>{selectedEntity.definition}</p>
@@ -120,9 +128,13 @@ export const Sidebar: React.FC = () => {
                     <div className="sidebar-placeholder">Select a node to see details.</div>
                 )}
             </aside>
-            <EditEntity
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
+            <EditIri
+                isOpen={isEditIriOpen}
+                onClose={() => setIsEditIriOpen(false)}
+            />
+            <EditDefinition
+                isOpen={isEditDefinitionOpen}
+                onClose={() => setIsEditDefinitionOpen(false)}
             />
         </>
     );

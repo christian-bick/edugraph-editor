@@ -85,3 +85,116 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
         </Modal>
     );
 };
+export const EditIri: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
+    const { ontologiesOriginal } = useOntologyStore();
+    const { updateIri } = useCurrentOntologyStore();
+    const { selectedEntityIri, setSelectedEntityIri } = useSelectedEntityStore();
+    const { activeDimension } = useBranchStore();
+
+    const originalEntity = useMemo(() => {
+        if (!selectedEntityIri) return null;
+        const ontology = ontologiesOriginal[activeDimension as keyof typeof ontologiesOriginal];
+        return ontology?.entities.find(e => e.iri === selectedEntityIri) || null;
+    }, [selectedEntityIri, ontologiesOriginal, activeDimension]);
+
+    const [id, setId] = useState('');
+
+    useEffect(() => {
+        if (originalEntity) {
+            setId(originalEntity.name);
+        }
+    }, [originalEntity]);
+
+    const handleSave = () => {
+        if (originalEntity) {
+            const newIri = updateIri(activeDimension as 'Area' | 'Ability' | 'Scope', originalEntity, id);
+            setSelectedEntityIri(newIri || null);
+            onClose();
+        }
+    };
+
+    if (!isOpen || !originalEntity) {
+        return null;
+    }
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose}>
+            <h2>Edit IRI</h2>
+
+            <div className="form-group">
+                <label>ID</label>
+                <div className="prefixed-input">
+                    <span className="input-prefix">{IRI_NAMESPACE}</span>
+                    <input
+                        type="text"
+                        value={id}
+                        onChange={(e) => setId(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            <div className="form-group">
+                <label>Natural Name</label>
+                <p className="natural-name-display">{toNaturalName(id)}</p>
+            </div>
+
+            <div className="form-actions">
+                <button onClick={onClose}>Cancel</button>
+                <button onClick={handleSave} className="primary">Save Changes</button>
+            </div>
+        </Modal>
+    );
+};
+
+export const EditDefinition: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
+    const { ontologiesOriginal } = useOntologyStore();
+    const { updateDefinition } = useCurrentOntologyStore();
+    const { selectedEntityIri } = useSelectedEntityStore();
+    const { activeDimension } = useBranchStore();
+
+    const originalEntity = useMemo(() => {
+        if (!selectedEntityIri) return null;
+        const ontology = ontologiesOriginal[activeDimension as keyof typeof ontologiesOriginal];
+        return ontology?.entities.find(e => e.iri === selectedEntityIri) || null;
+    }, [selectedEntityIri, ontologiesOriginal, activeDimension]);
+
+    const [definition, setDefinition] = useState('');
+
+    useEffect(() => {
+        if (originalEntity) {
+            setDefinition(originalEntity.definition);
+        }
+    }, [originalEntity]);
+
+    const handleSave = () => {
+        if (originalEntity) {
+            updateDefinition(activeDimension as 'Area' | 'Ability' | 'Scope', originalEntity, definition);
+            onClose();
+        }
+    };
+
+    if (!isOpen || !originalEntity) {
+        return null;
+    }
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose}>
+            <h2>Edit Definition</h2>
+
+            <div className="form-group">
+                <label htmlFor="definition-textarea">Definition</label>
+                <textarea
+                    id="definition-textarea"
+                    value={definition}
+                    onChange={(e) => setDefinition(e.target.value)}
+                    rows={5}
+                />
+            </div>
+
+            <div className="form-actions">
+                <button onClick={onClose}>Cancel</button>
+                <button onClick={handleSave} className="primary">Save Changes</button>
+            </div>
+        </Modal>
+    );
+};

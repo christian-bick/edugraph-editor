@@ -20,6 +20,8 @@ export interface CurrentOntologyState {
         Scope: Ontology | null;
     };
     updateEntity: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newId: string, newDefinition: string) => string | undefined;
+    updateIri: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newId: string) => string | undefined;
+    updateDefinition: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newDefinition: string) => void;
     setOntologies: (ontologies: CurrentOntologyState['ontologies']) => void;
 }
 
@@ -73,6 +75,59 @@ export const useCurrentOntologyStore = create(
                     });
                 }));
                 return newIri;
+            },
+            updateIri: (dimension, originalEntity, newId) => {
+                let newIri: string | undefined;
+                set(state => produce(state, (draft) => {
+                    const ontology = draft.ontologies[dimension];
+                    if (!ontology) return;
+
+                    const oldIri = originalEntity.iri;
+                    newIri = `${IRI_NAMESPACE}${newId}`;
+
+                    if (oldIri === newIri) {
+                        newIri = oldIri;
+                        return; // IRI didn't change, no relation updates needed.
+                    }
+
+                    // 1. Update the entity itself
+                    const entityToUpdate = ontology.entities.find(e => e.iri === oldIri);
+                    if (entityToUpdate) {
+                        entityToUpdate.iri = newIri;
+                        entityToUpdate.name = newId;
+                    }
+
+                    // 2. Update relations where oldIri is involved (as subject or object)
+                    Object.values(ontology.relations).forEach(relationMap => {
+                        // a) Handle oldIri as a SUBJECT key
+                        if (relationMap[oldIri]) {
+                            relationMap[newIri] = [...relationMap[oldIri]];
+                            delete relationMap[oldIri];
+                        }
+
+                        // b) Handle oldIri as an OBJECT in any subject's array
+                        Object.keys(relationMap).forEach(subjectIri => {
+                            const updatedObjectIris = relationMap[subjectIri].map(objIri =>
+                                objIri === oldIri ? newIri : objIri
+                            );
+                            if (updatedObjectIris.some((val, idx) => val !== relationMap[subjectIri][idx])) {
+                                relationMap[subjectIri] = updatedObjectIris;
+                            }
+                        });
+                    });
+                }));
+                return newIri;
+            },
+            updateDefinition: (dimension, originalEntity, newDefinition) => {
+                set(produce(state => {
+                    const ontology = state.ontologies[dimension];
+                    if (!ontology) return;
+
+                    const entityToUpdate = ontology.entities.find(e => e.iri === originalEntity.iri);
+                    if (entityToUpdate) {
+                        entityToUpdate.definition = newDefinition;
+                    }
+                }));
             },
         }),
         {
