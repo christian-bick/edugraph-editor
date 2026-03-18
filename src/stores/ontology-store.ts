@@ -22,6 +22,7 @@ export interface CurrentOntologyState {
     updateIri: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newId: string) => string | undefined;
     updateDefinition: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newDefinition: string) => void;
     updateRelations: (dimension: 'Area' | 'Ability' | 'Scope', subjectIri: string, relation: RelationType, objectIris: string[]) => void;
+    createEntity: (dimension: 'Area' | 'Ability' | 'Scope', parentIri: string | null, newId: string, newDefinition: string) => void;
     setOntologies: (ontologies: CurrentOntologyState['ontologies']) => void;
 }
 
@@ -92,6 +93,33 @@ export const useCurrentOntologyStore = create(
                         ontology.relations[relation][subjectIri] = objectIris;
                     } else {
                         delete ontology.relations[relation][subjectIri];
+                    }
+                }));
+            },
+            createEntity: (dimension, parentIri, newId, newDefinition) => {
+                set(produce(state => {
+                    const ontology = state.ontologies[dimension];
+                    if (!ontology) return;
+
+                    const newIri = `${IRI_NAMESPACE}${newId}`;
+                    
+                    // 1. Create and add the new entity
+                    const newEntity: OntologyEntity = {
+                        iri: newIri,
+                        name: newId,
+                        definition: newDefinition,
+                        examples: '', // Default examples
+                    };
+                    ontology.entities.push(newEntity);
+
+                    // 2. If a parent is provided, create the 'expands' relation
+                    if (parentIri) {
+                        const parentRelations = ontology.relations.expands[parentIri];
+                        if (parentRelations) {
+                            parentRelations.push(newIri);
+                        } else {
+                            ontology.relations.expands[parentIri] = [newIri];
+                        }
                     }
                 }));
             },

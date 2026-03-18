@@ -8,6 +8,7 @@ import {invertRelations, toNaturalName} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
 import {OntologyEntity, RelationType} from "../../../../types/ontology-types.ts";
 import { AddRelationModal } from '../AddRelation/AddRelation.tsx';
+import { CreateEntity } from '../CreateEntity/CreateEntity.tsx';
 
 interface RelationSectionProps {
     title: string;
@@ -62,6 +63,7 @@ export const Sidebar: React.FC = () => {
     const { activeDimension, activePerspective } = useBranchStore();
     const [isEditIriOpen, setIsEditIriOpen] = useState(false);
     const [isEditDefinitionOpen, setIsEditDefinitionOpen] = useState(false);
+    const [isCreateEntityOpen, setIsCreateEntityOpen] = useState(false);
 
     const selectedEntity = useMemo(() => {
         if (!selectedEntityIri) return null;
@@ -107,47 +109,57 @@ export const Sidebar: React.FC = () => {
             <aside className="graph-explorer-sidebar">
                 {selectedEntity ? (
                     <>
-                        <div className="sidebar-section">
-                            <h2>{toNaturalName(selectedEntity.name)}</h2>
-                        </div>
-
-                        <div className="sidebar-section">
-                            <div className="sidebar-header">
-                                <h3>IRI</h3>
-                                <button className="edit-btn" onClick={() => setIsEditIriOpen(true)}>
-                                    <img src={EditIcon} alt="Edit IRI"/>
-                                </button>
+                        <div className="sidebar-content">
+                            <div className="sidebar-section">
+                                <h2>{toNaturalName(selectedEntity.name)}</h2>
                             </div>
-                            <div className="section-content-wrapper">
-                                <div className="iri-display">
-                                    <span className="iri-id">:{selectedEntity.name}</span>
+
+                            <div className="sidebar-section">
+                                <div className="sidebar-header">
+                                    <h3>IRI</h3>
+                                    <button className="edit-btn" onClick={() => setIsEditIriOpen(true)}>
+                                        <img src={EditIcon} alt="Edit IRI"/>
+                                    </button>
+                                </div>
+                                <div className="section-content-wrapper">
+                                    <div className="iri-display">
+                                        <span className="iri-id">:{selectedEntity.name}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="sidebar-section">
-                            <div className="sidebar-header">
-                                <h3>Description</h3>
-                                <button className="edit-btn" onClick={() => setIsEditDefinitionOpen(true)}>
-                                    <img src={EditIcon} alt="Edit Definition"/>
+                            <div className="sidebar-section">
+                                <div className="sidebar-header">
+                                    <h3>Description</h3>
+                                    <button className="edit-btn" onClick={() => setIsEditDefinitionOpen(true)}>
+                                        <img src={EditIcon} alt="Edit Definition"/>
+                                    </button>
+                                </div>
+                                <div className="section-content-wrapper">
+                                    <p>{selectedEntity.definition}</p>
+                                </div>
+                            </div>
+
+                            {activePerspective === 'Progression' ? (
+                                <>
+                                    <RelationSection title="Expands" relationName="expands" entities={selectedEntity.relations.expands} />
+                                    <RelationSection title="Expanded By" entities={selectedEntity.relations.expandedBy} isInverse />
+                                </>
+                            ) : (
+                                <>
+                                    <RelationSection title="Parents" relationName="partOf" entities={selectedEntity.relations.partOf} minRelations={1} />
+                                    <RelationSection title="Children" entities={selectedEntity.relations.hasPart} isInverse />
+                                </>
+                            )}
+                        </div>
+                        
+                        <div className="sidebar-footer">
+                            {selectedEntity && activeDimension === 'Area' && activePerspective === 'Taxonomy' && (
+                                <button className="new-child-btn" onClick={() => setIsCreateEntityOpen(true)}>
+                                    New Child Entity
                                 </button>
-                            </div>
-                            <div className="section-content-wrapper">
-                                <p>{selectedEntity.definition}</p>
-                            </div>
+                            )}
                         </div>
-
-                        {activePerspective === 'Progression' ? (
-                            <>
-                                <RelationSection title="Expands" relationName="expands" entities={selectedEntity.relations.expands} />
-                                <RelationSection title="Expanded By" entities={selectedEntity.relations.expandedBy} isInverse />
-                            </>
-                        ) : (
-                            <>
-                                <RelationSection title="Parents" relationName="partOf" entities={selectedEntity.relations.partOf} minRelations={1} />
-                                <RelationSection title="Children" entities={selectedEntity.relations.hasPart} isInverse />
-                            </>
-                        )}
                     </>
                 ) : (
                     <div className="sidebar-placeholder">Select a node to see details.</div>
@@ -160,6 +172,11 @@ export const Sidebar: React.FC = () => {
             <EditDefinition
                 isOpen={isEditDefinitionOpen}
                 onClose={() => setIsEditDefinitionOpen(false)}
+            />
+            <CreateEntity
+                isOpen={isCreateEntityOpen}
+                onClose={() => setIsCreateEntityOpen(false)}
+                parentIri={selectedEntityIri} 
             />
         </>
     );

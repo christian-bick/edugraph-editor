@@ -128,4 +128,34 @@ describe('Ontology Store', () => {
         // History check
         expect(useCurrentOntologyStore.temporal.getState().pastStates).toHaveLength(2);
     });
+
+    it('should create a new entity and link it to a parent', () => {
+        const initialOntology = structuredClone(mockAreaOntology);
+        useCurrentOntologyStore.setState({ ontologies: { Area: initialOntology, Ability: null, Scope: null } });
+        useCurrentOntologyStore.temporal.getState().clear();
+
+        const parentIri = 'http://edugraph.io/edu/A';
+        const newId = 'E';
+        const newDefinition = 'Def E';
+        const newIri = `${IRI_NAMESPACE}${newId}`;
+
+        useCurrentOntologyStore.getState().createEntity('Area', parentIri, newId, newDefinition);
+
+        const updatedOntology = useCurrentOntologyStore.getState().ontologies.Area;
+
+        // Assert the new entity exists
+        const newEntity = updatedOntology?.entities.find(e => e.iri === newIri);
+        expect(newEntity).toBeDefined();
+        expect(newEntity?.name).toBe(newId);
+        expect(newEntity?.definition).toBe(newDefinition);
+        expect(updatedOntology?.entities).toHaveLength(initialOntology.entities.length + 1);
+        
+        // Assert the 'expands' relation was added to the parent
+        expect(updatedOntology?.relations.expands[parentIri]).toBeDefined();
+        expect(updatedOntology?.relations.expands[parentIri]).toContain(newIri);
+        // Ensure it didn't overwrite existing relations
+        expect(updatedOntology?.relations.expands[parentIri]).toContain('http://edugraph.io/edu/B');
+        
+        expect(useCurrentOntologyStore.temporal.getState().pastStates).toHaveLength(1);
+    });
 });

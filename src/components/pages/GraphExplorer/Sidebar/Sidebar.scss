@@ -5,11 +5,37 @@
     flex-shrink: 0;
     box-sizing: border-box;
     background-color: colors.$container-background;
-    padding: 1rem;
-    font-size: 0.9rem;
-    color: colors.$dark-text;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     border-left: 1px solid colors.$light-border-color;
+
+    .sidebar-content {
+        padding: 1rem;
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+
+    .sidebar-footer {
+        padding: 1rem;
+        border-top: 1px solid colors.$light-border-color;
+
+        .new-child-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: colors.$color-scope-dark;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+
+            &:hover {
+                background-color: colors.$color-scope-dark;
+            }
+        }
+    }
 
     h2 {
         font-size: 1.3rem;
