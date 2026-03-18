@@ -60,7 +60,6 @@ export const renderTaxonomyCompactBox = async (
     container: HTMLElement,
     graphData: { nodes: G6Node[]; edges: G6Edge[] },
     dimension: string,
-    onNodeClick: (id: string) => void,
 ): Promise<any> => {
 
     const treeData = graphToTree(graphData, dimension);
@@ -97,6 +96,18 @@ export const renderTaxonomyCompactBox = async (
                     lineWidth: 1.5,
                     ports: [{ placement: 'left' }, { placement: 'right' }],
                 };
+            },
+            state: {
+                highlighted: {
+                    stroke: 'red',
+                    lineWidth: 3,
+                },
+                selected: {
+                    labelFill: '#fff',
+                    stroke: 'red',
+                    fill: 'salmon',
+                    lineWidth: 3,
+                },
             }
         },
         edge: {
@@ -119,11 +130,6 @@ export const renderTaxonomyCompactBox = async (
         },
         behaviors: ['drag-canvas', 'zoom-canvas'],
         animation: false,
-    });
-
-    graph.on('node:click', (event) => {
-        const { id } = event.target;
-        onNodeClick(id);
     });
 
     await graph.render();

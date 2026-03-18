@@ -10,7 +10,6 @@ const dimensionColorMap: { [key: string]: string } = {
 export const renderTaxonomyDagre = async (
     container: HTMLElement,
     graphData: { nodes: G6Node[]; edges: G6Edge[] },
-    onNodeClick: (id: string) => void,
 ): Promise<any> => {
     const graph = new Graph({
         container,
@@ -33,6 +32,14 @@ export const renderTaxonomyDagre = async (
                     lineWidth: 1.5,
                     ports: [{ placement: 'top' }, { placement: 'bottom' }, { placement: 'left' }, { placement: 'right' }],
                 };
+            },
+            state: {
+                selected: {
+                    labelFill: '#fff',
+                    stroke: 'red',
+                    fill: 'salmon',
+                    lineWidth: 3,
+                },
             }
         },
         edge: {
@@ -52,11 +59,6 @@ export const renderTaxonomyDagre = async (
             sortByCombo: true,
         },
         behaviors: ['drag-canvas', 'zoom-canvas', 'drag-node'],
-    });
-
-    graph.on('node:click', (event) => {
-        const { id } = event.target;
-        onNodeClick(id);
     });
 
     await graph.render();
