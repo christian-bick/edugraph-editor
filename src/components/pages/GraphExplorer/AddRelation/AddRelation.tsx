@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Modal } from '../../../global/Modal/Modal';
 import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
 import { useSelectedEntityStore } from '../../../../stores/selected-entity-store';
@@ -13,19 +13,25 @@ interface AddRelationModalProps {
     onClose: () => void;
     relationTitle: string;
     existingRelations: OntologyEntity[];
+    minRelations?: number;
 }
 
-export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onClose, relationTitle, existingRelations }) => {
+export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onClose, relationTitle, existingRelations, minRelations = 0 }) => {
     const { ontologies } = useCurrentOntologyStore();
     const { selectedEntityIri } = useSelectedEntityStore();
     const { activeDimension, activePerspective } = useBranchStore();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [currentRelations, setCurrentRelations] = useState<OntologyEntity[]>([]);
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);
+    const resultsRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (isOpen) {
             setCurrentRelations(existingRelations);
+        } else {
+            setSearchQuery('');
+            setHighlightedIndex(-1);
         }
     }, [isOpen, existingRelations]);
 
@@ -58,9 +64,19 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
         return { availableEntities: filteredEntities, disabledIris: newDisabledIris };
     }, [ontologies, activeDimension, selectedEntityIri, activePerspective, currentRelations, searchQuery]);
 
+    useEffect(() => {
+        if (highlightedIndex >= 0 && resultsRef.current) {
+            const element = resultsRef.current.children[highlightedIndex] as HTMLElement;
+            if (element) {
+                element.scrollIntoView({ block: 'nearest' });
+            }
+        }
+    }, [highlightedIndex]);
+
     const handleAddRelation = (entity: OntologyEntity) => {
         setCurrentRelations(prev => [...prev, entity]);
         setSearchQuery('');
+        setHighlightedIndex(-1);
     };
 
     const handleRemoveRelation = (iri: string) => {
@@ -72,6 +88,28 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
         console.log("Saving relations:", currentRelations);
         onClose();
     };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setHighlightedIndex(prev => (prev + 1) % availableEntities.length);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setHighlightedIndex(prev => (prev - 1 + availableEntities.length) % availableEntities.length);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (highlightedIndex >= 0) {
+                const entity = availableEntities[highlightedIndex];
+                if (!disabledIris.has(entity.iri)) {
+                    handleAddRelation(entity);
+                }
+            }
+        } else if (e.key === 'Escape') {
+            setSearchQuery('');
+        }
+    };
+
+    const showRemoveButton = currentRelations.length > minRelations;
 
     if (!isOpen) {
         return null;
@@ -87,17 +125,21 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
                     id="search-entities"
                     type="text"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setHighlightedIndex(-1);
+                    }}
+                    onKeyDown={handleKeyDown}
                     placeholder="Start typing to search..."
                     autoComplete="off"
                 />
                 {searchQuery && (
-                    <div className="search-results">
-                        {availableEntities.map(entity => (
+                    <div className="search-results" ref={resultsRef}>
+                        {availableEntities.map((entity, index) => (
                             <div
                                 key={entity.iri}
-                                className={`search-result-item ${disabledIris.has(entity.iri) ? 'disabled' : ''}`}
-                                onMouseDown={() => { // onMouseDown to fire before onBlur of input
+                                className={`search-result-item ${disabledIris.has(entity.iri) ? 'disabled' : ''} ${index === highlightedIndex ? 'highlighted' : ''}`}
+                                onMouseDown={() => {
                                     if (!disabledIris.has(entity.iri)) {
                                         handleAddRelation(entity);
                                     }
@@ -117,9 +159,11 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
                     {currentRelations.map(entity => (
                         <li key={entity.iri}>
                             <span>{toNaturalName(entity.name)}</span>
-                            <button className="remove-btn" onClick={() => handleRemoveRelation(entity.iri)}>
-                                <img src={LinkRmIcon} alt="Remove"/>
-                            </button>
+                            {showRemoveButton && (
+                                <button className="remove-btn" onClick={() => handleRemoveRelation(entity.iri)}>
+                                    <img src={LinkRmIcon} alt="Remove"/>
+                                </button>
+                            )}
                         </li>
                     ))}
                     {currentRelations.length === 0 && <li className="no-relations">No relations of this type.</li>}

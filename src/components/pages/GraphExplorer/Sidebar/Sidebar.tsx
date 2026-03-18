@@ -3,8 +3,6 @@ import {useSelectedEntityStore} from '../../../../stores/selected-entity-store';
 import {useBranchStore} from '../../../../stores/branch-store.ts';
 import './Sidebar.scss';
 import EditIcon from '../../../../assets/icons/edit.svg';
-import LinkAddIcon from '../../../../assets/icons/link_add.svg';
-import LinkRmIcon from '../../../../assets/icons/link_rm.svg';
 import {EditDefinition, EditIri} from '../EditEntity/EditEntity.tsx';
 import {invertRelations, toNaturalName} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
@@ -25,15 +23,13 @@ const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isIn
         return null;
     }
 
-    const showRemoveButton = !isInverse && entities && entities.length > minRelations;
-
     return (
         <div className="sidebar-section">
             <div className="sidebar-header">
                 <h3>{title}</h3>
                 {!isInverse && (
                     <button className="edit-btn" onClick={() => setIsAddModalOpen(true)}>
-                        <img src={LinkAddIcon} alt="Add Relation"/>
+                        <img src={EditIcon} alt="Add Relation"/>
                     </button>
                 )}
             </div>
@@ -42,20 +38,16 @@ const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isIn
                     {entities.map(e => (
                         <li key={e.iri}>
                             <span>{toNaturalName(e.name)}</span>
-                            {showRemoveButton && (
-                                <button className="remove-btn" onClick={() => console.log('Remove relation')}>
-                                    <img src={LinkRmIcon} alt="Remove Relation"/>
-                                </button>
-                            )}
                         </li>
                     ))}
                 </ul>
             )}
-            <AddRelationModal 
-                isOpen={isAddModalOpen} 
-                onClose={() => setIsAddModalOpen(false)} 
+            <AddRelationModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
                 relationTitle={title}
-                existingRelations={entities || []} 
+                existingRelations={entities || []}
+                minRelations={minRelations}
             />
         </div>
     );
@@ -126,8 +118,7 @@ export const Sidebar: React.FC = () => {
                             </div>
                             <div className="section-content-wrapper">
                                 <div className="iri-display">
-                                    <span className="iri-namespace">http://edugraph.io/edu/</span>
-                                    <span className="iri-id">{selectedEntity.name}</span>
+                                    <span className="iri-id">:{selectedEntity.name}</span>
                                 </div>
                             </div>
                         </div>

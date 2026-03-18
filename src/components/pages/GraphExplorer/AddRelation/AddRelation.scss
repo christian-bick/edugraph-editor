@@ -33,6 +33,10 @@
         background-color: colors.$light-hover-background;
     }
 
+    &.highlighted {
+        background-color: colors.$light-hover-background;
+    }
+
     &.disabled {
         color: #aaa;
         background-color: #f9f9f9;
