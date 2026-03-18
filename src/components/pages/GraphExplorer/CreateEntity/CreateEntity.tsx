@@ -16,7 +16,7 @@ const IRI_NAMESPACE = 'http://edugraph.io/edu/';
 export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, parentIri }) => {
     const { createEntity } = useCurrentOntologyStore();
     const { activeDimension } = useBranchStore();
-    
+
     const [id, setId] = useState('');
     const [definition, setDefinition] = useState('');
 
@@ -66,7 +66,7 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
 
             <div className="form-actions">
                 <button onClick={onClose}>Cancel</button>
-                <button onClick={handleSave} className="primary" disabled={!id || !definition}>Create Entity</button>
+                <button onClick={handleSave} className="primary" disabled={!id}>Create Entity</button>
             </div>
         </Modal>
     );
