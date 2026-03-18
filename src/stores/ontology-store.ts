@@ -102,7 +102,7 @@ export const useCurrentOntologyStore = create(
                     if (!ontology) return;
 
                     const newIri = `${IRI_NAMESPACE}${newId}`;
-                    
+
                     // 1. Create and add the new entity
                     const newEntity: OntologyEntity = {
                         iri: newIri,
@@ -112,14 +112,9 @@ export const useCurrentOntologyStore = create(
                     };
                     ontology.entities.push(newEntity);
 
-                    // 2. If a parent is provided, create the 'expands' relation
+                    // 2. If a parent is provided, create the 'partOf' relation
                     if (parentIri) {
-                        const parentRelations = ontology.relations.expands[parentIri];
-                        if (parentRelations) {
-                            parentRelations.push(newIri);
-                        } else {
-                            ontology.relations.expands[parentIri] = [newIri];
-                        }
+                        ontology.relations.partOf[newIri] = [parentIri];
                     }
                 }));
             },

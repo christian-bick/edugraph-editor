@@ -134,12 +134,12 @@ describe('Ontology Store', () => {
         useCurrentOntologyStore.setState({ ontologies: { Area: initialOntology, Ability: null, Scope: null } });
         useCurrentOntologyStore.temporal.getState().clear();
 
-        const parentIri = 'http://edugraph.io/edu/A';
+        const parentIri = 'http://edugraph.io/edu/C';
         const newId = 'E';
         const newDefinition = 'Def E';
         const newIri = `${IRI_NAMESPACE}${newId}`;
 
-        useCurrentOntologyStore.getState().createEntity('Area', parentIri, newId, newDefinition);
+        useCurrentOntologyStore.getState().createEntity('Area', parentIri, newId, newDefinition, 'partOf');
 
         const updatedOntology = useCurrentOntologyStore.getState().ontologies.Area;
 
@@ -150,11 +150,9 @@ describe('Ontology Store', () => {
         expect(newEntity?.definition).toBe(newDefinition);
         expect(updatedOntology?.entities).toHaveLength(initialOntology.entities.length + 1);
         
-        // Assert the 'expands' relation was added to the parent
-        expect(updatedOntology?.relations.expands[parentIri]).toBeDefined();
-        expect(updatedOntology?.relations.expands[parentIri]).toContain(newIri);
-        // Ensure it didn't overwrite existing relations
-        expect(updatedOntology?.relations.expands[parentIri]).toContain('http://edugraph.io/edu/B');
+        // Assert the 'partOf' relation was added from the new entity to the parent
+        expect(updatedOntology?.relations.partOf[newIri]).toBeDefined();
+        expect(updatedOntology?.relations.partOf[newIri]).toContain(parentIri);
         
         expect(useCurrentOntologyStore.temporal.getState().pastStates).toHaveLength(1);
     });
