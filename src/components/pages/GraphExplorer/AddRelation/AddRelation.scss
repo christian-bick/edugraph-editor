@@ -1,0 +1,96 @@
+@use "/src/colors.scss" as colors;
+
+.search-container {
+    position: relative;
+    margin-top: 1.5rem;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 20; // Needs to be higher than modal content
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.search-result-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background-color: colors.$light-hover-background;
+    }
+
+    &.disabled {
+        color: #aaa;
+        background-color: #f9f9f9;
+    }
+}
+
+.current-relations-list {
+    margin-bottom: 1.5rem;
+
+    h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+        color: colors.$dark-text;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid #eee;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &.no-relations {
+            color: #888;
+            font-style: italic;
+            justify-content: center;
+        }
+    }
+
+    .remove-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 2px;
+        border-radius: 50%;
+        display: flex;
+
+        &:hover {
+            background-color: #e4c8c8;
+        }
+
+        img {
+            width: 16px;
+            height: 16px;
+        }
+    }
+}

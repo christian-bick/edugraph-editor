@@ -9,6 +9,7 @@ import {EditDefinition, EditIri} from '../EditEntity/EditEntity.tsx';
 import {invertRelations, toNaturalName} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
 import {OntologyEntity} from "../../../../types/ontology-types.ts";
+import { AddRelationModal } from '../AddRelation/AddRelation.tsx';
 
 interface RelationSectionProps {
     title: string;
@@ -50,7 +51,12 @@ const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isIn
                     ))}
                 </ul>
             )}
-            {/* Modal for adding relation will be handled later */}
+            <AddRelationModal 
+                isOpen={isAddModalOpen} 
+                onClose={() => setIsAddModalOpen(false)} 
+                relationTitle={title}
+                existingRelations={entities || []} 
+            />
         </div>
     );
 };
