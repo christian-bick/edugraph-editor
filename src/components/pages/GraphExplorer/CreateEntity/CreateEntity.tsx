@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Modal } from '../../../global/Modal/Modal';
 import './CreateEntity.scss';
 import { toNaturalName } from '../../../../stores/utils';
@@ -19,6 +19,13 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
 
     const [id, setId] = useState('');
     const [definition, setDefinition] = useState('');
+
+    useEffect(() => {
+        if (!isOpen) {
+            setId('');
+            setDefinition('');
+        }
+    }, [isOpen]);
 
     const handleSave = () => {
         if (id && definition) {
