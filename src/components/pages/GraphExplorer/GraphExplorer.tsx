@@ -26,7 +26,7 @@ export const GraphExplorer: React.FC = () => {
 
     useEffect(() => {
         setSelectedEntityIri(null);
-    }, [activeBranch, activeDimension, activePerspective, setSelectedEntityIri]);
+    }, [activeBranch, activeDimension, setSelectedEntityIri]);
 
     useEffect(() => {
         if (!containerRef.current || !ontology || loading) return;
