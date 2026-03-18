@@ -6,7 +6,7 @@ import EditIcon from '../../../../assets/icons/edit.svg';
 import {EditDefinition, EditIri} from '../EditEntity/EditEntity.tsx';
 import {invertRelations, toNaturalName} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
-import {OntologyEntity} from "../../../../types/ontology-types.ts";
+import {OntologyEntity, RelationType} from "../../../../types/ontology-types.ts";
 import { AddRelationModal } from '../AddRelation/AddRelation.tsx';
 
 interface RelationSectionProps {
@@ -14,9 +14,10 @@ interface RelationSectionProps {
     entities: OntologyEntity[] | undefined;
     isInverse?: boolean;
     minRelations?: number;
+    relationName?: RelationType;
 }
 
-const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isInverse = false, minRelations = 0 }) => {
+const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isInverse = false, minRelations = 0, relationName }) => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     if (isInverse && (!entities || entities.length === 0)) {
@@ -42,13 +43,14 @@ const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isIn
                     ))}
                 </ul>
             )}
-            <AddRelationModal
+            {relationName && <AddRelationModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 relationTitle={title}
+                relationName={relationName}
                 existingRelations={entities || []}
                 minRelations={minRelations}
-            />
+            />}
         </div>
     );
 };
@@ -137,12 +139,12 @@ export const Sidebar: React.FC = () => {
 
                         {activePerspective === 'Progression' ? (
                             <>
-                                <RelationSection title="Expands" entities={selectedEntity.relations.expands} />
+                                <RelationSection title="Expands" relationName="expands" entities={selectedEntity.relations.expands} />
                                 <RelationSection title="Expanded By" entities={selectedEntity.relations.expandedBy} isInverse />
                             </>
                         ) : (
                             <>
-                                <RelationSection title="Parents" entities={selectedEntity.relations.partOf} minRelations={1} />
+                                <RelationSection title="Parents" relationName="partOf" entities={selectedEntity.relations.partOf} minRelations={1} />
                                 <RelationSection title="Children" entities={selectedEntity.relations.hasPart} isInverse />
                             </>
                         )}

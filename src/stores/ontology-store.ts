@@ -1,6 +1,6 @@
 import {create} from 'zustand'
 import {loadOntologyFiles} from '../api/github.ts'
-import type {Ontology, OntologyEntity} from "../types/ontology-types.ts";
+import type {Ontology, OntologyEntity, RelationType} from "../types/ontology-types.ts";
 import {
     createEntityInfoMap,
     enrichOntology,
@@ -21,6 +21,7 @@ export interface CurrentOntologyState {
     };
     updateIri: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newId: string) => string | undefined;
     updateDefinition: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newDefinition: string) => void;
+    updateRelations: (dimension: 'Area' | 'Ability' | 'Scope', subjectIri: string, relation: RelationType, objectIris: string[]) => void;
     setOntologies: (ontologies: CurrentOntologyState['ontologies']) => void;
 }
 
@@ -79,6 +80,18 @@ export const useCurrentOntologyStore = create(
                     const entityToUpdate = ontology.entities.find(e => e.iri === originalEntity.iri);
                     if (entityToUpdate) {
                         entityToUpdate.definition = newDefinition;
+                    }
+                }));
+            },
+            updateRelations: (dimension, subjectIri, relation, objectIris) => {
+                set(produce(state => {
+                    const ontology = state.ontologies[dimension];
+                    if (!ontology) return;
+
+                    if (objectIris.length > 0) {
+                        ontology.relations[relation][subjectIri] = objectIris;
+                    } else {
+                        delete ontology.relations[relation][subjectIri];
                     }
                 }));
             },

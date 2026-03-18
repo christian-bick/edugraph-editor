@@ -11,6 +11,8 @@ export interface OntologyRelations {
     includes: Record<string, string[]>;
 }
 
+export type RelationType = keyof OntologyRelations;
+
 export interface Ontology {
     entities: OntologyEntity[];
     relations: OntologyRelations;

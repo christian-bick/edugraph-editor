@@ -4,7 +4,7 @@ import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
 import { useSelectedEntityStore } from '../../../../stores/selected-entity-store';
 import { useBranchStore } from '../../../../stores/branch-store';
 import { getSuccessors, invertRelations, toNaturalName } from '../../../../stores/utils';
-import type { OntologyEntity } from '../../../../types/ontology-types';
+import type { OntologyEntity, RelationType } from '../../../../types/ontology-types';
 import './AddRelation.scss';
 import LinkRmIcon from '../../../../assets/icons/link_rm.svg';
 
@@ -12,12 +12,13 @@ interface AddRelationModalProps {
     isOpen: boolean;
     onClose: () => void;
     relationTitle: string;
+    relationName: RelationType;
     existingRelations: OntologyEntity[];
     minRelations?: number;
 }
 
-export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onClose, relationTitle, existingRelations, minRelations = 0 }) => {
-    const { ontologies } = useCurrentOntologyStore();
+export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onClose, relationTitle, relationName, existingRelations, minRelations = 0 }) => {
+    const { ontologies, updateRelations } = useCurrentOntologyStore();
     const { selectedEntityIri } = useSelectedEntityStore();
     const { activeDimension, activePerspective } = useBranchStore();
 
@@ -84,8 +85,10 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
     };
 
     const handleSave = () => {
-        // TODO: Implement actual save logic with store actions
-        console.log("Saving relations:", currentRelations);
+        if (!selectedEntityIri) return;
+
+        const objectIris = currentRelations.map(e => e.iri);
+        updateRelations(activeDimension, selectedEntityIri, relationName, objectIris);
         onClose();
     };
 
@@ -154,7 +157,6 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
             </div>
 
             <div className="current-relations-list">
-                <h4>Current Relations</h4>
                 <ul>
                     {currentRelations.map(entity => (
                         <li key={entity.iri}>

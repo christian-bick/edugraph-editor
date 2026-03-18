@@ -9,6 +9,7 @@ const mockAreaOntology: Ontology = {
         { iri: 'http://edugraph.io/edu/A', name: 'A', definition: 'Def A', examples: '' },
         { iri: 'http://edugraph.io/edu/B', name: 'B', definition: 'Def B', examples: '' },
         { iri: 'http://edugraph.io/edu/C', name: 'C', definition: 'Def C', examples: '' },
+        { iri: 'http://edugraph.io/edu/D', name: 'D', definition: 'Def D', examples: '' },
     ],
     relations: {
         expands: {
@@ -96,5 +97,35 @@ describe('Ontology Store', () => {
         expect(updatedOntology?.relations).toEqual(initialOntology.relations);
 
         expect(useCurrentOntologyStore.temporal.getState().pastStates).toHaveLength(1);
+    });
+
+    it('should completely overwrite relations for a subject', () => {
+        const initialOntology = structuredClone(mockAreaOntology);
+        useCurrentOntologyStore.setState({ ontologies: { Area: initialOntology, Ability: null, Scope: null } });
+        useCurrentOntologyStore.temporal.getState().clear();
+
+        const subjectIri = 'http://edugraph.io/edu/A';
+        const newObjectIris = ['http://edugraph.io/edu/C', 'http://edugraph.io/edu/D'];
+
+        // Call the action to update 'expands' relations for entity A
+        useCurrentOntologyStore.getState().updateRelations('Area', subjectIri, 'expands', newObjectIris);
+
+        const updatedOntology = useCurrentOntologyStore.getState().ontologies.Area;
+
+        // Assert that the 'expands' relation for 'A' is now the new array
+        expect(updatedOntology?.relations.expands[subjectIri]).toEqual(newObjectIris);
+        // Assert that the old relation to 'B' is gone
+        expect(updatedOntology?.relations.expands[subjectIri]).not.toContain('http://edugraph.io/edu/B');
+        
+        // Assert that other relations are not affected
+        expect(updatedOntology?.relations.partOf).toEqual(initialOntology.relations.partOf);
+
+        // Test removing all relations for a subject
+        useCurrentOntologyStore.getState().updateRelations('Area', subjectIri, 'expands', []);
+        const finalOntology = useCurrentOntologyStore.getState().ontologies.Area;
+        expect(finalOntology?.relations.expands[subjectIri]).toBeUndefined();
+        
+        // History check
+        expect(useCurrentOntologyStore.temporal.getState().pastStates).toHaveLength(2);
     });
 });
