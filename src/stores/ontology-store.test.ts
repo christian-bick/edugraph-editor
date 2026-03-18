@@ -156,4 +156,29 @@ describe('Ontology Store', () => {
         
         expect(useCurrentOntologyStore.temporal.getState().pastStates).toHaveLength(1);
     });
+
+    it('should delete an entity and all its relations', () => {
+        const initialOntology = structuredClone(mockAreaOntology);
+        useCurrentOntologyStore.setState({ ontologies: { Area: initialOntology, Ability: null, Scope: null } });
+        useCurrentOntologyStore.temporal.getState().clear();
+    
+        const iriToDelete = 'http://edugraph.io/edu/A';
+    
+        useCurrentOntologyStore.getState().deleteEntity('Area', iriToDelete);
+    
+        const updatedOntology = useCurrentOntologyStore.getState().ontologies.Area;
+    
+        // Assert entity is removed
+        expect(updatedOntology?.entities.find(e => e.iri === iriToDelete)).toBeUndefined();
+    
+        // Assert relations where it was a subject are removed
+        expect(updatedOntology?.relations.expands[iriToDelete]).toBeUndefined();
+    
+        // Assert relations where it was an object are removed
+        expect(updatedOntology?.relations.expands['http://edugraph.io/edu/C']).not.toContain(iriToDelete);
+        // Check if the subject key is removed if the array becomes empty
+        expect(updatedOntology?.relations.expands['http://edugraph.io/edu/C']).toBeUndefined();
+
+        expect(useCurrentOntologyStore.temporal.getState().pastStates).toHaveLength(1);
+    });
 });

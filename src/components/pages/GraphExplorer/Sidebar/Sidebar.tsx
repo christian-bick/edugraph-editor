@@ -58,8 +58,8 @@ const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isIn
 
 
 export const Sidebar: React.FC = () => {
-    const { selectedEntityIri } = useSelectedEntityStore();
-    const { ontologies } = useCurrentOntologyStore();
+    const { selectedEntityIri, setSelectedEntityIri } = useSelectedEntityStore();
+    const { ontologies, deleteEntity } = useCurrentOntologyStore();
     const { activeDimension, activePerspective } = useBranchStore();
     const [isEditIriOpen, setIsEditIriOpen] = useState(false);
     const [isEditDefinitionOpen, setIsEditDefinitionOpen] = useState(false);
@@ -103,6 +103,18 @@ export const Sidebar: React.FC = () => {
             relations: allRelations,
         };
     }, [selectedEntityIri, ontologies, activeDimension]);
+
+    const hasChildren = useMemo(() => {
+        if (!selectedEntity?.relations.hasPart) return false;
+        return selectedEntity.relations.hasPart.length > 0;
+    }, [selectedEntity]);
+
+    const handleDelete = () => {
+        if (selectedEntityIri && !hasChildren) {
+            deleteEntity(activeDimension, selectedEntityIri);
+            setSelectedEntityIri(null);
+        }
+    }
 
     return (
         <>
@@ -154,10 +166,15 @@ export const Sidebar: React.FC = () => {
                         </div>
                         
                         <div className="sidebar-footer">
-                            {selectedEntity && activeDimension === 'Area' && activePerspective === 'Taxonomy' && (
-                                <button className="new-child-btn" onClick={() => setIsCreateEntityOpen(true)}>
-                                    New Child Entity
-                                </button>
+                            {activeDimension === 'Area' && activePerspective === 'Taxonomy' && (
+                                <div className="footer-buttons">
+                                    <button className="delete-btn" onClick={handleDelete} disabled={hasChildren} title={hasChildren ? 'Cannot delete an entity that has children.' : 'Delete this entity'}>
+                                        Delete Entity
+                                    </button>
+                                    <button className="new-child-btn" onClick={() => setIsCreateEntityOpen(true)}>
+                                        New Child Entity
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </>

@@ -23,6 +23,7 @@ export interface CurrentOntologyState {
     updateDefinition: (dimension: 'Area' | 'Ability' | 'Scope', originalEntity: OntologyEntity, newDefinition: string) => void;
     updateRelations: (dimension: 'Area' | 'Ability' | 'Scope', subjectIri: string, relation: RelationType, objectIris: string[]) => void;
     createEntity: (dimension: 'Area' | 'Ability' | 'Scope', parentIri: string | null, newId: string, newDefinition: string) => void;
+    deleteEntity: (dimension: 'Area' | 'Ability' | 'Scope', iriToDelete: string) => void;
     setOntologies: (ontologies: CurrentOntologyState['ontologies']) => void;
 }
 
@@ -116,6 +117,31 @@ export const useCurrentOntologyStore = create(
                     if (parentIri) {
                         ontology.relations.partOf[newIri] = [parentIri];
                     }
+                }));
+            },
+            deleteEntity: (dimension, iriToDelete) => {
+                set(produce(state => {
+                    const ontology = state.ontologies[dimension];
+                    if (!ontology) return;
+
+                    // 1. Remove the entity itself
+                    ontology.entities = ontology.entities.filter(e => e.iri !== iriToDelete);
+
+                    // 2. Remove all relations involving the entity
+                    Object.values(ontology.relations).forEach(relationMap => {
+                        // a) Remove as subject
+                        delete relationMap[iriToDelete];
+                        
+                        // b) Remove as object
+                        for (const subjectIri in relationMap) {
+                            const originalCount = relationMap[subjectIri].length;
+                            relationMap[subjectIri] = relationMap[subjectIri].filter(objIri => objIri !== iriToDelete);
+                            // If the array is now empty, delete the subject entry
+                            if (relationMap[subjectIri].length === 0 && originalCount > 0) {
+                                delete relationMap[subjectIri];
+                            }
+                        }
+                    });
                 }));
             },
         }),

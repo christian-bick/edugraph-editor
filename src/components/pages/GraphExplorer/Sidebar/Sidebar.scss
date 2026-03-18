@@ -19,10 +19,14 @@
         padding: 1rem;
         border-top: 1px solid colors.$light-border-color;
 
-        .new-child-btn {
+        .footer-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .new-child-btn, .delete-btn {
             width: 100%;
             padding: 0.75rem;
-            background-color: colors.$color-scope-dark;
             color: white;
             border: none;
             border-radius: 6px;
@@ -30,9 +34,23 @@
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.2s;
+        }
 
+        .new-child-btn {
+            background-color: colors.$color-scope-dark;
             &:hover {
-                background-color: colors.$color-scope-dark;
+                background-color: #3e8e41; // A slightly darker green for hover
+            }
+        }
+
+        .delete-btn {
+            background-color: #d9534f;
+            &:hover {
+                background-color: #c9302c;
+            }
+            &:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
             }
         }
     }
