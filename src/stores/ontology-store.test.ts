@@ -134,12 +134,12 @@ describe('Ontology Store', () => {
         useCurrentOntologyStore.setState({ ontologies: { Area: initialOntology, Ability: null, Scope: null } });
         useCurrentOntologyStore.temporal.getState().clear();
 
-        const parentIri = 'http://edugraph.io/edu/C';
+        const parentIri = 'http://edugraph.io/edu/A';
         const newId = 'E';
         const newDefinition = 'Def E';
         const newIri = `${IRI_NAMESPACE}${newId}`;
 
-        useCurrentOntologyStore.getState().createEntity('Area', parentIri, newId, newDefinition, 'partOf');
+        useCurrentOntologyStore.getState().createEntity('Area', parentIri, newId, newDefinition);
 
         const updatedOntology = useCurrentOntologyStore.getState().ontologies.Area;
 
