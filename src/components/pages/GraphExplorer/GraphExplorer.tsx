@@ -52,6 +52,10 @@ export const GraphExplorer: React.FC = () => {
 
             graphRef.current = graph;
 
+            graph.on('canvas:click', () => {
+                setSelectedEntityIri(null);
+            });
+
             const adjustGraph = () => {
                 const currentGraph = graphRef.current;
                 if (currentGraph && containerRef.current) {
@@ -89,7 +93,7 @@ export const GraphExplorer: React.FC = () => {
                 graphRef.current = null;
             }
         };
-    }, [ontology, loading, activeDimension, activePerspective, handleNodeClick]);
+    }, [ontology, loading, activeDimension, activePerspective, handleNodeClick, setSelectedEntityIri]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;
