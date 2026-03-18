@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import { Modal } from '../../../global/Modal/Modal';
 import './CreateEntity.scss';
 import { toNaturalName } from '../../../../stores/utils';
@@ -14,22 +14,44 @@ interface CreateEntityProps {
 const IRI_NAMESPACE = 'http://edugraph.io/edu/';
 
 export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, parentIri }) => {
-    const { createEntity } = useCurrentOntologyStore();
+    const { ontologies, createEntity } = useCurrentOntologyStore();
     const { activeDimension } = useBranchStore();
 
     const [id, setId] = useState('');
     const [definition, setDefinition] = useState('');
+    const [idError, setIdError] = useState<string | null>(null);
+
+    const allEntityNames = useMemo(() => {
+        const names = new Set<string>();
+        Object.values(ontologies).forEach(ontology => {
+            if (ontology) {
+                ontology.entities.forEach(entity => {
+                    names.add(entity.name.toLowerCase());
+                });
+            }
+        });
+        return names;
+    }, [ontologies]);
 
     useEffect(() => {
         if (!isOpen) {
             setId('');
             setDefinition('');
+            setIdError(null);
         }
     }, [isOpen]);
 
+    useEffect(() => {
+        if (allEntityNames.has(id.toLowerCase().trim())) {
+            setIdError('This ID is already taken.');
+        } else {
+            setIdError(null);
+        }
+    }, [id, allEntityNames]);
+
     const handleSave = () => {
-        if (id && definition) {
-            createEntity(activeDimension, parentIri, id, definition);
+        if (id && !idError) {
+            createEntity(activeDimension, parentIri, id.trim(), definition.trim());
             onClose();
         }
     };
@@ -53,11 +75,12 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
                         placeholder="e.g., NewConcept"
                     />
                 </div>
+                {idError && <p className="error-message">{idError}</p>}
             </div>
 
             <div className="form-group">
                 <label>Natural Name</label>
-                <p className="natural-name-display">{toNaturalName(id)}</p>
+                <p className="natural-name-display">{toNaturalName(id) || <>&nbsp;</>}</p>
             </div>
 
             <div className="form-group">
@@ -73,7 +96,7 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
 
             <div className="form-actions">
                 <button onClick={onClose}>Cancel</button>
-                <button onClick={handleSave} className="primary" disabled={!id}>Create Entity</button>
+                <button onClick={handleSave} className="primary" disabled={!id || !!idError}>Create Entity</button>
             </div>
         </Modal>
     );
