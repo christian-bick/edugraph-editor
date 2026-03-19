@@ -136,11 +136,17 @@
             border-top: 1px solid colors.$light-border-color;
 
             li {
-                padding: 0.5rem 0;
+                padding: 0.5rem;
                 border-bottom: 1px solid colors.$light-border-color;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                cursor: pointer;
+                transition: background-color 0.2s;
+
+                &:hover {
+                    background-color: colors.$light-hover-background;
+                }
 
                 .remove-btn {
                     background: none;

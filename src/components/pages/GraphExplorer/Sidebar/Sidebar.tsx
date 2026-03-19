@@ -17,9 +17,10 @@ interface RelationSectionProps {
     isInverse?: boolean;
     minRelations?: number;
     relationName?: RelationType;
+    setSelectedEntityIri: (iri: string) => void;
 }
 
-const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isInverse = false, minRelations = 0, relationName }) => {
+const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isInverse = false, minRelations = 0, relationName, setSelectedEntityIri }) => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     if (isInverse && (!entities || entities.length === 0)) {
@@ -39,7 +40,7 @@ const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isIn
             {entities && entities.length > 0 && (
                 <ul>
                     {entities.map(e => (
-                        <li key={e.iri}>
+                        <li key={e.iri} onClick={() => setSelectedEntityIri(e.iri)}>
                             <span>{toNaturalName(e.name)}</span>
                         </li>
                     ))}
@@ -155,13 +156,13 @@ export const Sidebar: React.FC = () => {
 
                             {activePerspective === 'Progression' ? (
                                 <>
-                                    <RelationSection title="Expands" relationName="expands" entities={selectedEntity.relations.expands} />
-                                    <RelationSection title="Expanded By" entities={selectedEntity.relations.expandedBy} isInverse />
+                                    <RelationSection title="Expands" relationName="expands" entities={selectedEntity.relations.expands} setSelectedEntityIri={setSelectedEntityIri} />
+                                    <RelationSection title="Expanded By" entities={selectedEntity.relations.expandedBy} isInverse setSelectedEntityIri={setSelectedEntityIri} />
                                 </>
                             ) : (
                                 <>
-                                    <RelationSection title="Parents" relationName="partOf" entities={selectedEntity.relations.partOf} minRelations={1} />
-                                    <RelationSection title="Children" entities={selectedEntity.relations.hasPart} isInverse />
+                                    <RelationSection title="Parents" relationName="partOf" entities={selectedEntity.relations.partOf} minRelations={1} setSelectedEntityIri={setSelectedEntityIri} />
+                                    <RelationSection title="Children" entities={selectedEntity.relations.hasPart} isInverse setSelectedEntityIri={setSelectedEntityIri} />
                                 </>
                             )}
                         </div>
