@@ -8,6 +8,7 @@ import {useSelectedEntityStore} from "../../../stores/selected-entity-store.ts";
 import {Sidebar} from "./Sidebar/Sidebar.tsx";
 import {renderTaxonomyDagre} from "../../../graphs/taxonomy-dagre.ts";
 import {ActionSidebar} from "./ActionSidebar/ActionSidebar.tsx";
+import {useFocusStore} from "../../../stores/focus-store.ts";
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -16,6 +17,7 @@ export const GraphExplorer: React.FC = () => {
     const { ontologies } = useCurrentOntologyStore();
     const { activeBranch, activeDimension, activePerspective } = useBranchStore();
     const { selectedEntityIri, setSelectedEntityIri } = useSelectedEntityStore();
+    const { focus } = useFocusStore();
 
     const ontology = useMemo(() => {
         return ontologies[activeDimension as keyof typeof ontologies];
@@ -58,10 +60,10 @@ export const GraphExplorer: React.FC = () => {
             let data, graph;
 
             if (activePerspective === 'Progression') {
-                data = getGraphData(ontology, activeDimension, 'expands', true, true);
+                data = getGraphData(ontology, activeDimension, 'expands', true, true, focus, selectedEntityIri);
                 graph = await renderTaxonomyDagre(containerRef.current!, data);
             } else {
-                data = getGraphData(ontology, activeDimension, 'partOf', false, true);
+                data = getGraphData(ontology, activeDimension, 'partOf', false, true, focus, selectedEntityIri);
                 graph = await renderTaxonomyCompactBox(containerRef.current!, data, activeDimension);
             }
 
@@ -122,7 +124,7 @@ export const GraphExplorer: React.FC = () => {
                 graphRef.current = null;
             }
         };
-    }, [ontology, loading, activeDimension, activePerspective, setSelectedEntityIri]);
+    }, [ontology, loading, activeDimension, activePerspective, focus, setSelectedEntityIri]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;

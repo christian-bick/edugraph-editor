@@ -10,4 +10,38 @@
     flex-direction: column;
     border-right: 1px solid colors.$light-border-color;
     padding: 0.5rem;
+    gap: 0.5rem;
 }
+
+.focus-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background-color: colors.$section-background;
+  border: 2px solid colors.$light-border-color;;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, border-color 0.2s;
+
+  img {
+    width: 28px;
+    height: 28px;
+    filter: invert(0.6); // Medium gray icon for inactive state
+  }
+
+  &:hover {
+    background-color: colors.$light-hover-background;
+  }
+
+  &.active {
+    border-color: colors.$container-border;
+
+    img {
+      filter: invert(0.5); // Dark icon for active state on light background
+    }
+  }
+}
+

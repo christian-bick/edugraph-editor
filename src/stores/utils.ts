@@ -50,3 +50,42 @@ export const getSuccessors = (
 
     return successors;
 };
+
+export const getPredecessors = (
+    startIri: string,
+    relations: Record<string, Record<string, string[]>>,
+    relationsToFollow: string[]
+): Set<string> => {
+    const predecessors = new Set<string>();
+    if (!startIri || !relations) return predecessors;
+
+    const invertedRelations: Record<string, Record<string, string[]>> = {};
+    for (const relName of relationsToFollow) {
+        if (relations[relName]) {
+            invertedRelations[relName] = invertRelations(relations[relName]);
+        }
+    }
+
+    const queue: string[] = [startIri];
+    const visited = new Set<string>([startIri]);
+
+    while (queue.length > 0) {
+        const currentIri = queue.shift()!;
+
+        for (const relName of relationsToFollow) {
+            const relatedIris = invertedRelations[relName]?.[currentIri];
+
+            if (relatedIris) {
+                for (const nextIri of relatedIris) {
+                    if (!visited.has(nextIri)) {
+                        visited.add(nextIri);
+                        predecessors.add(nextIri);
+                        queue.push(nextIri);
+                    }
+                }
+            }
+        }
+    }
+
+    return predecessors;
+};
