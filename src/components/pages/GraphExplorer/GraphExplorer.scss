@@ -5,11 +5,12 @@
     flex-direction: row;
     flex-grow: 1;
     width: 100%;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .graph-explorer {
     flex-grow: 1;
     position: relative;
+    min-width: 0;
     /* Add any specific styling for the graph container here */
 }

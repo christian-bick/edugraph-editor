@@ -82,36 +82,32 @@ export const GraphExplorer: React.FC = () => {
                 setSelectedEntityIri(null);
             });
 
-            const adjustGraph = () => {
-                const currentGraph = graphRef.current;
-                if (currentGraph && containerRef.current) {
+            const adjustGraphSize = () => {
+                if (graphRef.current && containerRef.current) {
                     const {width, height} = containerRef.current.getBoundingClientRect();
-                    currentGraph.setSize(width, height);
-                    currentGraph.fitView();
+                    graphRef.current.resize(width, height);
+                    graphRef.current.render();
                 }
             };
 
             graph.on('afterlayout', () => {
-                if (!isMounted || !containerRef.current) return;
-                adjustGraph();
-
-                if (!resizeObserver) {
-                    resizeObserver = new ResizeObserver(() => {
-                        adjustGraph();
-                    });
-                    resizeObserver.observe(containerRef.current);
-                }
+                if (!isMounted) return;
+                graph.fitView();
             });
 
-            adjustGraph();
+            if (containerRef.current) {
+                resizeObserver = new ResizeObserver(adjustGraphSize);
+                resizeObserver.observe(containerRef.current);
+            }
+
+            adjustGraphSize();
         };
 
         initGraph();
 
         return () => {
             isMounted = false;
-            if (resizeObserver && containerRef.current) {
-                resizeObserver.unobserve(containerRef.current);
+            if (resizeObserver) {
                 resizeObserver.disconnect();
             }
             if (graphRef.current) {
