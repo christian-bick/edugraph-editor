@@ -25,25 +25,25 @@ export const GraphExplorer: React.FC = () => {
     }, [activeBranch, activeDimension, setSelectedEntityIri]);
 
     useEffect(() => {
-        const graph = graphRef?.current;
-        if (!graph) {
+        if (!graphRef.current) {
             return;
         }
-        let selectedInGraph = false;
-        const allNodes = graph.getNodeData();
+        let selectedNode = null;
+        const allNodes = graphRef.current.getNodeData();
         allNodes.forEach((node: { id: string | null; }) => {
-            const states = graph.getElementState(node.id);
+            const states = graphRef.current.getElementState(node.id);
             if (states.includes('selected')) {
                 // Remove the state from previously selected nodes
-                graph.setElementState(node.id, []);
+                graphRef.current.setElementState(node.id, []);
             }
             if (node.id === selectedEntityIri) {
-                selectedInGraph = true
+                selectedNode = node
             }
         });
 
-        if (selectedInGraph) {
-            graph.setElementState(selectedEntityIri, 'selected');
+        if (selectedNode) {
+            graphRef.current.setElementState(selectedEntityIri, 'selected');
+            graphRef.current.focusElement(selectedEntityIri, 0.3);
         }
     }, [selectedEntityIri]);
 
@@ -82,6 +82,11 @@ export const GraphExplorer: React.FC = () => {
                 setSelectedEntityIri(null);
             });
 
+            graph.setOptions({
+                autoFit: false,
+                animation: true,
+            })
+
             const adjustGraphSize = () => {
                 if (graphRef.current && containerRef.current) {
                     const {width, height} = containerRef.current.getBoundingClientRect();
@@ -92,7 +97,6 @@ export const GraphExplorer: React.FC = () => {
 
             graph.on('afterlayout', () => {
                 if (!isMounted) return;
-                graph.fitView();
             });
 
             if (containerRef.current) {
@@ -101,6 +105,8 @@ export const GraphExplorer: React.FC = () => {
             }
 
             adjustGraphSize();
+            graph.fitView();
+            graph.zoomTo(0.9, 0.1);
         };
 
         initGraph();
