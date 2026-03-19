@@ -9,6 +9,7 @@ import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
 import {OntologyEntity, RelationType} from "../../../../types/ontology-types.ts";
 import { AddRelationModal } from '../AddRelation/AddRelation.tsx';
 import { CreateEntity } from '../CreateEntity/CreateEntity.tsx';
+import { EntitySearch } from '../EntitySearch/EntitySearch.tsx';
 
 interface RelationSectionProps {
     title: string;
@@ -179,7 +180,7 @@ export const Sidebar: React.FC = () => {
                         </div>
                     </>
                 ) : (
-                    <div className="sidebar-placeholder">Select a node to see details.</div>
+                    <EntitySearch />
                 )}
             </aside>
             <EditIri
