@@ -25,21 +25,26 @@ export const GraphExplorer: React.FC = () => {
     }, [activeBranch, activeDimension, setSelectedEntityIri]);
 
     useEffect(() => {
-        let graph = graphRef?.current;
+        const graph = graphRef?.current;
         if (!graph) {
             return;
         }
+        let selectedInGraph = false;
         const allNodes = graph.getNodeData();
-        allNodes.forEach((node) => {
+        allNodes.forEach((node: { id: string | null; }) => {
             const states = graph.getElementState(node.id);
             if (states.includes('selected')) {
                 // Remove the state from previously selected nodes
                 graph.setElementState(node.id, []);
             }
+            if (node.id === selectedEntityIri) {
+                selectedInGraph = true
+            }
         });
 
-        // 3. Set the 'selected' state for the new node
-        graph.setElementState(selectedEntityIri, 'selected');
+        if (selectedInGraph) {
+            graph.setElementState(selectedEntityIri, 'selected');
+        }
     }, [selectedEntityIri]);
 
     useEffect(() => {
