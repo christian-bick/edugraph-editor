@@ -14,7 +14,7 @@ export const GraphExplorer: React.FC = () => {
     const { loading, error } = useOntologyStore();
     const { ontologies } = useCurrentOntologyStore();
     const { activeBranch, activeDimension, activePerspective } = useBranchStore();
-    const { setSelectedEntityIri } = useSelectedEntityStore();
+    const { selectedEntityIri, setSelectedEntityIri } = useSelectedEntityStore();
 
     const ontology = useMemo(() => {
         return ontologies[activeDimension as keyof typeof ontologies];
@@ -23,6 +23,24 @@ export const GraphExplorer: React.FC = () => {
     useEffect(() => {
         setSelectedEntityIri(null);
     }, [activeBranch, activeDimension, setSelectedEntityIri]);
+
+    useEffect(() => {
+        let graph = graphRef?.current;
+        if (!graph) {
+            return;
+        }
+        const allNodes = graph.getNodeData();
+        allNodes.forEach((node) => {
+            const states = graph.getElementState(node.id);
+            if (states.includes('selected')) {
+                // Remove the state from previously selected nodes
+                graph.setElementState(node.id, []);
+            }
+        });
+
+        // 3. Set the 'selected' state for the new node
+        graph.setElementState(selectedEntityIri, 'selected');
+    }, [selectedEntityIri]);
 
     useEffect(() => {
         if (!containerRef.current || !ontology || loading) return;
@@ -51,17 +69,6 @@ export const GraphExplorer: React.FC = () => {
             // Handle node selection
             graph.on('node:click', (evt: any) => {
                 const { id } = evt.target;
-                const allNodes = graph.getNodeData();
-                allNodes.forEach((node) => {
-                    const states = graph.getElementState(node.id);
-                    if (states.includes('selected')) {
-                        // Remove the state from previously selected nodes
-                        graph.setElementState(node.id, []);
-                    }
-                });
-
-                // 3. Set the 'selected' state for the new node
-                graph.setElementState(id, 'selected');
                 setSelectedEntityIri(id);
             });
 
