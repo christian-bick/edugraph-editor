@@ -79,19 +79,18 @@ export const renderTaxonomyCompactBox = async (
         node: {
             type: 'rect',
             style: (d: any) => {
-                const isRoot = d.id === rootId;
                 const entityType = d.data.entityType as string;
                 const color = dimensionColorMap[entityType] || dimensionColorMap[dimension] ||'#666';
 
                 return {
-                    size: isRoot ? [200, 50] : [180, 40],
+                    size: [180, 40],
                     radius: 8,
                     labelText: d.label,
                     labelPlacement: 'center',
-                    labelFontSize: isRoot ? 20 : 12,
-                    labelFontWeight: isRoot ? 'bold' : 'normal',
-                    labelFill: isRoot ? '#fff' : '#000',
-                    fill: isRoot ? color : '#fff',
+                    labelFontSize: 12,
+                    labelFontWeight: 'normal',
+                    labelFill: '#000',
+                    fill: '#fff',
                     stroke: color,
                     lineWidth: 1.5,
                     ports: [{ placement: 'left' }, { placement: 'right' }],
