@@ -60,10 +60,10 @@ export const GraphExplorer: React.FC = () => {
             let data, graph;
 
             if (activePerspective === 'Progression') {
-                data = getGraphData(ontology, activeDimension, 'expands', true, true, focus, selectedEntityIri);
+                data = getGraphData(ontology, activeDimension, 'expands', true, true);
                 graph = await renderTaxonomyDagre(containerRef.current!, data);
             } else {
-                data = getGraphData(ontology, activeDimension, 'partOf', false, true, focus, selectedEntityIri);
+                data = getGraphData(ontology, activeDimension, 'partOf', false, true);
                 graph = await renderTaxonomyCompactBox(containerRef.current!, data, activeDimension);
             }
 
@@ -124,7 +124,20 @@ export const GraphExplorer: React.FC = () => {
                 graphRef.current = null;
             }
         };
-    }, [ontology, loading, activeDimension, activePerspective, focus, setSelectedEntityIri]);
+    }, [ontology, loading, activeDimension, activePerspective, setSelectedEntityIri]);
+
+    useEffect(() => {
+        if (!graphRef?.current) return;
+        const graph = graphRef.current;
+        let data
+        if (activePerspective === 'Progression') {
+            data = getGraphData(ontology, activeDimension, 'expands', true, true, focus, selectedEntityIri);
+        } else {
+            data = getGraphData(ontology, activeDimension, 'partOf', false, true, focus, selectedEntityIri);
+        }
+        graph.setData(data);
+        graph.render();
+    }, [focus, selectedEntityIri]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;
