@@ -7,6 +7,7 @@ import './GraphExplorer.scss';
 import {useSelectedEntityStore} from "../../../stores/selected-entity-store.ts";
 import {Sidebar} from "./Sidebar/Sidebar.tsx";
 import {renderTaxonomyDagre} from "../../../graphs/taxonomy-dagre.ts";
+import {ActionSidebar} from "./ActionSidebar/ActionSidebar.tsx";
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -129,6 +130,7 @@ export const GraphExplorer: React.FC = () => {
 
     return (
         <div className="graph-explorer-wrapper">
+            <ActionSidebar />
             <div
                 ref={containerRef}
                 className="graph-explorer"

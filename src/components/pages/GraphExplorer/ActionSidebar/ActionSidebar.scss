@@ -1,0 +1,13 @@
+@use "/src/colors.scss" as colors;
+
+.left-sidebar {
+    width: 50px;
+    max-width: 50px; /* Ensure it doesn't grow beyond 50px */
+    flex-shrink: 0; /* Prevent it from shrinking */
+    box-sizing: border-box;
+    background-color: colors.$container-background;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid colors.$light-border-color;
+    padding: 0.5rem;
+}
