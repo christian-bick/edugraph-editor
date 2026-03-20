@@ -27,17 +27,17 @@ export const GraphExplorer: React.FC = () => {
         setSelectedEntityIri(null);
     }, [activeBranch, activeDimension, setSelectedEntityIri]);
 
-    useEffect(() => {
-        if (!graphRef.current) {
+    const setSelected = (graph: any , selectedEntityIri: string | null) => {
+        if (!graph || !selectedEntityIri) {
             return;
         }
         let selectedNode = null;
-        const allNodes = graphRef.current.getNodeData();
+        const allNodes = graph.getNodeData();
         allNodes.forEach((node: { id: string | null; }) => {
-            const states = graphRef.current.getElementState(node.id);
+            const states = graph.getElementState(node.id);
             if (states.includes('selected')) {
                 // Remove the state from previously selected nodes
-                graphRef.current.setElementState(node.id, []);
+                graph.setElementState(node.id, []);
             }
             if (node.id === selectedEntityIri) {
                 selectedNode = node
@@ -45,47 +45,38 @@ export const GraphExplorer: React.FC = () => {
         });
 
         if (selectedNode) {
-            graphRef.current.setElementState(selectedEntityIri, 'selected');
-            graphRef.current.focusElement(selectedEntityIri, 0.3);
+            graph.setElementState(selectedEntityIri, 'selected');
         }
-    }, [selectedEntityIri]);
+    };
 
     useEffect(() => {
         if (!containerRef.current || !ontology || loading) return;
 
         let resizeObserver: ResizeObserver | null = null;
-        let isMounted = true;
 
         const initGraph = async () => {
-            let data, graph;
+            let data;
 
             if (activePerspective === 'Progression') {
                 data = getGraphData(ontology, activeDimension, 'expands', true, true);
-                graph = await renderTaxonomyDagre(containerRef.current!, data);
+                graphRef.current = await renderTaxonomyDagre(containerRef.current!, data);
             } else {
                 data = getGraphData(ontology, activeDimension, 'partOf', false, true);
-                graph = await renderTaxonomyCompactBox(containerRef.current!, data, activeDimension);
+                graphRef.current = await renderTaxonomyCompactBox(containerRef.current!, data, activeDimension);
             }
-
-            if (!isMounted || !graph) {
-                graph?.destroy();
-                return;
-            }
-
-            graphRef.current = graph;
 
             // Handle node selection
-            graph.on('node:click', (evt: any) => {
+            graphRef.current.on('node:click', (evt: any) => {
                 const { id } = evt.target;
                 setSelectedEntityIri(id);
             });
 
             // Handle canvas click to deselect
-            graph.on('canvas:click', () => {
+            graphRef.current.on('canvas:click', () => {
                 setSelectedEntityIri(null);
             });
 
-            graph.setOptions({
+            graphRef.current.setOptions({
                 autoFit: false,
                 animation: true,
             })
@@ -98,46 +89,33 @@ export const GraphExplorer: React.FC = () => {
                 }
             };
 
-            graph.on('afterlayout', () => {
-                if (!isMounted) return;
-            });
-
-            if (containerRef.current) {
-                resizeObserver = new ResizeObserver(adjustGraphSize);
-                resizeObserver.observe(containerRef.current);
-            }
+            resizeObserver = new ResizeObserver(adjustGraphSize);
+            resizeObserver.observe(containerRef.current);
 
             adjustGraphSize();
-            graph.fitView();
-            graph.zoomTo(0.9, 0.1);
+            graphRef.current.fitView();
+            graphRef.current.zoomTo(0.9, 0.1);
         };
 
-        initGraph();
-
-        return () => {
-            isMounted = false;
-            if (resizeObserver) {
-                resizeObserver.disconnect();
+        const updateGraph = () => {
+            let data;
+            if (activePerspective === 'Progression') {
+                data = getGraphData(ontology, activeDimension, 'expands', true, true, focus, selectedEntityIri);
+            } else {
+                data = getGraphData(ontology, activeDimension, 'partOf', false, true, focus, selectedEntityIri);
             }
-            if (graphRef.current) {
-                graphRef.current.destroy();
-                graphRef.current = null;
-            }
-        };
-    }, [ontology, loading, activeDimension, activePerspective, setSelectedEntityIri]);
-
-    useEffect(() => {
-        if (!graphRef?.current) return;
-        const graph = graphRef.current;
-        let data
-        if (activePerspective === 'Progression') {
-            data = getGraphData(ontology, activeDimension, 'expands', true, true, focus, selectedEntityIri);
-        } else {
-            data = getGraphData(ontology, activeDimension, 'partOf', false, true, focus, selectedEntityIri);
+            graphRef.current.setData(data);
+            setSelected(graphRef.current, selectedEntityIri)
+            graphRef.current.render();
+            graphRef.current.focusElement(selectedEntityIri, 0.5);
         }
-        graph.setData(data);
-        graph.render();
-    }, [focus, selectedEntityIri]);
+
+        if (!graphRef.current) {
+            initGraph();
+        } else {
+            updateGraph();
+        }
+    }, [loading, ontology, activeDimension, activePerspective, focus, selectedEntityIri, setSelectedEntityIri]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;
