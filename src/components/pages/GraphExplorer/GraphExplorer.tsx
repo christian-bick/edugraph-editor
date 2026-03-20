@@ -78,7 +78,9 @@ export const GraphExplorer: React.FC = () => {
 
             graphRef.current.setOptions({
                 autoFit: false,
-                animation: true,
+                animation: {
+                    duration: 200,
+                },
             })
 
             const adjustGraphSize = () => {
@@ -94,10 +96,10 @@ export const GraphExplorer: React.FC = () => {
 
             adjustGraphSize();
             graphRef.current.fitView();
-            graphRef.current.zoomTo(0.9, 0.1);
+            graphRef.current.zoomTo(0.9, 0.5);
         };
 
-        const updateGraph = () => {
+        const updateGraph = async () => {
             let data;
             if (activePerspective === 'Progression') {
                 data = getGraphData(ontology, activeDimension, 'expands', true, true, focus, selectedEntityIri);
@@ -106,8 +108,8 @@ export const GraphExplorer: React.FC = () => {
             }
             graphRef.current.setData(data);
             setSelected(graphRef.current, selectedEntityIri)
-            graphRef.current.render();
-            graphRef.current.focusElement(selectedEntityIri, 0.5);
+            await graphRef.current.render();
+            await graphRef.current.focusElement(selectedEntityIri, 0.3);
         }
 
         if (!graphRef.current) {
