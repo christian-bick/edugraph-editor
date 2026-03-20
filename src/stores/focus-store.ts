@@ -4,15 +4,15 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 export type FocusMode = 'global' | 'ancestry' | 'local';
 
 interface FocusState {
-    focus: FocusMode;
+    activeFocus: FocusMode;
     setFocus: (focus: FocusMode) => void;
 }
 
 export const useFocusStore = create<FocusState>()(
     persist(
         (set) => ({
-            focus: 'global',
-            setFocus: (focus: FocusMode) => set({ focus }),
+            activeFocus: 'global',
+            setFocus: (focus: FocusMode) => set({ activeFocus: focus }),
         }),
         {
             name: 'focus-storage',

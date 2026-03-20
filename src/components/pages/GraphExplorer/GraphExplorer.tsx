@@ -12,12 +12,19 @@ import {useFocusStore} from "../../../stores/focus-store.ts";
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const graphRef = useRef<any>(null); // Store the G6 graph instance
-    const { loading, error } = useOntologyStore();
-    const { ontologies } = useCurrentOntologyStore();
-    const { activeBranch, activeDimension, activePerspective } = useBranchStore();
-    const { selectedEntityIri, setSelectedEntityIri } = useSelectedEntityStore();
-    const { focus } = useFocusStore();
+    const graphRef = useRef<any>(null);
+    const dataRef = useRef<any>(null);
+    const selectedRef = useRef<string>(null);
+    const dimensionRef = useRef<string>(null);
+    const perpectiveRef = useRef<string>(null);
+    const branchRef = useRef<string>(null);
+    const focusRef = useRef<string>(null)
+
+    const {loading, error} = useOntologyStore();
+    const {ontologies} = useCurrentOntologyStore();
+    const {activeBranch, activeDimension, activePerspective} = useBranchStore();
+    const {selectedEntityIri, setSelectedEntityIri} = useSelectedEntityStore();
+    const {activeFocus} = useFocusStore();
 
     const ontology = useMemo(() => {
         return ontologies[activeDimension as keyof typeof ontologies];
@@ -27,10 +34,7 @@ export const GraphExplorer: React.FC = () => {
         setSelectedEntityIri(null);
     }, [activeBranch, activeDimension, setSelectedEntityIri]);
 
-    const setSelected = (graph: any , selectedEntityIri: string | null) => {
-        if (!graph || !selectedEntityIri) {
-            return;
-        }
+    const setSelected = (graph: any, selectedEntityIri: string | null) => {
         let selectedNode = null;
         const allNodes = graph.getNodeData();
         allNodes.forEach((node: { id: string | null; }) => {
@@ -53,35 +57,63 @@ export const GraphExplorer: React.FC = () => {
         if (!containerRef.current || !ontology || loading) return;
 
         let resizeObserver: ResizeObserver | null = null;
+        let isCancelled = false;
+
+        const hasBranchChanged = branchRef.current !== activeBranch
+        branchRef.current = activeBranch;
+        const hasDimensionChanged = dimensionRef.current !== activeDimension
+        dimensionRef.current = activeDimension;
+        const hasPerspectiveChanged = perpectiveRef.current !== activePerspective
+        perpectiveRef.current = activePerspective;
+        const hasFocusChanged = focusRef.current !== activeFocus
+        focusRef.current = activeFocus;
+        const hasSelectedChanged = selectedRef.current !== selectedEntityIri
+        selectedRef.current = selectedEntityIri;
+
+        let data
+        if (activePerspective === 'Progression') {
+            data = getGraphData(ontology, activeDimension, 'expands', true, true, activeFocus, selectedEntityIri);
+        } else {
+            data = getGraphData(ontology, activeDimension, 'partOf', false, true, activeFocus, selectedEntityIri);
+        }
+
+        const hasDataChanged = !isDeepEqual(dataRef.current, data)
+        if (hasDataChanged) {
+            dataRef.current = data;
+        }
 
         const initGraph = async () => {
-            let data;
-
+            let graph;
             if (activePerspective === 'Progression') {
-                data = getGraphData(ontology, activeDimension, 'expands', true, true);
-                graphRef.current = await renderTaxonomyDagre(containerRef.current!, data);
+                graph = await renderTaxonomyDagre(containerRef.current!, data);
             } else {
-                data = getGraphData(ontology, activeDimension, 'partOf', false, true);
-                graphRef.current = await renderTaxonomyCompactBox(containerRef.current!, data, activeDimension);
+                graph = await renderTaxonomyCompactBox(containerRef.current!, data, activeDimension);
+            }
+
+            if (isCancelled) {
+                graph.destroy();
+                return;
             }
 
             // Handle node selection
-            graphRef.current.on('node:click', (evt: any) => {
-                const { id } = evt.target;
+            graph.on('node:click', (evt: any) => {
+                const {id} = evt.target;
                 setSelectedEntityIri(id);
             });
 
             // Handle canvas click to deselect
-            graphRef.current.on('canvas:click', () => {
+            graph.on('canvas:click', () => {
                 setSelectedEntityIri(null);
             });
 
-            graphRef.current.setOptions({
+            graph.setOptions({
                 autoFit: false,
                 animation: {
-                    duration: 200,
+                    duration: 500,
                 },
             })
+
+            graphRef.current = graph
 
             const adjustGraphSize = () => {
                 if (graphRef.current && containerRef.current) {
@@ -95,29 +127,45 @@ export const GraphExplorer: React.FC = () => {
             resizeObserver.observe(containerRef.current);
 
             adjustGraphSize();
-            graphRef.current.fitView();
-            graphRef.current.zoomTo(0.9, 0.5);
+            graph.fitView();
+            graph.zoomTo(0.9, 0.5);
+
+            if ((hasSelectedChanged || hasFocusChanged) && selectedEntityIri) {
+                setSelected(graphRef.current, selectedEntityIri);
+                await graphRef.current.focusElement(selectedEntityIri, 0.3);
+            }
         };
 
         const updateGraph = async () => {
-            let data;
-            if (activePerspective === 'Progression') {
-                data = getGraphData(ontology, activeDimension, 'expands', true, true, focus, selectedEntityIri);
-            } else {
-                data = getGraphData(ontology, activeDimension, 'partOf', false, true, focus, selectedEntityIri);
+            if (hasDataChanged) {
+                graphRef.current.setData(data);
             }
-            graphRef.current.setData(data);
-            setSelected(graphRef.current, selectedEntityIri)
-            await graphRef.current.render();
-            await graphRef.current.focusElement(selectedEntityIri, 0.3);
+            if (hasSelectedChanged) {
+                setSelected(graphRef.current, selectedEntityIri);
+            }
+            if (hasDataChanged && data) {
+                await graphRef.current.render();
+            }
+            if (hasSelectedChanged && selectedEntityIri) {
+                await graphRef.current.focusElement(selectedEntityIri, 0.3);
+            }
         }
 
-        if (!graphRef.current) {
+        if (!graphRef.current || hasBranchChanged || hasDimensionChanged || hasPerspectiveChanged || hasFocusChanged) {
             initGraph();
         } else {
             updateGraph();
         }
-    }, [loading, ontology, activeDimension, activePerspective, focus, selectedEntityIri, setSelectedEntityIri]);
+
+        return () => {
+            isCancelled = true;
+            resizeObserver?.disconnect();
+            if (graphRef.current) {
+                graphRef.current.destroy();
+                graphRef.current = null;
+            }
+        };
+    }, [loading, ontology, activeDimension, activePerspective, activeFocus, activeBranch, selectedEntityIri, setSelectedEntityIri]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;
@@ -125,14 +173,45 @@ export const GraphExplorer: React.FC = () => {
 
     return (
         <div className="graph-explorer-wrapper">
-            <ActionSidebar />
+            <ActionSidebar/>
             <div
                 ref={containerRef}
                 className="graph-explorer"
             ></div>
-            <Sidebar />
+            <Sidebar/>
         </div>
     );
+};
+
+const isDeepEqual = (object1, object2) => {
+    if (object1 == null) {
+        return object2 == null;
+    } else if (object2 == null) {
+        return false;
+    }
+
+    const objKeys1 = Object.keys(object1);
+    const objKeys2 = Object.keys(object2);
+
+    if (objKeys1.length !== objKeys2.length) return false;
+
+    for (var key of objKeys1) {
+        const value1 = object1[key];
+        const value2 = object2[key];
+
+        const isObjects = isObject(value1) && isObject(value2);
+
+        if ((isObjects && !isDeepEqual(value1, value2)) ||
+            (!isObjects && value1 !== value2)
+        ) {
+            return false;
+        }
+    }
+    return true;
+};
+
+const isObject = (object) => {
+    return object != null && typeof object === "object";
 };
 
 export default GraphExplorer;
