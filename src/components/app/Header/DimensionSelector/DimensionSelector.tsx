@@ -1,17 +1,23 @@
 import {useEffect, useRef, useState} from 'react';
-import { useBranchStore } from '../../../../stores/branch-store.ts';
+import {useBranchStore} from '../../../../stores/branch-store.ts';
 import './DimensionSelector.scss';
 import clsx from "clsx";
+import {useSelectedEntityStore} from "../../../../stores/selected-entity-store.ts";
+import {useFocusStore} from "../../../../stores/focus-store.ts";
 
 export const DimensionSelector = () => {
     const [isOpen, setIsOpen] = useState(false);
     const { activeDimension, setActiveDimension } = useBranchStore();
+    const { setSelectedEntityIri } = useSelectedEntityStore();
+    const { setFocus } = useFocusStore();
     const selectorRef = useRef<HTMLDivElement>(null);
 
     const dimensions = ['Area', 'Ability', 'Scope'];
 
     const handleSelect = (dimension: string) => {
         setActiveDimension(dimension);
+        setSelectedEntityIri(null);
+        setFocus('global');
         setIsOpen(false);
     };
 
