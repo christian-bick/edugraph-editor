@@ -16,7 +16,7 @@ export const GraphExplorer: React.FC = () => {
     const dataRef = useRef<any>(null);
     const selectedRef = useRef<string>(null);
     const dimensionRef = useRef<string>(null);
-    const perpectiveRef = useRef<string>(null);
+    const perspectiveRef = useRef<string>(null);
     const branchRef = useRef<string>(null);
     const focusRef = useRef<string>(null)
 
@@ -63,8 +63,8 @@ export const GraphExplorer: React.FC = () => {
         branchRef.current = activeBranch;
         const hasDimensionChanged = dimensionRef.current !== activeDimension
         dimensionRef.current = activeDimension;
-        const hasPerspectiveChanged = perpectiveRef.current !== activePerspective
-        perpectiveRef.current = activePerspective;
+        const hasPerspectiveChanged = perspectiveRef.current !== activePerspective
+        perspectiveRef.current = activePerspective;
         const hasFocusChanged = focusRef.current !== activeFocus
         focusRef.current = activeFocus;
         const hasSelectedChanged = selectedRef.current !== selectedEntityIri
@@ -83,6 +83,17 @@ export const GraphExplorer: React.FC = () => {
         }
 
         const initGraph = async () => {
+            const adjustGraphSize = () => {
+                if (graphRef.current && containerRef.current) {
+                    const {width, height} = containerRef.current.getBoundingClientRect();
+                    graphRef.current.resize(width, height);
+                    graphRef.current.render();
+                }
+            };
+
+            resizeObserver = new ResizeObserver(adjustGraphSize);
+            resizeObserver.observe(containerRef.current);
+
             let graph;
             if (activePerspective === 'Progression') {
                 graph = await renderTaxonomyDagre(containerRef.current!, data);
@@ -115,17 +126,6 @@ export const GraphExplorer: React.FC = () => {
 
             graphRef.current = graph
 
-            const adjustGraphSize = () => {
-                if (graphRef.current && containerRef.current) {
-                    const {width, height} = containerRef.current.getBoundingClientRect();
-                    graphRef.current.resize(width, height);
-                    graphRef.current.render();
-                }
-            };
-
-            resizeObserver = new ResizeObserver(adjustGraphSize);
-            resizeObserver.observe(containerRef.current);
-
             adjustGraphSize();
             graph.fitView();
             graph.zoomTo(0.9, 0.5);
@@ -151,7 +151,7 @@ export const GraphExplorer: React.FC = () => {
             }
         }
 
-        if (!graphRef.current || hasBranchChanged || hasDimensionChanged || hasPerspectiveChanged || hasFocusChanged) {
+        if (!graphRef.current || hasBranchChanged || hasDimensionChanged || hasPerspectiveChanged) {
             initGraph();
         } else {
             updateGraph();
