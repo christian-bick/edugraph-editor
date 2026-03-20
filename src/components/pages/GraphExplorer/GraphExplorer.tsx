@@ -19,6 +19,7 @@ export const GraphExplorer: React.FC = () => {
     const perspectiveRef = useRef<string>(null);
     const branchRef = useRef<string>(null);
     const focusRef = useRef<string>(null)
+    const observerRef = useRef<ResizeObserver | null>(null);
 
     const {loading, error} = useOntologyStore();
     const {ontologies} = useCurrentOntologyStore();
@@ -53,36 +54,34 @@ export const GraphExplorer: React.FC = () => {
         }
     };
 
+    // 1. Lifecycle Effect: Manages the G6 Instance (Creation/Destruction)
     useEffect(() => {
         if (!containerRef.current || !ontology || loading) return;
 
-        let resizeObserver: ResizeObserver | null = null;
         let isCancelled = false;
 
-        const hasBranchChanged = branchRef.current !== activeBranch
-        branchRef.current = activeBranch;
-        const hasDimensionChanged = dimensionRef.current !== activeDimension
-        dimensionRef.current = activeDimension;
-        const hasPerspectiveChanged = perspectiveRef.current !== activePerspective
-        perspectiveRef.current = activePerspective;
-        const hasFocusChanged = focusRef.current !== activeFocus
-        focusRef.current = activeFocus;
-        const hasSelectedChanged = selectedRef.current !== selectedEntityIri
-        selectedRef.current = selectedEntityIri;
-
-        let data
-        if (activePerspective === 'Progression') {
-            data = getGraphData(ontology, activeDimension, 'expands', true, true, activeFocus, selectedEntityIri);
-        } else {
-            data = getGraphData(ontology, activeDimension, 'partOf', false, true, activeFocus, selectedEntityIri);
-        }
-
-        const hasDataChanged = !isDeepEqual(dataRef.current, data)
-        if (hasDataChanged) {
-            dataRef.current = data;
-        }
-
         const initGraph = async () => {
+            // Cleanup previous instance if any
+            observerRef.current?.disconnect();
+            if (graphRef.current) {
+                graphRef.current.destroy();
+                graphRef.current = null;
+            }
+
+            let data;
+            if (activePerspective === 'Progression') {
+                data = getGraphData(ontology, activeDimension, 'expands', true, true, activeFocus, selectedEntityIri);
+            } else {
+                data = getGraphData(ontology, activeDimension, 'partOf', false, true, activeFocus, selectedEntityIri);
+            }
+
+            dataRef.current = data;
+            branchRef.current = activeBranch;
+            dimensionRef.current = activeDimension;
+            perspectiveRef.current = activePerspective;
+            focusRef.current = activeFocus;
+            selectedRef.current = selectedEntityIri;
+
             const adjustGraphSize = () => {
                 if (graphRef.current && containerRef.current) {
                     const {width, height} = containerRef.current.getBoundingClientRect();
@@ -91,8 +90,9 @@ export const GraphExplorer: React.FC = () => {
                 }
             };
 
-            resizeObserver = new ResizeObserver(adjustGraphSize);
-            resizeObserver.observe(containerRef.current);
+            const observer = new ResizeObserver(adjustGraphSize);
+            observer.observe(containerRef.current);
+            observerRef.current = observer;
 
             let graph;
             if (activePerspective === 'Progression') {
@@ -103,8 +103,11 @@ export const GraphExplorer: React.FC = () => {
 
             if (isCancelled) {
                 graph.destroy();
+                observer.disconnect();
                 return;
             }
+
+            graphRef.current = graph;
 
             // Handle node selection
             graph.on('node:click', (evt: any) => {
@@ -119,53 +122,67 @@ export const GraphExplorer: React.FC = () => {
 
             graph.setOptions({
                 autoFit: false,
-                animation: {
-                    duration: 500,
-                },
-            })
-
-            graphRef.current = graph
+                animation: { duration: 500 },
+            });
 
             adjustGraphSize();
             graph.fitView();
             graph.zoomTo(0.9, 0.5);
 
-            if ((hasSelectedChanged || hasFocusChanged) && selectedEntityIri) {
-                setSelected(graphRef.current, selectedEntityIri);
-                await graphRef.current.focusElement(selectedEntityIri, 0.3);
+            if (selectedEntityIri) {
+                setSelected(graph, selectedEntityIri);
+                await graph.focusElement(selectedEntityIri, 0.3);
             }
         };
 
-        const updateGraph = async () => {
-            if (hasDataChanged) {
-                graphRef.current.setData(data);
-            }
-            if (hasSelectedChanged) {
-                setSelected(graphRef.current, selectedEntityIri);
-            }
-            if (hasDataChanged && data) {
-                await graphRef.current.render();
-            }
-            if (hasSelectedChanged && selectedEntityIri) {
-                await graphRef.current.focusElement(selectedEntityIri, 0.3);
-            }
-        }
-
-        if (!graphRef.current || hasBranchChanged || hasDimensionChanged || hasPerspectiveChanged) {
-            initGraph();
-        } else {
-            updateGraph();
-        }
+        initGraph();
 
         return () => {
             isCancelled = true;
-            resizeObserver?.disconnect();
+            observerRef.current?.disconnect();
             if (graphRef.current) {
                 graphRef.current.destroy();
                 graphRef.current = null;
             }
         };
-    }, [loading, ontology, activeDimension, activePerspective, activeFocus, activeBranch, selectedEntityIri, setSelectedEntityIri]);
+    }, [loading, ontology, activeDimension, activePerspective, activeBranch, activeFocus]);
+
+    // 2. Update Effect: Manages data, focus, and selection changes
+    useEffect(() => {
+        const graph = graphRef.current;
+        if (!graph || loading || !ontology) return;
+
+        const hasFocusChanged = focusRef.current !== activeFocus;
+        focusRef.current = activeFocus;
+        const hasSelectedChanged = selectedRef.current !== selectedEntityIri;
+        selectedRef.current = selectedEntityIri;
+
+        const updateGraph = async () => {
+            let data;
+            if (activePerspective === 'Progression') {
+                data = getGraphData(ontology, activeDimension, 'expands', true, true, activeFocus, selectedEntityIri);
+            } else {
+                data = getGraphData(ontology, activeDimension, 'partOf', false, true, activeFocus, selectedEntityIri);
+            }
+
+            const hasDataChanged = !isDeepEqual(dataRef.current, data);
+
+            if (hasDataChanged) {
+                dataRef.current = data;
+                graph.setData(data);
+                await graph.render();
+            }
+
+            if (hasSelectedChanged || hasFocusChanged) {
+                setSelected(graph, selectedEntityIri);
+                if (selectedEntityIri) {
+                    await graph.focusElement(selectedEntityIri, 0.3);
+                }
+            }
+        };
+
+        updateGraph();
+    }, [selectedEntityIri]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;
