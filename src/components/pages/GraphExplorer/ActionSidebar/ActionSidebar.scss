@@ -32,8 +32,18 @@
     filter: invert(0.6); // Medium gray icon for inactive state
   }
 
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: colors.$light-hover-background;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background-color: colors.$container-background;
+    
+    img {
+      filter: invert(0.8);
+    }
   }
 
   &.active {
