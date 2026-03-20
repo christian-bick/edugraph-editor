@@ -14,11 +14,6 @@ export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const graphRef = useRef<any>(null);
     const dataRef = useRef<any>(null);
-    const selectedRef = useRef<string>(null);
-    const dimensionRef = useRef<string>(null);
-    const perspectiveRef = useRef<string>(null);
-    const branchRef = useRef<string>(null);
-    const focusRef = useRef<string>(null)
     const observerRef = useRef<ResizeObserver | null>(null);
 
     const {loading, error} = useOntologyStore();
@@ -76,11 +71,6 @@ export const GraphExplorer: React.FC = () => {
             }
 
             dataRef.current = data;
-            branchRef.current = activeBranch;
-            dimensionRef.current = activeDimension;
-            perspectiveRef.current = activePerspective;
-            focusRef.current = activeFocus;
-            selectedRef.current = selectedEntityIri;
 
             const adjustGraphSize = () => {
                 if (graphRef.current && containerRef.current) {
@@ -117,7 +107,9 @@ export const GraphExplorer: React.FC = () => {
 
             // Handle canvas click to deselect
             graph.on('canvas:click', () => {
-                setSelectedEntityIri(null);
+                if (activeFocus === 'global') {
+                    setSelectedEntityIri(null);
+                }
             });
 
             graph.setOptions({
@@ -152,11 +144,6 @@ export const GraphExplorer: React.FC = () => {
         const graph = graphRef.current;
         if (!graph || loading || !ontology) return;
 
-        const hasFocusChanged = focusRef.current !== activeFocus;
-        focusRef.current = activeFocus;
-        const hasSelectedChanged = selectedRef.current !== selectedEntityIri;
-        selectedRef.current = selectedEntityIri;
-
         const updateGraph = async () => {
             let data;
             if (activePerspective === 'Progression') {
@@ -173,11 +160,9 @@ export const GraphExplorer: React.FC = () => {
                 await graph.render();
             }
 
-            if (hasSelectedChanged || hasFocusChanged) {
-                setSelected(graph, selectedEntityIri);
-                if (selectedEntityIri) {
-                    await graph.focusElement(selectedEntityIri, 0.3);
-                }
+            setSelected(graph, selectedEntityIri);
+            if (selectedEntityIri) {
+                await graph.focusElement(selectedEntityIri, 0.3);
             }
         };
 
