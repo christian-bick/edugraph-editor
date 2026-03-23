@@ -53,7 +53,12 @@
         gap: 1rem;
         padding: 0 1rem;
 
-        .github-icon {
+        .token-managers {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .github-icon, .gemini-icon {
             background-color: colors.$section-background;
             border: 1px solid colors.$light-border-color;
             cursor: pointer;
@@ -75,14 +80,25 @@
             }
 
             &.token-present {
-                background-color: colors.$color-scope;
-                border-color: colors.$color-scope-dark;
-                &:hover {
-                    background-color: colors.$color-scope-dark;
-                }
                 img {
                     filter: brightness(0) invert(1);
                 }
+            }
+        }
+
+        .github-icon.token-present {
+            background-color: colors.$color-scope;
+            border-color: colors.$color-scope-dark;
+            &:hover {
+                background-color: colors.$color-scope-dark;
+            }
+        }
+
+        .gemini-icon.token-present {
+            background-color: colors.$color-ability;
+            border-color: colors.$color-ability-dark;
+            &:hover {
+                background-color: colors.$color-ability-dark;
             }
         }
     }

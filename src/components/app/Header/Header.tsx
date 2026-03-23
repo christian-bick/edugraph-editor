@@ -3,7 +3,9 @@ import { DimensionSelector } from './DimensionSelector/DimensionSelector';
 import { PerspectiveSelector } from "./PerspectiveSelector/PerspectiveSelector.tsx";
 import './Header.scss';
 import GithubIcon from '../../../assets/icons/github.svg';
+import GeminiIcon from '../../../assets/icons/gemini.svg';
 import {TokenManager} from "../TokenManager/TokenManager.tsx";
+import {GeminiTokenManager} from "../TokenManager/GeminiTokenManager.tsx";
 import {useState} from "react";
 import {useAuthStore} from "../../../stores/auth-store.ts";
 import {Modal} from "../../global/Modal/Modal.tsx";
@@ -20,8 +22,9 @@ const useTemporalStore = <T, >(
 
 
 export const Header = () => {
-    const [showTokenManager, setShowTokenManager] = useState(false);
-    const { token } = useAuthStore();
+    const [showGithubTokenManager, setShowGithubTokenManager] = useState(false);
+    const [showGeminiTokenManager, setShowGeminiTokenManager] = useState(false);
+    const { token, geminiToken } = useAuthStore();
 
     const { pastStates } = useTemporalStore(
         (state) => state,
@@ -47,11 +50,20 @@ export const Header = () => {
                 <BranchSelector/>
                 <DimensionSelector/>
                 <PerspectiveSelector/>
-                <button className={clsx('github-icon', { 'token-present': token })} onClick={() => setShowTokenManager(true)}>
-                    <img src={GithubIcon} alt="GitHub Token"/>
-                </button>
-                <Modal isOpen={showTokenManager} onClose={() => setShowTokenManager(false)}>
+                <div className="token-managers">
+                    <button className={clsx('github-icon', { 'token-present': token })} onClick={() => setShowGithubTokenManager(true)}>
+                        <img src={GithubIcon} alt="GitHub Token"/>
+                    </button>
+                    <button className={clsx('gemini-icon', { 'token-present': geminiToken })} onClick={() => setShowGeminiTokenManager(true)}>
+                        <img src={GeminiIcon} alt="Gemini Token"/>
+                    </button>
+                </div>
+
+                <Modal isOpen={showGithubTokenManager} onClose={() => setShowGithubTokenManager(false)}>
                     <TokenManager />
+                </Modal>
+                <Modal isOpen={showGeminiTokenManager} onClose={() => setShowGeminiTokenManager(false)}>
+                    <GeminiTokenManager />
                 </Modal>
             </div>
         </header>
