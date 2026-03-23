@@ -11,9 +11,10 @@ export const getGraphData = (
     inverse = false,
     focusMode: FocusMode = 'global',
     selectedEntityIri: string | null = null,
+    useVirtualRoot = false,
 ) => {
-    const nodes: G6Node[] = [];
-    const edges: G6Edge[] = [];
+    let nodes: G6Node[] = [];
+    let edges: G6Edge[] = [];
     if (!ontology || !filterRelationType) return { nodes, edges };
 
     const entityIRItoIdMap = new Map<string, string>();
@@ -23,7 +24,7 @@ export const getGraphData = (
         nodes.push({
             id: id,
             label: toNaturalName(entity.name),
-            entityType: activeDimension,
+            entityType: activeDimension as any,
         });
     });
 
@@ -39,18 +40,18 @@ export const getGraphData = (
                 const sourceId = entityIRItoIdMap.get(subjectIRI);
 
                 objectIRIs.forEach((objectIRI, index) => {
-                const targetId = entityIRItoIdMap.get(objectIRI);
+                    const targetId = entityIRItoIdMap.get(objectIRI);
 
-                if (sourceId && targetId) {
-                    edges.push({
-                        id: `${sourceId}-${filterRelationType}-${targetId}-${index}`,
-                        source: sourceId,
-                        target: targetId,
-                        label: filterRelationType,
-                    });
-                }
+                    if (sourceId && targetId) {
+                        edges.push({
+                            id: `${sourceId}-${filterRelationType}-${targetId}-${index}`,
+                            source: sourceId,
+                            target: targetId,
+                            label: filterRelationType,
+                        });
+                    }
+                });
             });
-        });
     }
 
     if (focusMode !== 'global' && selectedEntityIri) {
@@ -71,21 +72,39 @@ export const getGraphData = (
             directPredecessors.forEach(iri => irisToKeep.add(iri));
         }
 
-        const filteredNodes = nodes.filter(node => irisToKeep.has(node.id));
-        const filteredEdges = edges.filter(edge => irisToKeep.has(edge.source) && irisToKeep.has(edge.target));
-
-        return { nodes: filteredNodes, edges: filteredEdges };
-    }
-
-    if (filterOrphanNodes) {
+        nodes = nodes.filter(node => irisToKeep.has(node.id));
+        edges = edges.filter(edge => irisToKeep.has(edge.source) && irisToKeep.has(edge.target));
+    } else if (filterOrphanNodes) {
         const participatingNodeIRIs = new Set<string>();
         edges.forEach(edge => {
             participatingNodeIRIs.add(edge.source);
             participatingNodeIRIs.add(edge.target);
         });
 
-        const connectedNodes = nodes.filter(node => participatingNodeIRIs.has(node.id));
-        return { nodes: connectedNodes, edges };
+        nodes = nodes.filter(node => participatingNodeIRIs.has(node.id));
+    }
+
+    if (useVirtualRoot) {
+        const targetNodeIds = new Set(edges.map(e => e.target));
+        const roots = nodes.filter(n => !targetNodeIds.has(n.id));
+
+        if (roots.length > 1) {
+            const virtualRootId = 'virtual-root';
+            nodes.push({
+                id: virtualRootId,
+                label: activeDimension,
+                entityType: activeDimension as any,
+            });
+
+            roots.forEach((root, index) => {
+                edges.push({
+                    id: `${virtualRootId}-${root.id}-${index}`,
+                    source: virtualRootId,
+                    target: root.id,
+                    label: 'virtual-relation',
+                });
+            });
+        }
     }
 
     return { nodes, edges };

@@ -1,7 +1,6 @@
 import React, {useEffect, useMemo, useRef} from 'react';
 import {getGraphData} from "../../../graphs/taxonomy.ts";
 import {useCurrentOntologyStore, useOntologyStore} from "../../../stores/ontology-store.ts";
-import {renderTaxonomyCompactBox} from "../../../graphs/taxonomy-compact-box.ts";
 import {useBranchStore} from "../../../stores/branch-store.ts";
 import './GraphExplorer.scss';
 import {useSelectedEntityStore} from "../../../stores/selected-entity-store.ts";
@@ -10,7 +9,6 @@ import {renderTaxonomyDagre} from "../../../graphs/taxonomy-dagre.ts";
 import {ActionSidebar} from "./ActionSidebar/ActionSidebar.tsx";
 import {useFocusStore} from "../../../stores/focus-store.ts";
 import {Graph} from "@antv/g6";
-import {render} from "sass-embedded";
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -59,6 +57,16 @@ export const GraphExplorer: React.FC = () => {
         }
     };
 
+    const getData = () => {
+        let data;
+        if (activePerspective === 'Progression') {
+            data = getGraphData(ontology, activeDimension, 'expands', true, true, activeFocus, selectedEntityIri, false);
+        } else {
+            data = getGraphData(ontology, activeDimension, 'partOf', false, true, activeFocus, selectedEntityIri, true);
+        }
+        return data;
+    }
+
     // 1. Lifecycle Effect: Manages the G6 Instance (Creation/Destruction)
     useEffect(() => {
         if (!containerRef.current || !ontology || loading) return;
@@ -73,22 +81,10 @@ export const GraphExplorer: React.FC = () => {
                 graphRef.current = null;
             }
 
-            let data;
-            if (activePerspective === 'Progression') {
-                data = getGraphData(ontology, activeDimension, 'expands', true, true, activeFocus, selectedEntityIri);
-            } else {
-                data = getGraphData(ontology, activeDimension, 'partOf', false, true, activeFocus, selectedEntityIri);
-            }
-
+            const data = getData();
             dataRef.current = data;
 
-            let graph;
-            if (activePerspective === 'Progression') {
-                graph = renderTaxonomyDagre(containerRef.current!, data);
-            } else {
-                graph = renderTaxonomyCompactBox(containerRef.current!, data, activeDimension);
-            }
-
+            const graph = renderTaxonomyDagre(containerRef.current!, data);
             graphRef.current = graph;
 
             const observer = new ResizeObserver(renderWithinBoundaries);
@@ -139,7 +135,7 @@ export const GraphExplorer: React.FC = () => {
                 graphRef.current = null;
             }
         };
-    }, [ontology, loading, activeDimension, activePerspective, activeBranch, activeFocus]);
+    }, [loading, activeDimension, activePerspective, activeBranch]);
 
     // 2. Update Effect: Manages data, focus, and selection changes
     useEffect(() => {
@@ -147,19 +143,13 @@ export const GraphExplorer: React.FC = () => {
         if (!graph || loading || !ontology) return;
 
         const updateGraph = async () => {
-            let data;
-            if (activePerspective === 'Progression') {
-                data = getGraphData(ontology, activeDimension, 'expands', true, true, activeFocus, selectedEntityIri);
-            } else {
-                data = getGraphData(ontology, activeDimension, 'partOf', false, true, activeFocus, selectedEntityIri);
-            }
-
+            const data = getData();
             const hasDataChanged = !isDeepEqual(dataRef.current, data);
 
             if (hasDataChanged) {
                 dataRef.current = data;
                 graph.setData(data);
-                await graph.render();
+                await graph.render()
             }
 
             setSelected(graph, selectedEntityIri);
@@ -169,7 +159,7 @@ export const GraphExplorer: React.FC = () => {
         };
 
         updateGraph();
-    }, [selectedEntityIri]);
+    }, [ontology, activeFocus, selectedEntityIri]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;
