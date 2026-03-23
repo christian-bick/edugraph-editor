@@ -9,10 +9,12 @@ import {Sidebar} from "./Sidebar/Sidebar.tsx";
 import {renderTaxonomyDagre} from "../../../graphs/taxonomy-dagre.ts";
 import {ActionSidebar} from "./ActionSidebar/ActionSidebar.tsx";
 import {useFocusStore} from "../../../stores/focus-store.ts";
+import {Graph} from "@antv/g6";
+import {render} from "sass-embedded";
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const graphRef = useRef<any>(null);
+    const graphRef = useRef<Graph>(null);
     const dataRef = useRef<any>(null);
     const observerRef = useRef<ResizeObserver | null>(null);
 
@@ -49,6 +51,14 @@ export const GraphExplorer: React.FC = () => {
         }
     };
 
+    const renderWithinBoundaries = async () => {
+        if (graphRef.current && containerRef.current) {
+            const {width, height} = containerRef.current.getBoundingClientRect();
+            graphRef.current.resize(width, height);
+            await graphRef.current.render();
+        }
+    };
+
     // 1. Lifecycle Effect: Manages the G6 Instance (Creation/Destruction)
     useEffect(() => {
         if (!containerRef.current || !ontology || loading) return;
@@ -72,32 +82,18 @@ export const GraphExplorer: React.FC = () => {
 
             dataRef.current = data;
 
-            const adjustGraphSize = () => {
-                if (graphRef.current && containerRef.current) {
-                    const {width, height} = containerRef.current.getBoundingClientRect();
-                    graphRef.current.resize(width, height);
-                    graphRef.current.render();
-                }
-            };
-
-            const observer = new ResizeObserver(adjustGraphSize);
-            observer.observe(containerRef.current);
-            observerRef.current = observer;
-
             let graph;
             if (activePerspective === 'Progression') {
-                graph = await renderTaxonomyDagre(containerRef.current!, data);
+                graph = renderTaxonomyDagre(containerRef.current!, data);
             } else {
-                graph = await renderTaxonomyCompactBox(containerRef.current!, data, activeDimension);
-            }
-
-            if (isCancelled) {
-                graph.destroy();
-                observer.disconnect();
-                return;
+                graph = renderTaxonomyCompactBox(containerRef.current!, data, activeDimension);
             }
 
             graphRef.current = graph;
+
+            const observer = new ResizeObserver(renderWithinBoundaries);
+            observer.observe(containerRef.current);
+            observerRef.current = observer;
 
             // Handle node selection
             graph.on('node:click', (evt: any) => {
@@ -117,13 +113,19 @@ export const GraphExplorer: React.FC = () => {
                 animation: { duration: 500 },
             });
 
-            adjustGraphSize();
-            graph.fitView();
-            graph.zoomTo(0.9, 0.5);
+            await renderWithinBoundaries();
+
+            if (isCancelled) {
+                graph.destroy();
+                observer.disconnect();
+                return;
+            }
+
+            await graph.zoomTo(0.9, 0.5);
 
             if (selectedEntityIri) {
                 setSelected(graph, selectedEntityIri);
-                await graph.focusElement(selectedEntityIri, 0.3);
+                graph.focusElement(selectedEntityIri, 0.3);
             }
         };
 
@@ -137,7 +139,7 @@ export const GraphExplorer: React.FC = () => {
                 graphRef.current = null;
             }
         };
-    }, [loading, ontology, activeDimension, activePerspective, activeBranch, activeFocus]);
+    }, [ontology, loading, activeDimension, activePerspective, activeBranch, activeFocus]);
 
     // 2. Update Effect: Manages data, focus, and selection changes
     useEffect(() => {

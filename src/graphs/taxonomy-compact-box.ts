@@ -56,11 +56,11 @@ const markSiblingNodes = (node: any) => {
     }
 };
 
-export const renderTaxonomyCompactBox = async (
+export const renderTaxonomyCompactBox = (
     container: HTMLElement,
     graphData: { nodes: G6Node[]; edges: G6Edge[] },
     dimension: string,
-): Promise<any> => {
+): Graph => {
 
     const treeData = graphToTree(graphData, dimension);
 
@@ -72,7 +72,7 @@ export const renderTaxonomyCompactBox = async (
 
     markSiblingNodes(treeData);
 
-    const graph = new Graph({
+    return new Graph({
         container,
         data: treeToGraphData(treeData),
         autoFit: 'view',
@@ -130,7 +130,4 @@ export const renderTaxonomyCompactBox = async (
         behaviors: ['drag-canvas', 'zoom-canvas'],
         animation: false,
     });
-
-    await graph.render();
-    return graph;
 };

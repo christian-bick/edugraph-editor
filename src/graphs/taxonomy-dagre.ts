@@ -7,11 +7,11 @@ const dimensionColorMap: { [key: string]: string } = {
     'Scope': '#5cb85c',
 };
 
-export const renderTaxonomyDagre = async (
+export const renderTaxonomyDagre = (
     container: HTMLElement,
     graphData: { nodes: G6Node[]; edges: G6Edge[] },
-): Promise<any> => {
-    const graph = new Graph({
+): Graph => {
+    return new Graph({
         container,
         data: graphData,
         autoFit: 'view',
@@ -60,7 +60,4 @@ export const renderTaxonomyDagre = async (
         },
         behaviors: ['drag-canvas', 'zoom-canvas', 'drag-node'],
     });
-
-    await graph.render();
-    return graph;
 };
