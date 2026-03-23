@@ -126,6 +126,16 @@ export const populateOntologyFromQuads = (
             });
         }
     });
+
+    // Sort entities lexicographically by IRI
+    ontology.entities.sort((a, b) => a.iri.localeCompare(b.iri));
+
+    // Sort all object IRIs in relations
+    Object.values(ontology.relations).forEach(relationMap => {
+        Object.keys(relationMap).forEach(subjectIri => {
+            relationMap[subjectIri].sort((a, b) => a.localeCompare(b));
+        });
+    });
 };
 
 

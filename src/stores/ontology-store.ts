@@ -51,6 +51,8 @@ export const useCurrentOntologyStore = create(
                     if (entityToUpdate) {
                         entityToUpdate.iri = newIri;
                         entityToUpdate.name = newId;
+                        // Sort entities after IRI change
+                        ontology.entities.sort((a, b) => a.iri.localeCompare(b.iri));
                     }
 
                     // 2. Update relations where oldIri is involved (as subject or object)
@@ -67,7 +69,7 @@ export const useCurrentOntologyStore = create(
                                 objIri === oldIri ? newIri : objIri
                             );
                             if (updatedObjectIris.some((val, idx) => val !== relationMap[subjectIri][idx])) {
-                                relationMap[subjectIri] = updatedObjectIris;
+                                relationMap[subjectIri] = updatedObjectIris.sort((a, b) => a.localeCompare(b));
                             }
                         });
                     });
@@ -91,7 +93,7 @@ export const useCurrentOntologyStore = create(
                     if (!ontology) return;
 
                     if (objectIris.length > 0) {
-                        ontology.relations[relation][subjectIri] = objectIris;
+                        ontology.relations[relation][subjectIri] = [...objectIris].sort((a, b) => a.localeCompare(b));
                     } else {
                         delete ontology.relations[relation][subjectIri];
                     }
@@ -112,6 +114,7 @@ export const useCurrentOntologyStore = create(
                         examples: '', // Default examples
                     };
                     ontology.entities.push(newEntity);
+                    ontology.entities.sort((a, b) => a.iri.localeCompare(b.iri));
 
                     // 2. If a parent is provided, create the 'partOf' relation
                     if (parentIri) {

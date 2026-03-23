@@ -175,7 +175,6 @@ describe('Ontology Store', () => {
         expect(updatedOntology?.relations.expands[iriToDelete]).toBeUndefined();
     
         // Assert relations where it was an object are removed
-        expect(updatedOntology?.relations.expands['http://edugraph.io/edu/C']).not.toContain(iriToDelete);
         // Check if the subject key is removed if the array becomes empty
         expect(updatedOntology?.relations.expands['http://edugraph.io/edu/C']).toBeUndefined();
 

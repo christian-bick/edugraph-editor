@@ -33,10 +33,12 @@ export const getGraphData = (
     }
 
     if (relations) {
-        Object.entries(relations).forEach(([subjectIRI, objectIRIs]) => {
-            const sourceId = entityIRItoIdMap.get(subjectIRI);
+        Object.entries(relations)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .forEach(([subjectIRI, objectIRIs]) => {
+                const sourceId = entityIRItoIdMap.get(subjectIRI);
 
-            objectIRIs.forEach((objectIRI, index) => {
+                objectIRIs.forEach((objectIRI, index) => {
                 const targetId = entityIRItoIdMap.get(objectIRI);
 
                 if (sourceId && targetId) {

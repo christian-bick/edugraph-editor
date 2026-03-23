@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import {OntologyEntity} from "../types/ontology-types.ts";
+import type {OntologyEntity} from "../types/ontology-types.ts";
 
 export interface SelectedEntity extends OntologyEntity {
     relations: {
