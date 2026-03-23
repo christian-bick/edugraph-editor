@@ -22,6 +22,11 @@ export const GraphExplorer: React.FC = () => {
     const {selectedEntityIri, setSelectedEntityIri} = useSelectedEntityStore();
     const {activeFocus} = useFocusStore();
 
+    const activeFocusRef = useRef(activeFocus);
+    useEffect(() => {
+        activeFocusRef.current = activeFocus;
+    }, [activeFocus]);
+
     const ontology = useMemo(() => {
         return ontologies[activeDimension as keyof typeof ontologies];
     }, [ontologies, activeDimension]);
@@ -99,7 +104,7 @@ export const GraphExplorer: React.FC = () => {
 
             // Handle canvas click to deselect
             graph.on('canvas:click', () => {
-                if (activeFocus === 'global') {
+                if (activeFocusRef.current === 'global') {
                     setSelectedEntityIri(null);
                 }
             });
