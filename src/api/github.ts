@@ -63,7 +63,12 @@ export const verifyToken = async (token: string): Promise<boolean> => {
     }
 };
 
-export const loadOntologyFiles = async (files: string[], branch = 'main'): Promise<string[]> => {
+export interface OntologyFileResponse {
+    content: string;
+    sha: string;
+}
+
+export const loadOntologyFiles = async (files: string[], branch = 'main'): Promise<OntologyFileResponse[]> => {
     const octokit = getOctokit();
 
     const expressions = files.reduce((obj, file, index) => {
@@ -82,6 +87,7 @@ export const loadOntologyFiles = async (files: string[], branch = 'main'): Promi
                     file${index}: object(expression: $expression${index}) {
                         ... on Blob {
                             text
+                            oid
                         }
                     }
                 `).join('\n')}
@@ -97,8 +103,11 @@ export const loadOntologyFiles = async (files: string[], branch = 'main'): Promi
 
     return files.map((_, index) => {
         const fileContent = response.repository[`file${index}`];
-        if (fileContent && fileContent.text) {
-            return fileContent.text;
+        if (fileContent && fileContent.text && fileContent.oid) {
+            return {
+                content: fileContent.text,
+                sha: fileContent.oid,
+            };
         }
         // Handle cases where a file might not be found
         throw new Error(`Content for file ${files[index]} not found in GraphQL response.`);
@@ -126,11 +135,9 @@ export const pushOntologyFile = async (
     content: string, // Unencoded content
     branch: string,
     commitMessage: string,
+    expectedSha: string,
 ): Promise<string> => {
     const octokit = getOctokit();
-
-    // Get the current SHA of the file
-    const currentFileSha = await getFileSha(filePath, branch);
 
     const response = await octokit.repos.createOrUpdateFileContents({
         owner: REPO_OWNER,
@@ -138,7 +145,7 @@ export const pushOntologyFile = async (
         path: filePath,
         message: commitMessage,
         content: toBase64(content), // Content must be base64 encoded
-        sha: currentFileSha, // Required for updates
+        sha: expectedSha, // Required for safe updates
         branch: branch,
     });
 

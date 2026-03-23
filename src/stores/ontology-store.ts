@@ -191,18 +191,19 @@ export const useOntologyStore = create<OntologyState>()((set, get) => ({
 
             for (let i = 0; i < files.length; i++) {
                 const fileName = files[i];
-                const rawTurtle = rawTurtles[i];
+                const fileResponse = rawTurtles[i];
                 const type = fileMapping[fileName];
 
-                const quads = await getQuadsFromString(rawTurtle);
+                const quads = await getQuadsFromString(fileResponse.content);
                 const entityInfoMap = createEntityInfoMap(quads);
 
                 const newOntology: Ontology = {
                     entities: [],
                     relations: { expands: {}, partOf: {}, includes: {} },
+                    sha: fileResponse.sha
                 };
 
-                populateOntologyFromQuads(newOntology, quads, entityInfoMap);
+                populateOntologyFromQuads(newOntology, quads, entityInfoMap, fileResponse.sha);
                 finalOntologies[type] = enrichOntology(newOntology);
             }
 

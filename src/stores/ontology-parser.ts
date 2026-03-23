@@ -67,8 +67,10 @@ export const createEntityInfoMap = (quads: Quad[]): Map<string, EntityTempInfo> 
 export const populateOntologyFromQuads = (
     ontology: Ontology,
     quads: Quad[],
-    entityInfoMap: Map<string, EntityTempInfo>
+    entityInfoMap: Map<string, EntityTempInfo>,
+    sha: string | null = null
 ) => {
+    ontology.sha = sha;
     // Second pass: Populate types, natural names, and relations
     quads.forEach(quad => {
         const subjectIRI = quad.subject.value;

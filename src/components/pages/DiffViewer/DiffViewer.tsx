@@ -76,9 +76,12 @@ export const DiffViewer = () => {
             if (currentText === null) {
                  throw new Error("Serialized current ontology is not available.");
             }
+            if (!originalOntology?.sha) {
+                throw new Error("Original ontology SHA is not available. Please refresh.");
+            }
             const commitMessage = `feat: update ${dim} ontology`;
 
-            await pushOntologyFile(filePath, currentText, activeBranch, commitMessage);
+            await pushOntologyFile(filePath, currentText, activeBranch, commitMessage, originalOntology.sha);
 
             // On success:
             // 1. Reset original ontology by re-fetching
