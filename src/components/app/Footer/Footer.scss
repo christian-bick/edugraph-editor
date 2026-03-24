@@ -16,13 +16,58 @@
     left: 0;
     z-index: 10;
 
-    .undo-redo-controls {
+    .footer-controls {
         display: flex;
-        gap: 0.5rem;
+        align-items: center;
+        gap: 1rem;
 
-        button.active {
-            background-color: #007bff;
-            color: white;
+        button {
+            padding: 0.4rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            border: 1px solid colors.$light-border-color;
+            background-color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            &:not(:disabled):hover {
+                background-color: colors.$light-hover-background;
+            }
+
+            &.push-button {
+                background-color: #007bff;
+                color: white;
+                border-color: darken(#007bff, 10%);
+                font-weight: bold;
+
+                &:not(:disabled):hover {
+                    background-color: darken(#007bff, 10%);
+                }
+            }
+
+            .arrow-left {
+                width: 0;
+                height: 0;
+                border-top: 5px solid transparent;
+                border-bottom: 5px solid transparent;
+                border-right: 8px solid currentColor;
+            }
+
+            .arrow-right {
+                width: 0;
+                height: 0;
+                border-top: 5px solid transparent;
+                border-bottom: 5px solid transparent;
+                border-left: 8px solid currentColor;
+            }
         }
     }
 }

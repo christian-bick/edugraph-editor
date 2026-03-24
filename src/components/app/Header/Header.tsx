@@ -4,32 +4,20 @@ import { PerspectiveSelector } from "./PerspectiveSelector/PerspectiveSelector.t
 import './Header.scss';
 import GithubIcon from '../../../assets/icons/github.svg';
 import GeminiIcon from '../../../assets/icons/gemini.svg';
+import RefreshIcon from '../../../assets/icons/refresh.svg';
 import {TokenManager} from "../TokenManager/TokenManager.tsx";
 import {GeminiTokenManager} from "../TokenManager/GeminiTokenManager.tsx";
 import {useState} from "react";
 import {useAuthStore} from "../../../stores/auth-store.ts";
+import {useBranchStore} from "../../../stores/branch-store.ts";
 import {Modal} from "../../global/Modal/Modal.tsx";
-import {type CurrentOntologyState, useCurrentOntologyStore} from "../../../stores/ontology-store.ts";
-import {useStore} from "zustand";
-import type {TemporalState} from "zundo";
-import {useViewStore} from "../../../stores/view-store.ts";
 import clsx from "clsx";
-
-const useTemporalStore = <T, >(
-    selector: (state: TemporalState<CurrentOntologyState>) => T,
-    equality?: (a: T, b: T) => boolean,
-) => useStore(useCurrentOntologyStore.temporal, selector, equality);
-
 
 export const Header = () => {
     const [showGithubTokenManager, setShowGithubTokenManager] = useState(false);
     const [showGeminiTokenManager, setShowGeminiTokenManager] = useState(false);
     const { token, geminiToken } = useAuthStore();
-
-    const { pastStates } = useTemporalStore(
-        (state) => state,
-    );
-    const { setView } = useViewStore()
+    const { fetchBranches, loading } = useBranchStore();
 
     return (
         <header className="header">
@@ -38,15 +26,14 @@ export const Header = () => {
                 <a href="/">EduGraph Editor</a>
             </div>
             <div className="header-controls">
-                {token && (
-                    <button
-                        onClick={() => setView('diff')}
-                        disabled={!pastStates.length}
-                        className={clsx({ active: pastStates.length })}
-                    >
-                        Push
-                    </button>
-                )}
+                <button 
+                    className={clsx('refresh-button', { loading })} 
+                    onClick={() => fetchBranches()}
+                    disabled={loading}
+                    title="Refresh Branches"
+                >
+                    <img src={RefreshIcon} alt="Refresh"/>
+                </button>
                 <BranchSelector/>
                 <DimensionSelector/>
                 <PerspectiveSelector/>

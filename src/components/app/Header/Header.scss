@@ -53,6 +53,38 @@
         gap: 1rem;
         padding: 0 1rem;
 
+        .refresh-button {
+            background-color: colors.$section-background;
+            border: 1px solid colors.$light-border-color;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+
+            &:hover:not(:disabled) {
+                background-color: colors.$light-hover-background;
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+            img {
+                width: 18px;
+                height: 18px;
+                color: colors.$dark-text;
+            }
+
+            &.loading img {
+                animation: spin 1s linear infinite;
+            }
+        }
+
         .token-managers {
             display: flex;
             gap: 0.5rem;
@@ -111,6 +143,11 @@
     @media (max-width: 800px) {
         justify-content: center;
     }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .custom-selector {
@@ -183,4 +220,3 @@
         }
     }
 }
-
