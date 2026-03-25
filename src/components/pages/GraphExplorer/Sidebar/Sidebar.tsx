@@ -196,28 +196,43 @@ export const Sidebar: React.FC = () => {
                             </div>
 
                             <div className="relations-group">
-                                {currentPerspectiveRelations.map(rel => (
-                                    <RelationSection
-                                        key={rel.id}
-                                        title={rel.label}
-                                        relationName={rel.id}
-                                        entities={selectedEntity.relations[rel.id]}
-                                        minRelations={rel.id === 'partOf' ? 1 : 0}
-                                        setSelectedEntityIri={setSelectedEntityIri}
-                                    />
-                                ))}
+                                {currentPerspectiveRelations
+                                    .sort((a, b) => {
+                                        const aEmpty = !selectedEntity.relations[a.id] || selectedEntity.relations[a.id].length === 0;
+                                        const bEmpty = !selectedEntity.relations[b.id] || selectedEntity.relations[b.id].length === 0;
+                                        if (aEmpty && !bEmpty) return 1;
+                                        if (!aEmpty && bEmpty) return -1;
+                                        return 0;
+                                    })
+                                    .map(rel => (
+                                        <RelationSection 
+                                            key={rel.id}
+                                            title={rel.label} 
+                                            relationName={rel.id} 
+                                            entities={selectedEntity.relations[rel.id]} 
+                                            minRelations={rel.id === 'partOf' ? 1 : 0}
+                                            setSelectedEntityIri={setSelectedEntityIri} 
+                                        />
+                                    ))}
                             </div>
 
                             <div className="relations-group inverse">
                                 {currentPerspectiveRelations
                                     .filter(rel => rel.id !== rel.inverseId)
+                                    .sort((a, b) => {
+                                        const aEmpty = !selectedEntity.relations[a.inverseId] || selectedEntity.relations[a.inverseId].length === 0;
+                                        const bEmpty = !selectedEntity.relations[b.inverseId] || selectedEntity.relations[b.inverseId].length === 0;
+                                        if (aEmpty && !bEmpty) return 1;
+                                        if (!aEmpty && bEmpty) return -1;
+                                        return 0;
+                                    })
                                     .map(rel => (
-                                        <RelationSection
+                                        <RelationSection 
                                             key={`${rel.id}-inverse`}
-                                            title={rel.inverseLabel}
-                                            entities={selectedEntity.relations[rel.inverseId]}
-                                            isInverse
-                                            setSelectedEntityIri={setSelectedEntityIri}
+                                            title={rel.inverseLabel} 
+                                            entities={selectedEntity.relations[rel.inverseId]} 
+                                            isInverse 
+                                            setSelectedEntityIri={setSelectedEntityIri} 
                                         />
                                     ))
                                 }
