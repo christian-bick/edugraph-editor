@@ -10,6 +10,7 @@ import type {OntologyEntity, RelationType} from "../../../../types/ontology-type
 import { AddRelationModal } from '../AddRelation/AddRelation.tsx';
 import { CreateEntity } from '../CreateEntity/CreateEntity.tsx';
 import { EntitySearch } from '../EntitySearch/EntitySearch.tsx';
+import { getRelationsByPerspective } from '../../../../config/relations.ts';
 
 interface RelationSectionProps {
     title: string;
@@ -76,35 +77,36 @@ export const Sidebar: React.FC = () => {
         if (!entity) return null;
 
         const allEntities = ontology.entities;
-        const directRelations: { [relationName: string]: OntologyEntity[] } = {};
-        for (const rel in ontology.relations) {
-            const relTyped = rel as keyof typeof ontology.relations;
+        const allRelations: { [key: string]: OntologyEntity[] } = {};
+
+        // 1. Process all direct relations
+        for (const relType in ontology.relations) {
+            const relTyped = relType as RelationType;
             if (ontology.relations[relTyped]?.[entity.iri]) {
                 const relatedIris = ontology.relations[relTyped]![entity.iri];
-                directRelations[relTyped] = relatedIris.map(iri => allEntities.find(e => e.iri === iri)!).filter(Boolean) as OntologyEntity[];
+                allRelations[relTyped] = relatedIris
+                    .map(iri => allEntities.find(e => e.iri === iri))
+                    .filter(Boolean) as OntologyEntity[];
             }
         }
 
-        const inverseRelations = {
-            expandedBy: invertRelations(ontology.relations.expands),
-            hasPart: invertRelations(ontology.relations.partOf),
-            includedBy: invertRelations(ontology.relations.includes),
-        };
-
-        const allRelations: { [key: string]: OntologyEntity[] } = { ...directRelations };
-        for (const rel in inverseRelations) {
-            const relTyped = rel as keyof typeof inverseRelations;
-            if (inverseRelations[relTyped]?.[entity.iri]) {
-                const relatedIris = inverseRelations[relTyped]![entity.iri];
-                allRelations[relTyped] = relatedIris.map(iri => allEntities.find(e => e.iri === iri)!).filter(Boolean) as OntologyEntity[];
+        // 2. Process all inverse relations defined in our config
+        const perspectiveRelations = getRelationsByPerspective(activePerspective);
+        perspectiveRelations.forEach(rel => {
+            const invertedMap = invertRelations(ontology.relations[rel.id] || {});
+            if (invertedMap[entity.iri]) {
+                const relatedIris = invertedMap[entity.iri];
+                allRelations[rel.inverseId] = relatedIris
+                    .map(iri => allEntities.find(e => e.iri === iri))
+                    .filter(Boolean) as OntologyEntity[];
             }
-        }
+        });
 
         return {
             ...entity,
             relations: allRelations,
         };
-    }, [selectedEntityIri, ontologies, activeDimension]);
+    }, [selectedEntityIri, ontologies, activeDimension, activePerspective]);
 
     const hasChildren = useMemo(() => {
         if (!selectedEntity?.relations.hasPart) return false;
@@ -117,6 +119,10 @@ export const Sidebar: React.FC = () => {
             setSelectedEntityIri(null);
         }
     }
+
+    const currentPerspectiveRelations = useMemo(() => 
+        getRelationsByPerspective(activePerspective), 
+    [activePerspective]);
 
     return (
         <>
@@ -154,17 +160,23 @@ export const Sidebar: React.FC = () => {
                                 </div>
                             </div>
 
-                            {activePerspective === 'Progression' ? (
-                                <>
-                                    <RelationSection title="Expands" relationName="expands" entities={selectedEntity.relations.expands} setSelectedEntityIri={setSelectedEntityIri} />
-                                    <RelationSection title="Expanded By" entities={selectedEntity.relations.expandedBy} isInverse setSelectedEntityIri={setSelectedEntityIri} />
-                                </>
-                            ) : (
-                                <>
-                                    <RelationSection title="Parents" relationName="partOf" entities={selectedEntity.relations.partOf} minRelations={1} setSelectedEntityIri={setSelectedEntityIri} />
-                                    <RelationSection title="Children" entities={selectedEntity.relations.hasPart} isInverse setSelectedEntityIri={setSelectedEntityIri} />
-                                </>
-                            )}
+                            {currentPerspectiveRelations.map(rel => (
+                                <React.Fragment key={rel.id}>
+                                    <RelationSection 
+                                        title={rel.label} 
+                                        relationName={rel.id} 
+                                        entities={selectedEntity.relations[rel.id]} 
+                                        minRelations={rel.id === 'partOf' ? 1 : 0}
+                                        setSelectedEntityIri={setSelectedEntityIri} 
+                                    />
+                                    <RelationSection 
+                                        title={rel.inverseLabel} 
+                                        entities={selectedEntity.relations[rel.inverseId]} 
+                                        isInverse 
+                                        setSelectedEntityIri={setSelectedEntityIri} 
+                                    />
+                                </React.Fragment>
+                            ))}
                         </div>
                         
                         <div className="sidebar-footer">

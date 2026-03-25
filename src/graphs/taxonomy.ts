@@ -1,12 +1,12 @@
 import type {G6Edge, G6Node} from "../types/graph-types.ts";
-import type {Ontology, OntologyRelations} from "../types/ontology-types.ts";
+import type {Ontology, OntologyRelations, RelationType} from "../types/ontology-types.ts";
 import {getPredecessors, getSuccessors, invertRelations, toNaturalName} from "../stores/utils.ts";
 import {FocusMode} from "../stores/focus-store.ts";
 
 export const getGraphData = (
     ontology: Ontology | null,
     activeDimension: string,
-    filterRelationType: keyof OntologyRelations | null = null,
+    filterRelationTypes: RelationType[] = [],
     filterOrphanNodes = false,
     inverse = false,
     focusMode: FocusMode = 'global',
@@ -15,7 +15,7 @@ export const getGraphData = (
 ) => {
     let nodes: G6Node[] = [];
     let edges: G6Edge[] = [];
-    if (!ontology || !filterRelationType) return { nodes, edges };
+    if (!ontology || filterRelationTypes.length === 0) return { nodes, edges };
 
     const entityIRItoIdMap = new Map<string, string>();
     ontology.entities.forEach(entity => {
@@ -28,35 +28,37 @@ export const getGraphData = (
         });
     });
 
-    let relations = ontology.relations[filterRelationType];
-    if (inverse) {
-        relations = invertRelations(relations);
-    }
+    filterRelationTypes.forEach(relationType => {
+        let relations = ontology.relations[relationType];
+        if (inverse) {
+            relations = invertRelations(relations);
+        }
 
-    if (relations) {
-        Object.entries(relations)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .forEach(([subjectIRI, objectIRIs]) => {
-                const sourceId = entityIRItoIdMap.get(subjectIRI);
+        if (relations) {
+            Object.entries(relations)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .forEach(([subjectIRI, objectIRIs]) => {
+                    const sourceId = entityIRItoIdMap.get(subjectIRI);
 
-                objectIRIs.forEach((objectIRI, index) => {
-                    const targetId = entityIRItoIdMap.get(objectIRI);
+                    objectIRIs.forEach((objectIRI, index) => {
+                        const targetId = entityIRItoIdMap.get(objectIRI);
 
-                    if (sourceId && targetId) {
-                        edges.push({
-                            id: `${sourceId}-${filterRelationType}-${targetId}-${index}`,
-                            source: sourceId,
-                            target: targetId,
-                            label: filterRelationType,
-                        });
-                    }
+                        if (sourceId && targetId) {
+                            edges.push({
+                                id: `${sourceId}-${relationType}-${targetId}-${index}`,
+                                source: sourceId,
+                                target: targetId,
+                                label: relationType,
+                            });
+                        }
+                    });
                 });
-            });
-    }
+        }
+    });
 
     if (focusMode !== 'global' && selectedEntityIri) {
         const irisToKeep = new Set<string>([selectedEntityIri]);
-        const relationsToFollow = filterRelationType ? [filterRelationType] : [];
+        const relationsToFollow = filterRelationTypes;
 
         if (focusMode === 'ancestry') {
             const successors = getSuccessors(selectedEntityIri, ontology.relations, relationsToFollow);
@@ -64,12 +66,14 @@ export const getGraphData = (
             successors.forEach(iri => irisToKeep.add(iri));
             predecessors.forEach(iri => irisToKeep.add(iri));
         } else if (focusMode === 'local') {
-            const directSuccessors = ontology.relations[filterRelationType]?.[selectedEntityIri] || [];
-            directSuccessors.forEach(iri => irisToKeep.add(iri));
+            filterRelationTypes.forEach(relationType => {
+                const directSuccessors = ontology.relations[relationType]?.[selectedEntityIri] || [];
+                directSuccessors.forEach(iri => irisToKeep.add(iri));
 
-            const inverted = invertRelations(ontology.relations[filterRelationType] || {});
-            const directPredecessors = inverted[selectedEntityIri] || [];
-            directPredecessors.forEach(iri => irisToKeep.add(iri));
+                const inverted = invertRelations(ontology.relations[relationType] || {});
+                const directPredecessors = inverted[selectedEntityIri] || [];
+                directPredecessors.forEach(iri => irisToKeep.add(iri));
+            });
         }
 
         nodes = nodes.filter(node => irisToKeep.has(node.id));

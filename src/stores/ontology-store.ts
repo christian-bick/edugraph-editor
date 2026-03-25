@@ -1,6 +1,6 @@
 import {create} from 'zustand'
 import {loadOntologyFiles} from '../api/github.ts'
-import type {Ontology, OntologyEntity, RelationType} from "../types/ontology-types.ts";
+import type {Ontology, OntologyEntity, RelationType, OntologyRelations} from "../types/ontology-types.ts";
 import {
     createEntityInfoMap,
     enrichOntology,
@@ -9,6 +9,7 @@ import {
 } from "./ontology-parser.ts";
 import {temporal} from 'zundo';
 import {produce} from 'immer';
+import { RELATIONS } from "../config/relations.ts";
 
 const IRI_NAMESPACE = 'http://edugraph.io/edu/';
 
@@ -197,9 +198,14 @@ export const useOntologyStore = create<OntologyState>()((set, get) => ({
                 const quads = await getQuadsFromString(fileResponse.content);
                 const entityInfoMap = createEntityInfoMap(quads);
 
+                const relations: OntologyRelations = {} as any;
+                RELATIONS.forEach(rel => {
+                    relations[rel.id] = {};
+                });
+
                 const newOntology: Ontology = {
                     entities: [],
-                    relations: { expands: {}, partOf: {}, includes: {} },
+                    relations,
                     sha: fileResponse.sha
                 };
 

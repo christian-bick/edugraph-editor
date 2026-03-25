@@ -7,6 +7,7 @@ import { getSuccessors, invertRelations, toNaturalName } from '../../../../store
 import type { OntologyEntity, RelationType } from '../../../../types/ontology-types';
 import './AddRelation.scss';
 import LinkRmIcon from '../../../../assets/icons/link_rm.svg';
+import { RELATIONS, getRelationsByPerspective } from '../../../../config/relations.ts';
 
 interface AddRelationModalProps {
     isOpen: boolean;
@@ -42,14 +43,17 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
         const ontology = ontologies[activeDimension];
         if (!ontology) return { availableEntities: [], disabledIris: new Set<string>() };
 
-        const allRelations = {
-            ...ontology.relations,
-            hasPart: invertRelations(ontology.relations.partOf),
-            expandedBy: invertRelations(ontology.relations.expands),
-            includedIn: invertRelations(ontology.relations.includes),
+        const perspectiveRelations = getRelationsByPerspective(activePerspective);
+        
+        const allRelations: Record<string, Record<string, string[]>> = {
+            ...ontology.relations
         };
 
-        const relationsToFollow = activePerspective === 'Progression' ? ['expands', 'includes'] : ['hasPart'];
+        perspectiveRelations.forEach(rel => {
+            allRelations[rel.inverseId] = invertRelations(ontology.relations[rel.id] || {});
+        });
+
+        const relationsToFollow = perspectiveRelations.map(rel => rel.id);
         const successors = getSuccessors(selectedEntityIri, allRelations, relationsToFollow);
         const currentRelationIris = new Set(currentRelations.map(e => e.iri));
         const selfIri = new Set([selectedEntityIri]);

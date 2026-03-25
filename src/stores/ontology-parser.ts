@@ -1,5 +1,6 @@
 import { Parser, Quad } from 'n3';
-import type {Ontology} from "../types/ontology-types.ts";
+import type {Ontology, OntologyRelations} from "../types/ontology-types.ts";
+import { RELATIONS } from "../config/relations.ts";
 
 // RDF URIs based on core-ontology.ttl
 const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
@@ -13,10 +14,6 @@ const OWL_NAMED_INDIVIDUAL = 'http://www.w3.org/2002/07/owl#NamedIndividual';
 const TYPE_ABILITY = EDU_BASE + 'Ability';
 const TYPE_AREA = EDU_BASE + 'Area';
 const TYPE_SCOPE = EDU_BASE + 'Scope';
-
-const PREDICATE_EXPANDS = EDU_BASE + 'expands';
-const PREDICATE_PARTOF = EDU_BASE + 'partOf';
-const PREDICATE_INCLUDES = EDU_BASE + 'includes';
 
 export interface EntityTempInfo {
     type: 'Ability' | 'Area' | 'Scope';
@@ -71,6 +68,12 @@ export const populateOntologyFromQuads = (
     sha: string | null = null
 ) => {
     ontology.sha = sha;
+    
+    const predicateToRelationId = new Map<string, keyof OntologyRelations>();
+    RELATIONS.forEach(rel => {
+        predicateToRelationId.set(EDU_BASE + rel.id, rel.id);
+    });
+
     // Second pass: Populate types, natural names, and relations
     quads.forEach(quad => {
         const subjectIRI = quad.subject.value;
@@ -97,21 +100,15 @@ export const populateOntologyFromQuads = (
             const subjectName = quad.subject.value;
             const objectName = quad.object.value;
 
-            if (predicateIRI === PREDICATE_EXPANDS) {
-                if (!ontology.relations.expands[subjectName]) {
-                    ontology.relations.expands[subjectName] = [];
+            const relationId = predicateToRelationId.get(predicateIRI);
+            if (relationId) {
+                if (!ontology.relations[relationId]) {
+                    ontology.relations[relationId] = {};
                 }
-                ontology.relations.expands[subjectName].push(objectName);
-            } else if (predicateIRI === PREDICATE_PARTOF) {
-                if (!ontology.relations.partOf[subjectName]) {
-                    ontology.relations.partOf[subjectName] = [];
+                if (!ontology.relations[relationId][subjectName]) {
+                    ontology.relations[relationId][subjectName] = [];
                 }
-                ontology.relations.partOf[subjectName].push(objectName);
-            } else if (predicateIRI === PREDICATE_INCLUDES) {
-                if (!ontology.relations.includes[subjectName]) {
-                    ontology.relations.includes[subjectName] = [];
-                }
-                ontology.relations.includes[subjectName].push(objectName);
+                ontology.relations[relationId][subjectName].push(objectName);
             }
         }
     });

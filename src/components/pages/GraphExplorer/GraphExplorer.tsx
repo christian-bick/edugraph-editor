@@ -9,6 +9,7 @@ import {renderTaxonomyDagre} from "../../../graphs/taxonomy-dagre.ts";
 import {ActionSidebar} from "./ActionSidebar/ActionSidebar.tsx";
 import {useFocusStore} from "../../../stores/focus-store.ts";
 import {Graph} from "@antv/g6";
+import {getRelationsByPerspective} from "../../../config/relations.ts";
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -63,13 +64,21 @@ export const GraphExplorer: React.FC = () => {
     };
 
     const getData = () => {
-        let data;
-        if (activePerspective === 'Progression') {
-            data = getGraphData(ontology, activeDimension, 'expands', true, true, activeFocus, selectedEntityIri, false);
-        } else {
-            data = getGraphData(ontology, activeDimension, 'partOf', false, true, activeFocus, selectedEntityIri, true);
-        }
-        return data;
+        const relationTypes = getRelationsByPerspective(activePerspective).map(r => r.id);
+        const inverse = activePerspective !== 'Progression';
+        const useVirtualRoot = activePerspective === 'Taxonomy';
+        const filterOrphanNodes = activePerspective === 'Progression';
+
+        return getGraphData(
+            ontology,
+            activeDimension,
+            relationTypes,
+            filterOrphanNodes,
+            inverse,
+            activeFocus,
+            selectedEntityIri,
+            useVirtualRoot
+        );
     }
 
     // 1. Lifecycle Effect: Manages the G6 Instance (Creation/Destruction)

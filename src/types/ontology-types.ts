@@ -7,6 +7,11 @@ export interface OntologyEntity {
 
 export interface OntologyRelations {
     expands: Record<string, string[]>;
+    constrains: Record<string, string[]>;
+    inverts: Record<string, string[]>;
+    integrates: Record<string, string[]>;
+    decomposes: Record<string, string[]>;
+    translates: Record<string, string[]>;
     partOf: Record<string, string[]>;
     includes: Record<string, string[]>;
 }
@@ -18,4 +23,3 @@ export interface Ontology {
     relations: OntologyRelations;
     sha: string | null;
 }
-
