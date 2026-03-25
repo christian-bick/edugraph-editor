@@ -7,10 +7,10 @@ import {EditDefinition, EditIri} from '../EditEntity/EditEntity.tsx';
 import {invertRelations, toNaturalName} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
 import type {OntologyEntity, RelationType} from "../../../../types/ontology-types.ts";
-import { AddRelationModal } from '../AddRelation/AddRelation.tsx';
-import { CreateEntity } from '../CreateEntity/CreateEntity.tsx';
-import { EntitySearch } from '../EntitySearch/EntitySearch.tsx';
-import { getRelationsByPerspective } from '../../../../config/relations.ts';
+import {AddRelationModal} from '../AddRelation/AddRelation.tsx';
+import {CreateEntity} from '../CreateEntity/CreateEntity.tsx';
+import {EntitySearch} from '../EntitySearch/EntitySearch.tsx';
+import {getRelationsByPerspective} from '../../../../config/relations.ts';
 import clsx from 'clsx';
 
 interface RelationSectionProps {
@@ -22,7 +22,14 @@ interface RelationSectionProps {
     setSelectedEntityIri: (iri: string) => void;
 }
 
-const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isInverse = false, minRelations = 0, relationName, setSelectedEntityIri }) => {
+const RelationSection: React.FC<RelationSectionProps> = ({
+                                                             title,
+                                                             entities,
+                                                             isInverse = false,
+                                                             minRelations = 0,
+                                                             relationName,
+                                                             setSelectedEntityIri
+                                                         }) => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const isEmpty = !entities || entities.length === 0;
 
@@ -31,7 +38,7 @@ const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isIn
     }
 
     return (
-        <div className={clsx("sidebar-section", { "is-empty": isEmpty })}>
+        <div className={clsx("sidebar-section", {"is-empty": isEmpty})}>
             <div className="sidebar-header">
                 <h3>{title}</h3>
                 {!isInverse && (
@@ -112,9 +119,9 @@ const computeEntityRelations = (
 };
 
 export const Sidebar: React.FC = () => {
-    const { selectedEntityIri, setSelectedEntityIri } = useSelectedEntityStore();
-    const { ontologies, deleteEntity } = useCurrentOntologyStore();
-    const { activeDimension, activePerspective } = useBranchStore();
+    const {selectedEntityIri, setSelectedEntityIri} = useSelectedEntityStore();
+    const {ontologies, deleteEntity} = useCurrentOntologyStore();
+    const {activeDimension, activePerspective} = useBranchStore();
     const [isEditIriOpen, setIsEditIriOpen] = useState(false);
     const [isEditDefinitionOpen, setIsEditDefinitionOpen] = useState(false);
     const [isCreateEntityOpen, setIsCreateEntityOpen] = useState(false);
@@ -147,9 +154,9 @@ export const Sidebar: React.FC = () => {
         }
     }
 
-    const currentPerspectiveRelations = useMemo(() => 
-        getRelationsByPerspective(activePerspective), 
-    [activePerspective]);
+    const currentPerspectiveRelations = useMemo(() =>
+            getRelationsByPerspective(activePerspective),
+        [activePerspective]);
 
     return (
         <>
@@ -189,13 +196,13 @@ export const Sidebar: React.FC = () => {
 
                             <div className="relations-group">
                                 {currentPerspectiveRelations.map(rel => (
-                                    <RelationSection 
+                                    <RelationSection
                                         key={rel.id}
-                                        title={rel.label} 
-                                        relationName={rel.id} 
-                                        entities={selectedEntity.relations[rel.id]} 
+                                        title={rel.label}
+                                        relationName={rel.id}
+                                        entities={selectedEntity.relations[rel.id]}
                                         minRelations={rel.id === 'partOf' ? 1 : 0}
-                                        setSelectedEntityIri={setSelectedEntityIri} 
+                                        setSelectedEntityIri={setSelectedEntityIri}
                                     />
                                 ))}
                             </div>
@@ -204,33 +211,34 @@ export const Sidebar: React.FC = () => {
                                 {currentPerspectiveRelations
                                     .filter(rel => rel.id !== rel.inverseId)
                                     .map(rel => (
-                                        <RelationSection 
+                                        <RelationSection
                                             key={`${rel.id}-inverse`}
-                                            title={rel.inverseLabel} 
-                                            entities={selectedEntity.relations[rel.inverseId]} 
-                                            isInverse 
-                                            setSelectedEntityIri={setSelectedEntityIri} 
+                                            title={rel.inverseLabel}
+                                            entities={selectedEntity.relations[rel.inverseId]}
+                                            isInverse
+                                            setSelectedEntityIri={setSelectedEntityIri}
                                         />
                                     ))
                                 }
                             </div>
                         </div>
-                        
-                        <div className="sidebar-footer">
-                            {activeDimension === 'Area' && activePerspective === 'Taxonomy' && (
+
+                        {activeDimension === 'Area' && activePerspective === 'Taxonomy' && (
+                            <div className="sidebar-footer">
                                 <div className="footer-buttons">
-                                    <button className="delete-btn" onClick={handleDelete} disabled={hasChildren} title={hasChildren ? 'Cannot delete an entity that has children.' : 'Delete this entity'}>
+                                    <button className="delete-btn" onClick={handleDelete} disabled={hasChildren}
+                                            title={hasChildren ? 'Cannot delete an entity that has children.' : 'Delete this entity'}>
                                         Delete Entity
                                     </button>
                                     <button className="new-child-btn" onClick={() => setIsCreateEntityOpen(true)}>
                                         New Child Entity
                                     </button>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </>
                 ) : (
-                    <EntitySearch />
+                    <EntitySearch/>
                 )}
             </aside>
             <EditIri
@@ -244,7 +252,7 @@ export const Sidebar: React.FC = () => {
             <CreateEntity
                 isOpen={isCreateEntityOpen}
                 onClose={() => setIsCreateEntityOpen(false)}
-                parentIri={selectedEntityIri} 
+                parentIri={selectedEntityIri}
             />
         </>
     );
