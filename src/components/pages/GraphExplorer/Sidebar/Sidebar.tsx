@@ -187,25 +187,33 @@ export const Sidebar: React.FC = () => {
                                 </div>
                             </div>
 
-                            {currentPerspectiveRelations.map(rel => (
-                                <React.Fragment key={rel.id}>
+                            <div className="relations-group">
+                                {currentPerspectiveRelations.map(rel => (
                                     <RelationSection 
+                                        key={rel.id}
                                         title={rel.label} 
                                         relationName={rel.id} 
                                         entities={selectedEntity.relations[rel.id]} 
                                         minRelations={rel.id === 'partOf' ? 1 : 0}
                                         setSelectedEntityIri={setSelectedEntityIri} 
                                     />
-                                    {rel.id !== rel.inverseId && (
+                                ))}
+                            </div>
+
+                            <div className="relations-group inverse">
+                                {currentPerspectiveRelations
+                                    .filter(rel => rel.id !== rel.inverseId)
+                                    .map(rel => (
                                         <RelationSection 
+                                            key={`${rel.id}-inverse`}
                                             title={rel.inverseLabel} 
                                             entities={selectedEntity.relations[rel.inverseId]} 
                                             isInverse 
                                             setSelectedEntityIri={setSelectedEntityIri} 
                                         />
-                                    )}
-                                </React.Fragment>
-                            ))}
+                                    ))
+                                }
+                            </div>
                         </div>
                         
                         <div className="sidebar-footer">

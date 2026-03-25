@@ -61,16 +61,31 @@
         padding: 0;
     }
 
+    .relations-group {
+        &.inverse {
+            margin-top: 1rem;
+            position: relative;
+        }
+    }
+
     .sidebar-section {
         background-color: colors.$section-background;
         padding: 0.75rem 1rem;
         border-radius: 8px;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
 
         &.is-empty {
-            margin-bottom: 0.5rem;
+            background-color: transparent;
+            padding: 0.25rem 1rem;
+            margin-bottom: 0.25rem;
+
             .sidebar-header {
                 margin-bottom: 0;
+                h3 {
+                    color: #999;
+                    font-weight: normal;
+                    font-size: 0.9rem;
+                }
             }
         }
 
