@@ -59,6 +59,55 @@ const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isIn
     );
 };
 
+/**
+ * Computes all relations for an entity, merging direct and inverse lists for symmetric relations.
+ */
+const computeEntityRelations = (
+    entityIri: string,
+    ontology: any,
+    perspective: string
+): { [key: string]: OntologyEntity[] } => {
+    const allEntities = ontology.entities;
+    const relationsMap: { [key: string]: OntologyEntity[] } = {};
+
+    // 1. Process all direct relations
+    for (const relType in ontology.relations) {
+        if (ontology.relations[relType]?.[entityIri]) {
+            const iris = ontology.relations[relType][entityIri];
+            relationsMap[relType] = iris
+                .map((iri: string) => allEntities.find((e: any) => e.iri === iri))
+                .filter(Boolean);
+        }
+    }
+
+    // 2. Process inverse relations from config
+    const perspectiveRelations = getRelationsByPerspective(perspective);
+    perspectiveRelations.forEach(rel => {
+        const inverted = invertRelations(ontology.relations[rel.id] || {});
+        if (inverted[entityIri]) {
+            const iris = inverted[entityIri];
+            const entities = iris
+                .map((iri: string) => allEntities.find((e: any) => e.iri === iri))
+                .filter(Boolean);
+
+            if (rel.id === rel.inverseId) {
+                // Symmetric: Merge into the direct relation list and deduplicate
+                const direct = relationsMap[rel.id] || [];
+                const combined = [...direct, ...entities];
+                const seen = new Set<string>();
+                relationsMap[rel.id] = combined.filter(e => {
+                    if (seen.has(e.iri)) return false;
+                    seen.add(e.iri);
+                    return true;
+                });
+            } else {
+                relationsMap[rel.inverseId] = entities;
+            }
+        }
+    });
+
+    return relationsMap;
+};
 
 export const Sidebar: React.FC = () => {
     const { selectedEntityIri, setSelectedEntityIri } = useSelectedEntityStore();
@@ -76,35 +125,11 @@ export const Sidebar: React.FC = () => {
         const entity = ontology.entities.find(e => e.iri === selectedEntityIri);
         if (!entity) return null;
 
-        const allEntities = ontology.entities;
-        const allRelations: { [key: string]: OntologyEntity[] } = {};
-
-        // 1. Process all direct relations
-        for (const relType in ontology.relations) {
-            const relTyped = relType as RelationType;
-            if (ontology.relations[relTyped]?.[entity.iri]) {
-                const relatedIris = ontology.relations[relTyped]![entity.iri];
-                allRelations[relTyped] = relatedIris
-                    .map(iri => allEntities.find(e => e.iri === iri))
-                    .filter(Boolean) as OntologyEntity[];
-            }
-        }
-
-        // 2. Process all inverse relations defined in our config
-        const perspectiveRelations = getRelationsByPerspective(activePerspective);
-        perspectiveRelations.forEach(rel => {
-            const invertedMap = invertRelations(ontology.relations[rel.id] || {});
-            if (invertedMap[entity.iri]) {
-                const relatedIris = invertedMap[entity.iri];
-                allRelations[rel.inverseId] = relatedIris
-                    .map(iri => allEntities.find(e => e.iri === iri))
-                    .filter(Boolean) as OntologyEntity[];
-            }
-        });
+        const relations = computeEntityRelations(selectedEntityIri, ontology, activePerspective);
 
         return {
             ...entity,
-            relations: allRelations,
+            relations,
         };
     }, [selectedEntityIri, ontologies, activeDimension, activePerspective]);
 
@@ -169,12 +194,14 @@ export const Sidebar: React.FC = () => {
                                         minRelations={rel.id === 'partOf' ? 1 : 0}
                                         setSelectedEntityIri={setSelectedEntityIri} 
                                     />
-                                    <RelationSection 
-                                        title={rel.inverseLabel} 
-                                        entities={selectedEntity.relations[rel.inverseId]} 
-                                        isInverse 
-                                        setSelectedEntityIri={setSelectedEntityIri} 
-                                    />
+                                    {rel.id !== rel.inverseId && (
+                                        <RelationSection 
+                                            title={rel.inverseLabel} 
+                                            entities={selectedEntity.relations[rel.inverseId]} 
+                                            isInverse 
+                                            setSelectedEntityIri={setSelectedEntityIri} 
+                                        />
+                                    )}
                                 </React.Fragment>
                             ))}
                         </div>
