@@ -35,8 +35,9 @@
                 border-bottom: none;
             }
 
-            &:hover {
+            &:hover, &.highlighted {
                 background-color: colors.$light-hover-background;
+                border-left-color: colors.$color-area;
             }
         }
     }
