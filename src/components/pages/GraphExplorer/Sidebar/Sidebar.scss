@@ -67,6 +67,13 @@
         border-radius: 8px;
         margin-bottom: 1.5rem;
 
+        &.is-empty {
+            margin-bottom: 0.5rem;
+            .sidebar-header {
+                margin-bottom: 0;
+            }
+        }
+
         .sidebar-header {
             display: flex;
             justify-content: space-between;

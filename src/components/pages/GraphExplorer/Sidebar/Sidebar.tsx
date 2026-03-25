@@ -11,6 +11,7 @@ import { AddRelationModal } from '../AddRelation/AddRelation.tsx';
 import { CreateEntity } from '../CreateEntity/CreateEntity.tsx';
 import { EntitySearch } from '../EntitySearch/EntitySearch.tsx';
 import { getRelationsByPerspective } from '../../../../config/relations.ts';
+import clsx from 'clsx';
 
 interface RelationSectionProps {
     title: string;
@@ -23,13 +24,14 @@ interface RelationSectionProps {
 
 const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isInverse = false, minRelations = 0, relationName, setSelectedEntityIri }) => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const isEmpty = !entities || entities.length === 0;
 
-    if (isInverse && (!entities || entities.length === 0)) {
+    if (isInverse && isEmpty) {
         return null;
     }
 
     return (
-        <div className="sidebar-section">
+        <div className={clsx("sidebar-section", { "is-empty": isEmpty })}>
             <div className="sidebar-header">
                 <h3>{title}</h3>
                 {!isInverse && (
@@ -38,7 +40,7 @@ const RelationSection: React.FC<RelationSectionProps> = ({ title, entities, isIn
                     </button>
                 )}
             </div>
-            {entities && entities.length > 0 && (
+            {!isEmpty && (
                 <ul>
                     {entities.map(e => (
                         <li key={e.iri} onClick={() => setSelectedEntityIri(e.iri)}>
