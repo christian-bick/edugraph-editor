@@ -82,12 +82,18 @@
             .sidebar-header {
                 margin-bottom: 0;
                 h3 {
-                    color: #999;
+                    color: #666;
                     font-weight: normal;
                     font-size: 0.9rem;
                 }
+                .edit-btn img {
+                    opacity: 0.5;
+                    width: 16px;
+                    height: 16px;
+                }
             }
         }
+
 
         .sidebar-header {
             display: flex;

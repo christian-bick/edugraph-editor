@@ -3,6 +3,7 @@ import {useSelectedEntityStore} from '../../../../stores/selected-entity-store';
 import {useBranchStore} from '../../../../stores/branch-store.ts';
 import './Sidebar.scss';
 import EditIcon from '../../../../assets/icons/edit.svg';
+import PlusIcon from '../../../../assets/icons/plus.svg';
 import {EditDefinition, EditIri} from '../EditEntity/EditEntity.tsx';
 import {invertRelations, toNaturalName} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
@@ -43,7 +44,7 @@ const RelationSection: React.FC<RelationSectionProps> = ({
                 <h3>{title}</h3>
                 {!isInverse && (
                     <button className="edit-btn" onClick={() => setIsAddModalOpen(true)}>
-                        <img src={EditIcon} alt="Add Relation"/>
+                        <img src={isEmpty ? PlusIcon : EditIcon} alt={isEmpty ? "Add Relation" : "Edit Relations"}/>
                     </button>
                 )}
             </div>
