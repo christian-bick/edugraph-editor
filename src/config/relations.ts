@@ -26,15 +26,15 @@ export const RELATIONS: RelationConfig[] = [
     {
         id: 'inverts',
         label: 'Inverts',
-        inverseId: 'inverts',
-        inverseLabel: 'Inverts',
+        inverseId: 'invertedBy',
+        inverseLabel: 'Inverted By',
         perspective: 'Progression',
     },
     {
         id: 'integrates',
         label: 'Integrates',
-        inverseId: 'integratedBy',
-        inverseLabel: 'Integrated By',
+        inverseId: 'integratedIn',
+        inverseLabel: 'Integrated In',
         perspective: 'Progression',
     },
     {
@@ -47,8 +47,8 @@ export const RELATIONS: RelationConfig[] = [
     {
         id: 'translates',
         label: 'Translates',
-        inverseId: 'translates',
-        inverseLabel: 'Translates',
+        inverseId: 'translatedTo',
+        inverseLabel: 'Translated To',
         perspective: 'Progression',
     },
     {
@@ -67,8 +67,8 @@ export const RELATIONS: RelationConfig[] = [
     }
 ];
 
-export const getRelationsByPerspective = (perspective: string) => 
+export const getRelationsByPerspective = (perspective: string) =>
     RELATIONS.filter(r => r.perspective === perspective);
 
-export const getRelationById = (id: string) => 
+export const getRelationById = (id: string) =>
     RELATIONS.find(r => r.id === id);
