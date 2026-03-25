@@ -70,7 +70,7 @@ const RelationSection: React.FC<RelationSectionProps> = ({
 };
 
 /**
- * Computes all relations for an entity, merging direct and inverse lists for symmetric relations.
+ * Computes all relations for an entity.
  */
 const computeEntityRelations = (
     entityIri: string,
@@ -96,23 +96,9 @@ const computeEntityRelations = (
         const inverted = invertRelations(ontology.relations[rel.id] || {});
         if (inverted[entityIri]) {
             const iris = inverted[entityIri];
-            const entities = iris
+            relationsMap[rel.inverseId] = iris
                 .map((iri: string) => allEntities.find((e: any) => e.iri === iri))
                 .filter(Boolean);
-
-            if (rel.id === rel.inverseId) {
-                // Symmetric: Merge into the direct relation list and deduplicate
-                const direct = relationsMap[rel.id] || [];
-                const combined = [...direct, ...entities];
-                const seen = new Set<string>();
-                relationsMap[rel.id] = combined.filter(e => {
-                    if (seen.has(e.iri)) return false;
-                    seen.add(e.iri);
-                    return true;
-                });
-            } else {
-                relationsMap[rel.inverseId] = entities;
-            }
         }
     });
 
@@ -205,20 +191,19 @@ export const Sidebar: React.FC = () => {
                                         return 0;
                                     })
                                     .map(rel => (
-                                        <RelationSection 
+                                        <RelationSection
                                             key={rel.id}
-                                            title={rel.label} 
-                                            relationName={rel.id} 
-                                            entities={selectedEntity.relations[rel.id]} 
+                                            title={rel.label}
+                                            relationName={rel.id}
+                                            entities={selectedEntity.relations[rel.id]}
                                             minRelations={rel.id === 'partOf' ? 1 : 0}
-                                            setSelectedEntityIri={setSelectedEntityIri} 
+                                            setSelectedEntityIri={setSelectedEntityIri}
                                         />
                                     ))}
                             </div>
 
                             <div className="relations-group inverse">
                                 {currentPerspectiveRelations
-                                    .filter(rel => rel.id !== rel.inverseId)
                                     .sort((a, b) => {
                                         const aEmpty = !selectedEntity.relations[a.inverseId] || selectedEntity.relations[a.inverseId].length === 0;
                                         const bEmpty = !selectedEntity.relations[b.inverseId] || selectedEntity.relations[b.inverseId].length === 0;
@@ -227,18 +212,17 @@ export const Sidebar: React.FC = () => {
                                         return 0;
                                     })
                                     .map(rel => (
-                                        <RelationSection 
+                                        <RelationSection
                                             key={`${rel.id}-inverse`}
-                                            title={rel.inverseLabel} 
-                                            entities={selectedEntity.relations[rel.inverseId]} 
-                                            isInverse 
-                                            setSelectedEntityIri={setSelectedEntityIri} 
+                                            title={rel.inverseLabel}
+                                            entities={selectedEntity.relations[rel.inverseId]}
+                                            isInverse
+                                            setSelectedEntityIri={setSelectedEntityIri}
                                         />
                                     ))
                                 }
                             </div>
                         </div>
-
                         {activeDimension === 'Area' && activePerspective === 'Taxonomy' && (
                             <div className="sidebar-footer">
                                 <div className="footer-buttons">
