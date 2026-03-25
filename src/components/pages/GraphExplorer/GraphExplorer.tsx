@@ -65,7 +65,6 @@ export const GraphExplorer: React.FC = () => {
 
     const getData = () => {
         const relationTypes = getRelationsByPerspective(activePerspective).map(r => r.id);
-        const inverse = activePerspective !== 'Progression';
         const useVirtualRoot = activePerspective === 'Taxonomy';
         const filterOrphanNodes = activePerspective === 'Progression';
 
@@ -74,7 +73,7 @@ export const GraphExplorer: React.FC = () => {
             activeDimension,
             relationTypes,
             filterOrphanNodes,
-            inverse,
+            true,
             activeFocus,
             selectedEntityIri,
             useVirtualRoot
