@@ -3,7 +3,7 @@ import { Modal } from '../../../global/Modal/Modal';
 import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
 import { useSelectedEntityStore } from '../../../../stores/selected-entity-store';
 import { useBranchStore } from '../../../../stores/branch-store';
-import { getSuccessors, invertRelations, toNaturalName } from '../../../../stores/utils';
+import { getPredecessors, toNaturalName } from '../../../../stores/utils';
 import type { OntologyEntity, RelationType } from '../../../../types/ontology-types';
 import './ModifyRelation.scss';
 import LinkRmIcon from '../../../../assets/icons/link_rm.svg';
@@ -54,21 +54,13 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
         if (!ontology) return { availableEntities: [], disabledIris: new Set<string>() };
 
         const perspectiveRelations = getRelationsByPerspective(activePerspective);
-        
-        const allRelations: Record<string, Record<string, string[]>> = {
-            ...ontology.relations
-        };
-
-        perspectiveRelations.forEach(rel => {
-            allRelations[rel.inverseId] = invertRelations(ontology.relations[rel.id] || {});
-        });
-
         const relationsToFollow = perspectiveRelations.map(rel => rel.id);
-        const successors = getSuccessors(selectedEntityIri, allRelations, relationsToFollow);
+
+        const predecessors = getPredecessors(selectedEntityIri, ontology.relations, relationsToFollow);
         const currentRelationIris = new Set(currentRelations.map(e => e.iri));
         const selfIri = new Set([selectedEntityIri]);
 
-        const newDisabledIris = new Set([...successors, ...currentRelationIris, ...selfIri]);
+        const newDisabledIris = new Set([...predecessors, ...currentRelationIris, ...selfIri]);
 
         const filteredEntities = searchQuery
             ? ontology.entities.filter(e =>
@@ -145,77 +137,79 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <h2>{sourceName}</h2>
-            <h3 className="modal-subtitle">Manage "{relationTitle}" Relations</h3>
+            <div className="modify-relation-modal">
+                <h2>{sourceName}</h2>
+                <h3 className="modal-subtitle">Manage "{relationTitle}" Relations</h3>
 
-            <div className="form-group search-container">
-                <input
-                    id="search-entities"
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        setHighlightedIndex(-1);
-                    }}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Search to add relation..."
-                    autoComplete="off"
-                />
-                {searchQuery && (
-                    <div className="search-results" ref={resultsRef}>
-                        {availableEntities.map((entity, index) => (
-                            <div
-                                key={entity.iri}
-                                className={`search-result-item ${disabledIris.has(entity.iri) ? 'disabled' : ''} ${index === highlightedIndex ? 'highlighted' : ''}`}
-                                onMouseDown={() => {
-                                    if (!disabledIris.has(entity.iri)) {
-                                        handleAddRelation(entity);
-                                    }
-                                }}
-                            >
-                                {toNaturalName(entity.name)}
-                            </div>
-                        ))}
-                        {availableEntities.length === 0 && <div className="search-result-item disabled">No results</div>}
-                    </div>
-                )}
-            </div>
+                <div className="form-group search-container">
+                    <input
+                        id="search-entities"
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setHighlightedIndex(-1);
+                        }}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Search to add relation..."
+                        autoComplete="off"
+                    />
+                    {searchQuery && (
+                        <div className="search-results" ref={resultsRef}>
+                            {availableEntities.map((entity, index) => (
+                                <div
+                                    key={entity.iri}
+                                    className={`search-result-item ${disabledIris.has(entity.iri) ? 'disabled' : ''} ${index === highlightedIndex ? 'highlighted' : ''}`}
+                                    onMouseDown={() => {
+                                        if (!disabledIris.has(entity.iri)) {
+                                            handleAddRelation(entity);
+                                        }
+                                    }}
+                                >
+                                    {toNaturalName(entity.name)}
+                                </div>
+                            ))}
+                            {availableEntities.length === 0 && <div className="search-result-item disabled">No results</div>}
+                        </div>
+                    )}
+                </div>
 
-            <div className="current-relations-list">
-                <ul>
-                    {currentRelations.map(entity => (
-                        <li key={entity.iri} className="relation-item">
-                            <div className="relation-item-content">
-                                <div className="relation-item-main">
-                                    <button 
-                                        className={clsx("toggle-definition-btn", { expanded: expandedIris.has(entity.iri) })}
-                                        onClick={() => toggleDefinition(entity.iri)}
-                                        title="Toggle definition"
-                                    >
-                                        ▶
-                                    </button>
-                                    <span className="relation-item-name">{toNaturalName(entity.name)}</span>
-                                    {showRemoveButton && (
-                                        <button className="remove-btn" onClick={() => handleRemoveRelation(entity.iri)}>
-                                            <img src={LinkRmIcon} alt="Remove"/>
+                <div className="current-relations-list">
+                    <ul>
+                        {currentRelations.map(entity => (
+                            <li key={entity.iri} className="relation-item">
+                                <div className="relation-item-content">
+                                    <div className="relation-item-main">
+                                        <button 
+                                            className={clsx("toggle-definition-btn", { expanded: expandedIris.has(entity.iri) })}
+                                            onClick={() => toggleDefinition(entity.iri)}
+                                            title="Toggle definition"
+                                        >
+                                            ▶
                                         </button>
+                                        <span className="relation-item-name">{toNaturalName(entity.name)}</span>
+                                        {showRemoveButton && (
+                                            <button className="remove-btn" onClick={() => handleRemoveRelation(entity.iri)}>
+                                                <img src={LinkRmIcon} alt="Remove"/>
+                                            </button>
+                                        )}
+                                    </div>
+                                    {expandedIris.has(entity.iri) && (
+                                        <div className="relation-item-definition">
+                                            {entity.definition || <i>No definition available.</i>}
+                                        </div>
                                     )}
                                 </div>
-                                {expandedIris.has(entity.iri) && (
-                                    <div className="relation-item-definition">
-                                        {entity.definition || <i>No definition available.</i>}
-                                    </div>
-                                )}
-                            </div>
-                        </li>
-                    ))}
-                    {currentRelations.length === 0 && <li className="no-relations">No relations of this type.</li>}
-                </ul>
-            </div>
+                            </li>
+                        ))}
+                        {currentRelations.length === 0 && <li className="no-relations">No relations of this type.</li>}
+                    </ul>
+                </div>
 
-            <div className="form-actions">
-                <button onClick={onClose}>Cancel</button>
-                <button onClick={handleSave} className="primary">Save</button>
+                <div className="form-actions">
+                    <button onClick={onClose}>Cancel</button>
+                    <button onClick={handleSave} className="primary">Save</button>
+                </div>
             </div>
         </Modal>
     );

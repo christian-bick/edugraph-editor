@@ -1,5 +1,11 @@
 @use "/src/colors.scss" as colors;
 
+.modify-relation-modal {
+    min-height: 450px;
+    display: flex;
+    flex-direction: column;
+}
+
 .modal-subtitle {
     font-size: 1rem;
     font-weight: normal;
@@ -56,7 +62,6 @@
         margin: 0;
         border: 1px solid #ddd;
         border-radius: 4px;
-        max-height: 250px;
         overflow-y: auto;
     }
 
@@ -66,13 +71,13 @@
         &:last-child {
             border-bottom: none;
         }
+    }
 
-        &.no-relations {
-            padding: 1rem;
-            color: #888;
-            font-style: italic;
-            text-align: center;
-        }
+    .no-relations {
+        padding: 1rem;
+        color: #888;
+        font-style: italic;
+        text-align: center;
     }
 
     .relation-item-content {
@@ -142,4 +147,14 @@
             height: 14px;
         }
     }
+}
+
+.form-actions {
+    display: flex;
+    flex-grow: 1;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-top: auto;
+    padding-top: 1.5rem;
 }
