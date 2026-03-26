@@ -1,3 +1,9 @@
+const GENERATE_DEFINITION_PROMPT = `You are an expert in competency ontologies.
+Your task is to provide a concise and precise definition for a given term within the ontology.
+The definition should be strictly text, without any conversational filler, preambles, or postambles.
+Crucially, mirror the language, technical vocabulary, and stylistic tone of the provided parent and sibling
+definitions to ensure the new definition fits seamlessly into the existing context.`;
+
 export const verifyGeminiToken = async (token: string): Promise<boolean> => {
     if (!token) return false;
     try {
@@ -19,11 +25,6 @@ export const generateDefinition = async (
 ): Promise<string> => {
     if (!token) throw new Error("Gemini API token is missing.");
 
-    const systemPrompt = `You are an expert in competency ontologies.
-Your task is to provide a concise and precise definition for a given term within the ontology.
-The definition should be strictly text, without any conversational filler, preambles (like "Sure, here is your definition"), or postambles.
-Focus only on the semantic meaning of the competency.`;
-
     let userPrompt = `Term to define: "${term}"\n\n`;
 
     if (context.parent) {
@@ -39,7 +40,7 @@ Focus only on the semantic meaning of the competency.`;
         userPrompt += `\n`;
     }
 
-    userPrompt += `Provide a definition for "${term}" based on this context.`;
+    userPrompt += `Provide a definition for "${term}" that adopts the wording and style of the context above.`;
 
     try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${token}`, {
@@ -51,7 +52,7 @@ Focus only on the semantic meaning of the competency.`;
                 contents: [
                     {
                         role: 'user',
-                        parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }]
+                        parts: [{ text: `${GENERATE_DEFINITION_PROMPT}\n\n${userPrompt}` }]
                     }
                 ],
                 generationConfig: {
