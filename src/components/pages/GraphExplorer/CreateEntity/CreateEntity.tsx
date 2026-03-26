@@ -4,6 +4,7 @@ import './CreateEntity.scss';
 import { toNaturalName } from '../../../../stores/utils';
 import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
 import { useBranchStore } from '../../../../stores/branch-store';
+import { useDefinitionSuggest, SuggestButton } from '../DefinitionSuggest/DefinitionSuggest';
 
 interface CreateEntityProps {
     isOpen: boolean;
@@ -20,6 +21,11 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
     const [id, setId] = useState('');
     const [definition, setDefinition] = useState('');
     const [idError, setIdError] = useState<string | null>(null);
+
+    const { isSuggesting, handleSuggest, canSuggest } = useDefinitionSuggest(
+        id,
+        parentIri
+    );
 
     const allEntityNames = useMemo(() => {
         const names = new Set<string>();
@@ -48,6 +54,11 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
             setIdError(null);
         }
     }, [id, allEntityNames]);
+
+    const onSuggest = async () => {
+        const suggestion = await handleSuggest();
+        if (suggestion) setDefinition(suggestion);
+    };
 
     const handleSave = () => {
         if (id && !idError) {
@@ -95,8 +106,17 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
             </div>
 
             <div className="form-actions">
-                <button onClick={onClose}>Cancel</button>
-                <button onClick={handleSave} className="primary" disabled={!id || !!idError}>Create Entity</button>
+                <div className="left-actions">
+                    <SuggestButton 
+                        onClick={onSuggest} 
+                        isSuggesting={isSuggesting} 
+                        disabled={!canSuggest} 
+                    />
+                </div>
+                <div className="right-actions">
+                    <button onClick={onClose}>Cancel</button>
+                    <button onClick={handleSave} className="primary" disabled={!id || !!idError}>Create Entity</button>
+                </div>
             </div>
         </Modal>
     );

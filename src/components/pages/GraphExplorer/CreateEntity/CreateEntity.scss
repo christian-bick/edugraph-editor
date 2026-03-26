@@ -1,3 +1,5 @@
+@use "/src/colors.scss" as colors;
+
 .form-group {
     margin-bottom: 1.5rem;
 
@@ -38,8 +40,47 @@
 .form-actions {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     gap: 1rem;
     margin-top: 2rem;
+
+    .left-actions {
+        flex: 1;
+        display: flex;
+    }
+
+    .right-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .suggest-button {
+        background-color: colors.$color-ability;
+        color: white;
+        border: 1px solid colors.$color-ability-dark;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.2s;
+
+        &:hover:not(:disabled) {
+            background-color: colors.$color-ability-dark;
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        img {
+            width: 18px;
+            height: 18px;
+            filter: brightness(0) invert(1);
+        }
+    }
 }
 
 .error-message {
