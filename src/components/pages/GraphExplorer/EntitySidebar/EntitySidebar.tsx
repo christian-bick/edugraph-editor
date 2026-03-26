@@ -171,7 +171,7 @@ export const EntitySidebar: React.FC = () => {
 
                             <div className="sidebar-section">
                                 <div className="sidebar-header">
-                                    <h3>Description</h3>
+                                    <h3>Definition</h3>
                                     <button className="edit-btn" onClick={() => setIsEditDefinitionOpen(true)}>
                                         <img src={EditIcon} alt="Edit Definition"/>
                                     </button>

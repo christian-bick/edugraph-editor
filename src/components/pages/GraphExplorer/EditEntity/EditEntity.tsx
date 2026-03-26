@@ -26,7 +26,7 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
         const ontology = ontologies[activeDimension as keyof typeof ontologies];
         return ontology?.entities.find(e => e.iri === selectedEntityIri) || null;
     }, [selectedEntityIri, ontologies, activeDimension]);
-    
+
     const [id, setId] = useState('');
     const [definition, setDefinition] = useState('');
 
@@ -36,7 +36,7 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
             setDefinition(originalEntity.definition);
         }
     }, [originalEntity]);
-    
+
     const handleSave = () => {
         if (originalEntity) {
             // No-op for now, or create a new entity
@@ -122,7 +122,6 @@ export const EditIri: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
             <h2>Edit IRI</h2>
 
             <div className="form-group">
-                <label>ID</label>
                 <div className="prefixed-input">
                     <span className="input-prefix">{IRI_NAMESPACE}</span>
                     <input
@@ -174,10 +173,10 @@ export const EditDefinition: React.FC<EditEntityProps> = ({ isOpen, onClose }) =
         try {
             const ontology = ontologies[activeDimension as keyof typeof ontologies];
             const relationType = activePerspective === 'Progression' ? 'expands' : 'partOf';
-            
+
             const parentIri = ontology.relations[relationType]?.[originalEntity.iri]?.[0];
             const parent = parentIri ? ontology.entities.find(e => e.iri === parentIri) : undefined;
-            
+
             let siblings: { name: string; definition: string }[] = [];
             if (parentIri) {
                 const inverted = invertRelations(ontology.relations[relationType]);
@@ -221,7 +220,6 @@ export const EditDefinition: React.FC<EditEntityProps> = ({ isOpen, onClose }) =
             <h2>Edit Definition</h2>
 
             <div className="form-group">
-                <label htmlFor="definition-textarea">Definition</label>
                 <textarea
                     id="definition-textarea"
                     value={definition}
@@ -232,9 +230,9 @@ export const EditDefinition: React.FC<EditEntityProps> = ({ isOpen, onClose }) =
 
             <div className="form-actions">
                 <div className="left-actions">
-                    <button 
-                        className="suggest-button" 
-                        onClick={handleSuggest} 
+                    <button
+                        className="suggest-button"
+                        onClick={handleSuggest}
                         disabled={isSuggesting || !geminiToken}
                     >
                         <img src={GeminiIcon} alt="Gemini" />
