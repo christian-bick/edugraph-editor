@@ -1,7 +1,7 @@
 import React, {useMemo, useState} from 'react';
 import {useSelectedEntityStore} from '../../../../stores/selected-entity-store';
 import {useBranchStore} from '../../../../stores/branch-store.ts';
-import './Sidebar.scss';
+import './EntitySidebar.scss';
 import EditIcon from '../../../../assets/icons/edit.svg';
 import PlusIcon from '../../../../assets/icons/plus.svg';
 import {EditDefinition, EditIri} from '../EditEntity/EditEntity.tsx';
@@ -105,7 +105,7 @@ const computeEntityRelations = (
     return relationsMap;
 };
 
-export const Sidebar: React.FC = () => {
+export const EntitySidebar: React.FC = () => {
     const {selectedEntityIri, setSelectedEntityIri} = useSelectedEntityStore();
     const {ontologies, deleteEntity} = useCurrentOntologyStore();
     const {activeDimension, activePerspective} = useBranchStore();

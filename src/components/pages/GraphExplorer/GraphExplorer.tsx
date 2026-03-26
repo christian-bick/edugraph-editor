@@ -4,7 +4,7 @@ import {useCurrentOntologyStore, useOntologyStore} from "../../../stores/ontolog
 import {useBranchStore} from "../../../stores/branch-store.ts";
 import './GraphExplorer.scss';
 import {useSelectedEntityStore} from "../../../stores/selected-entity-store.ts";
-import {Sidebar} from "./Sidebar/Sidebar.tsx";
+import {EntitySidebar} from "./EntitySidebar/EntitySidebar.tsx";
 import {renderTaxonomyDagre} from "../../../graphs/taxonomy-dagre.ts";
 import {ActionSidebar} from "./ActionSidebar/ActionSidebar.tsx";
 import {useFocusStore} from "../../../stores/focus-store.ts";
@@ -185,7 +185,7 @@ export const GraphExplorer: React.FC = () => {
                 ref={containerRef}
                 className="graph-explorer"
             ></div>
-            <Sidebar/>
+            <EntitySidebar/>
         </div>
     );
 };
