@@ -1,8 +1,15 @@
 @use "/src/colors.scss" as colors;
 
+.modal-subtitle {
+    font-size: 1rem;
+    font-weight: normal;
+    color: #666;
+    margin: -0.5rem 0 1.5rem 0;
+}
+
 .search-container {
     position: relative;
-    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .search-results {
@@ -16,7 +23,7 @@
     margin-top: 4px;
     max-height: 200px;
     overflow-y: auto;
-    z-index: 20; // Needs to be higher than modal content
+    z-index: 20;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
@@ -29,28 +36,19 @@
         border-bottom: none;
     }
 
-    &:hover {
-        background-color: colors.$light-hover-background;
-    }
-
-    &.highlighted {
+    &:hover, &.highlighted {
         background-color: colors.$light-hover-background;
     }
 
     &.disabled {
         color: #aaa;
         background-color: #f9f9f9;
+        cursor: not-allowed;
     }
 }
 
 .current-relations-list {
     margin-bottom: 1.5rem;
-
-    h4 {
-        margin: 0 0 0.5rem 0;
-        font-size: 1rem;
-        color: colors.$dark-text;
-    }
 
     ul {
         list-style: none;
@@ -58,15 +56,11 @@
         margin: 0;
         border: 1px solid #ddd;
         border-radius: 4px;
-        max-height: 150px;
+        max-height: 250px;
         overflow-y: auto;
     }
 
-    li {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem 1rem;
+    .relation-item {
         border-bottom: 1px solid #eee;
 
         &:last-child {
@@ -74,27 +68,78 @@
         }
 
         &.no-relations {
+            padding: 1rem;
             color: #888;
             font-style: italic;
-            justify-content: center;
+            text-align: center;
         }
+    }
+
+    .relation-item-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .relation-item-main {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        gap: 0.5rem;
+
+        .relation-item-name {
+            flex-grow: 1;
+        }
+    }
+
+    .toggle-definition-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        font-size: 0.7rem;
+        color: #aaa;
+        transition: transform 0.2s;
+        width: 1.2rem;
+        height: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            color: #666;
+        }
+
+        &.expanded {
+            transform: rotate(90deg);
+        }
+    }
+
+    .relation-item-definition {
+        padding: 0 1rem 0.75rem 2.7rem;
+        font-size: 0.85rem;
+        color: #777;
+        line-height: 1.4;
+        font-style: italic;
     }
 
     .remove-btn {
         background: none;
         border: none;
         cursor: pointer;
-        padding: 2px;
+        padding: 4px;
         border-radius: 50%;
         display: flex;
+        opacity: 0.6;
+        transition: opacity 0.2s, background-color 0.2s;
 
         &:hover {
-            background-color: #e4c8c8;
+            background-color: #fcecea;
+            opacity: 1;
         }
 
         img {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
         }
     }
 }

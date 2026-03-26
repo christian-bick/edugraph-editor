@@ -8,6 +8,7 @@ import type { OntologyEntity, RelationType } from '../../../../types/ontology-ty
 import './AddRelation.scss';
 import LinkRmIcon from '../../../../assets/icons/link_rm.svg';
 import { RELATIONS, getRelationsByPerspective } from '../../../../config/relations.ts';
+import clsx from 'clsx';
 
 interface AddRelationModalProps {
     isOpen: boolean;
@@ -26,7 +27,15 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
     const [searchQuery, setSearchQuery] = useState('');
     const [currentRelations, setCurrentRelations] = useState<OntologyEntity[]>([]);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
+    const [expandedIris, setExpandedIris] = useState<Set<string>>(new Set());
     const resultsRef = useRef<HTMLDivElement>(null);
+
+    const sourceEntity = useMemo(() => {
+        const ontology = ontologies[activeDimension];
+        return ontology?.entities.find(e => e.iri === selectedEntityIri);
+    }, [ontologies, activeDimension, selectedEntityIri]);
+
+    const sourceName = sourceEntity ? toNaturalName(sourceEntity.name) : '';
 
     useEffect(() => {
         if (isOpen) {
@@ -34,6 +43,7 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
         } else {
             setSearchQuery('');
             setHighlightedIndex(-1);
+            setExpandedIris(new Set());
         }
     }, [isOpen, existingRelations]);
 
@@ -88,6 +98,15 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
         setCurrentRelations(prev => prev.filter(e => e.iri !== iri));
     };
 
+    const toggleDefinition = (iri: string) => {
+        setExpandedIris(prev => {
+            const next = new Set(prev);
+            if (next.has(iri)) next.delete(iri);
+            else next.add(iri);
+            return next;
+        });
+    };
+
     const handleSave = () => {
         if (!selectedEntityIri) return;
 
@@ -97,6 +116,8 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (availableEntities.length === 0) return;
+
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             setHighlightedIndex(prev => (prev + 1) % availableEntities.length);
@@ -124,10 +145,10 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <h2>Manage "{relationTitle}" Relations</h2>
+            <h2>{sourceName}</h2>
+            <h3 className="modal-subtitle">Manage "{relationTitle}" Relations</h3>
 
             <div className="form-group search-container">
-                <label htmlFor="search-entities">Search to add relation</label>
                 <input
                     id="search-entities"
                     type="text"
@@ -137,7 +158,7 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
                         setHighlightedIndex(-1);
                     }}
                     onKeyDown={handleKeyDown}
-                    placeholder="Start typing to search..."
+                    placeholder="Search to add relation..."
                     autoComplete="off"
                 />
                 {searchQuery && (
@@ -163,13 +184,29 @@ export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onCl
             <div className="current-relations-list">
                 <ul>
                     {currentRelations.map(entity => (
-                        <li key={entity.iri}>
-                            <span>{toNaturalName(entity.name)}</span>
-                            {showRemoveButton && (
-                                <button className="remove-btn" onClick={() => handleRemoveRelation(entity.iri)}>
-                                    <img src={LinkRmIcon} alt="Remove"/>
-                                </button>
-                            )}
+                        <li key={entity.iri} className="relation-item">
+                            <div className="relation-item-content">
+                                <div className="relation-item-main">
+                                    <button 
+                                        className={clsx("toggle-definition-btn", { expanded: expandedIris.has(entity.iri) })}
+                                        onClick={() => toggleDefinition(entity.iri)}
+                                        title="Toggle definition"
+                                    >
+                                        ▶
+                                    </button>
+                                    <span className="relation-item-name">{toNaturalName(entity.name)}</span>
+                                    {showRemoveButton && (
+                                        <button className="remove-btn" onClick={() => handleRemoveRelation(entity.iri)}>
+                                            <img src={LinkRmIcon} alt="Remove"/>
+                                        </button>
+                                    )}
+                                </div>
+                                {expandedIris.has(entity.iri) && (
+                                    <div className="relation-item-definition">
+                                        {entity.definition || <i>No definition available.</i>}
+                                    </div>
+                                )}
+                            </div>
                         </li>
                     ))}
                     {currentRelations.length === 0 && <li className="no-relations">No relations of this type.</li>}
