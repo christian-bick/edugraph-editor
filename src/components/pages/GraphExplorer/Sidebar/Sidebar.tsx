@@ -8,7 +8,7 @@ import {EditDefinition, EditIri} from '../EditEntity/EditEntity.tsx';
 import {invertRelations, toNaturalName} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
 import type {OntologyEntity, RelationType} from "../../../../types/ontology-types.ts";
-import {AddRelationModal} from '../AddRelation/AddRelation.tsx';
+import {ModifyRelationModal} from '../ModifyRelation/ModifyRelation.tsx';
 import {CreateEntity} from '../CreateEntity/CreateEntity.tsx';
 import {EntitySearch} from '../EntitySearch/EntitySearch.tsx';
 import {getRelationsByPerspective} from '../../../../config/relations.ts';
@@ -57,7 +57,7 @@ const RelationSection: React.FC<RelationSectionProps> = ({
                     ))}
                 </ul>
             )}
-            {relationName && <AddRelationModal
+            {relationName && <ModifyRelationModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 relationTitle={title}

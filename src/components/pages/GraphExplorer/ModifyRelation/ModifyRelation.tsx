@@ -5,12 +5,12 @@ import { useSelectedEntityStore } from '../../../../stores/selected-entity-store
 import { useBranchStore } from '../../../../stores/branch-store';
 import { getSuccessors, invertRelations, toNaturalName } from '../../../../stores/utils';
 import type { OntologyEntity, RelationType } from '../../../../types/ontology-types';
-import './AddRelation.scss';
+import './ModifyRelation.scss';
 import LinkRmIcon from '../../../../assets/icons/link_rm.svg';
 import { RELATIONS, getRelationsByPerspective } from '../../../../config/relations.ts';
 import clsx from 'clsx';
 
-interface AddRelationModalProps {
+interface ModifyRelationModalProps {
     isOpen: boolean;
     onClose: () => void;
     relationTitle: string;
@@ -19,7 +19,7 @@ interface AddRelationModalProps {
     minRelations?: number;
 }
 
-export const AddRelationModal: React.FC<AddRelationModalProps> = ({ isOpen, onClose, relationTitle, relationName, existingRelations, minRelations = 0 }) => {
+export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen, onClose, relationTitle, relationName, existingRelations, minRelations = 0 }) => {
     const { ontologies, updateRelations } = useCurrentOntologyStore();
     const { selectedEntityIri } = useSelectedEntityStore();
     const { activeDimension, activePerspective } = useBranchStore();
