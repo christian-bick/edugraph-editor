@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Modal } from '../../../global/Modal/Modal';
 import { useSelectedEntityStore } from '../../../../stores/selected-entity-store';
 import './EditEntity.scss';
-import { toNaturalName } from '../../../../stores/utils';
+import { toNaturalName, toCamelCase } from '../../../../stores/utils';
 import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
 import { useBranchStore } from '../../../../stores/branch-store';
 import { useDefinitionSuggest, SuggestButton } from '../DefinitionSuggest/DefinitionSuggest';
@@ -57,7 +57,7 @@ export const EditEntity: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
                     <input
                         type="text"
                         value={id}
-                        onChange={(e) => setId(e.target.value)}
+                        onChange={(e) => setId(toCamelCase(e.target.value))}
                     />
                 </div>
             </div>
@@ -125,7 +125,7 @@ export const EditIri: React.FC<EditEntityProps> = ({ isOpen, onClose }) => {
                     <input
                         type="text"
                         value={id}
-                        onChange={(e) => setId(e.target.value)}
+                        onChange={(e) => setId(toCamelCase(e.target.value))}
                     />
                 </div>
             </div>

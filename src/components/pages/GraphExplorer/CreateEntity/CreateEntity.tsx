@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import { Modal } from '../../../global/Modal/Modal';
 import './CreateEntity.scss';
-import { toNaturalName } from '../../../../stores/utils';
+import { toNaturalName, toCamelCase } from '../../../../stores/utils';
 import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
 import { useBranchStore } from '../../../../stores/branch-store';
 import { useDefinitionSuggest, SuggestButton } from '../DefinitionSuggest/DefinitionSuggest';
@@ -67,10 +67,6 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
         }
     };
 
-    if (!isOpen) {
-        return null;
-    }
-
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <h2>Create New Entity</h2>
@@ -82,7 +78,7 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
                     <input
                         type="text"
                         value={id}
-                        onChange={(e) => setId(e.target.value)}
+                        onChange={(e) => setId(toCamelCase(e.target.value))}
                         placeholder="e.g., NewConcept"
                     />
                 </div>
