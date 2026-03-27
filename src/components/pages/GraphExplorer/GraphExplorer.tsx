@@ -66,7 +66,7 @@ export const GraphExplorer: React.FC = () => {
     const getData = () => {
         const relationTypes = getRelationsByPerspective(activePerspective).map(r => r.id);
         const useVirtualRoot = activePerspective === 'Taxonomy';
-        const filterOrphanNodes = activePerspective === 'Progression';
+        const filterOrphanNodes = activePerspective !== 'Taxonomy';
 
         return getGraphData(
             ontology,

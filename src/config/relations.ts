@@ -1,11 +1,13 @@
 import type { OntologyRelations } from "../types/ontology-types";
 
+export type PerspectiveType = 'Progression' | 'Taxonomy' | 'Application' | 'Understanding';
+
 export interface RelationConfig {
     id: keyof OntologyRelations;
     label: string;
     inverseId: string;
     inverseLabel: string;
-    perspective: 'Progression' | 'Taxonomy';
+    perspectives: PerspectiveType[];
 }
 
 export const RELATIONS: RelationConfig[] = [
@@ -14,61 +16,61 @@ export const RELATIONS: RelationConfig[] = [
         label: 'Expands',
         inverseId: 'expandedBy',
         inverseLabel: 'Expanded By',
-        perspective: 'Progression',
+        perspectives: ['Progression', 'Understanding'],
     },
     {
         id: 'constrains',
         label: 'Constrains',
         inverseId: 'constrainedBy',
         inverseLabel: 'Constrained By',
-        perspective: 'Progression',
+        perspectives: ['Progression', 'Understanding'],
     },
     {
         id: 'inverts',
         label: 'Inverts',
         inverseId: 'invertedBy',
         inverseLabel: 'Inverted By',
-        perspective: 'Progression',
+        perspectives: ['Progression', 'Understanding'],
     },
     {
         id: 'integrates',
         label: 'Integrates',
         inverseId: 'integratedIn',
         inverseLabel: 'Integrated In',
-        perspective: 'Progression',
+        perspectives: ['Progression', 'Application'],
     },
     {
         id: 'decomposes',
         label: 'Decomposes',
         inverseId: 'decomposedBy',
         inverseLabel: 'Decomposed By',
-        perspective: 'Progression',
+        perspectives: ['Progression', 'Application'],
     },
     {
         id: 'translates',
         label: 'Translates',
         inverseId: 'translatedTo',
         inverseLabel: 'Translated To',
-        perspective: 'Progression',
+        perspectives: ['Progression', 'Application'],
     },
     {
         id: 'partOf',
         label: 'Part Of',
         inverseId: 'hasPart',
         inverseLabel: 'Has Part',
-        perspective: 'Taxonomy',
+        perspectives: ['Taxonomy'],
     },
     {
         id: 'includes',
         label: 'Includes',
         inverseId: 'includedIn',
         inverseLabel: 'Included In',
-        perspective: 'Taxonomy',
+        perspectives: ['Taxonomy'],
     }
 ];
 
 export const getRelationsByPerspective = (perspective: string) =>
-    RELATIONS.filter(r => r.perspective === perspective);
+    RELATIONS.filter(r => r.perspectives.includes(perspective as PerspectiveType));
 
 export const getRelationById = (id: string) =>
     RELATIONS.find(r => r.id === id);
