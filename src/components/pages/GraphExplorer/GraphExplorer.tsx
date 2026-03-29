@@ -10,6 +10,7 @@ import {ActionSidebar} from "./ActionSidebar/ActionSidebar.tsx";
 import {useFocusStore} from "../../../stores/focus-store.ts";
 import {Graph} from "@antv/g6";
 import {getRelationsByPerspective} from "../../../config/relations.ts";
+import {useViewStore} from "../../../stores/view-store.ts";
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -22,6 +23,7 @@ export const GraphExplorer: React.FC = () => {
     const {activeBranch, activeDimension, activePerspective} = useBranchStore();
     const {selectedEntityIri, setSelectedEntityIri} = useSelectedEntityStore();
     const {activeFocus} = useFocusStore();
+    const {showInferredRelations} = useViewStore();
 
     const activeFocusRef = useRef(activeFocus);
     useEffect(() => {
@@ -76,7 +78,8 @@ export const GraphExplorer: React.FC = () => {
             true,
             activeFocus,
             selectedEntityIri,
-            useVirtualRoot
+            useVirtualRoot,
+            showInferredRelations
         );
     }
 
@@ -172,7 +175,7 @@ export const GraphExplorer: React.FC = () => {
         };
 
         updateGraph();
-    }, [ontology, activeFocus, selectedEntityIri]);
+    }, [ontology, activeFocus, selectedEntityIri, showInferredRelations]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;

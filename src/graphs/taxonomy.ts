@@ -12,6 +12,7 @@ export const getGraphData = (
     focusMode: FocusMode = 'global',
     selectedEntityIri: string | null = null,
     useVirtualRoot = false,
+    showInferred = true,
 ) => {
     let nodes: G6Node[] = [];
     let edges: G6Edge[] = [];
@@ -28,13 +29,15 @@ export const getGraphData = (
         });
     });
 
-    filterRelationTypes.forEach(relationType => {
-        let relations = ontology.relations[relationType];
-        if (inverse) {
-            relations = invertRelations(relations);
-        }
+    const addEdges = (relMap: Partial<OntologyRelations>, isInferred: boolean) => {
+        filterRelationTypes.forEach(relationType => {
+            let relations = relMap[relationType];
+            if (!relations) return;
 
-        if (relations) {
+            if (inverse) {
+                relations = invertRelations(relations);
+            }
+
             Object.entries(relations)
                 .sort(([a], [b]) => a.localeCompare(b))
                 .forEach(([subjectIRI, objectIRIs]) => {
@@ -45,32 +48,58 @@ export const getGraphData = (
 
                         if (sourceId && targetId) {
                             edges.push({
-                                id: `${sourceId}-${relationType}-${targetId}-${index}`,
+                                id: `${sourceId}-${relationType}-${targetId}-${index}${isInferred ? '-inferred' : ''}`,
                                 source: sourceId,
                                 target: targetId,
                                 label: relationType,
+                                isInferred,
                             });
                         }
                     });
                 });
-        }
-    });
+        });
+    };
+
+    // 1. Add Original Relations
+    addEdges(ontology.relations, false);
+
+    // 2. Add Inferred Relations if enabled
+    if (showInferred && ontology.inferredRelations) {
+        addEdges(ontology.inferredRelations, true);
+    }
 
     if (focusMode !== 'global' && selectedEntityIri) {
         const irisToKeep = new Set<string>([selectedEntityIri]);
+        
+        // Combine relations for successor/predecessor calculation to ensure focus works with inferred
+        const allRelations: Record<string, Record<string, string[]>> = {};
+        const allRelTypes = Array.from(new Set([
+            ...Object.keys(ontology.relations),
+            ...(showInferred && ontology.inferredRelations ? Object.keys(ontology.inferredRelations) : [])
+        ])) as RelationType[];
+
+        allRelTypes.forEach(type => {
+            const original = ontology.relations[type] || {};
+            const inferred = showInferred && ontology.inferredRelations?.[type] || {};
+            allRelations[type] = { ...original };
+            Object.entries(inferred).forEach(([subject, objects]) => {
+                allRelations[type][subject] = Array.from(new Set([...(allRelations[type][subject] || []), ...objects]));
+            });
+        });
+
         const relationsToFollow = filterRelationTypes;
 
         if (focusMode === 'ancestry') {
-            const successors = getSuccessors(selectedEntityIri, ontology.relations, relationsToFollow);
-            const predecessors = getPredecessors(selectedEntityIri, ontology.relations, relationsToFollow);
+            const successors = getSuccessors(selectedEntityIri, allRelations, relationsToFollow);
+            const predecessors = getPredecessors(selectedEntityIri, allRelations, relationsToFollow);
             successors.forEach(iri => irisToKeep.add(iri));
             predecessors.forEach(iri => irisToKeep.add(iri));
         } else if (focusMode === 'local') {
             filterRelationTypes.forEach(relationType => {
-                const directSuccessors = ontology.relations[relationType]?.[selectedEntityIri] || [];
+                const directSuccessors = allRelations[relationType]?.[selectedEntityIri] || [];
                 directSuccessors.forEach(iri => irisToKeep.add(iri));
 
-                const inverted = invertRelations(ontology.relations[relationType] || {});
+                const inverted = invertRelations(allRelations[relationType] || {});
                 const directPredecessors = inverted[selectedEntityIri] || [];
                 directPredecessors.forEach(iri => irisToKeep.add(iri));
             });

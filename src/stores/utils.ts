@@ -100,3 +100,69 @@ export const getPredecessors = (
 
     return predecessors;
 };
+
+/**
+ * Calculates inferred relations based on inheritance through partOf relations.
+ *
+ * Rule:
+ * IF (Parent_A) -[Rel]-> (Parent_B)
+ * AND (Child_A) -[:partOf]-> (Parent_A)
+ * AND (Child_B) -[:partOf]-> (Parent_B)
+ * AND are_aligned(Child_A, Child_B)
+ * THEN (Child_A) -[Rel]-> (Child_B)
+ */
+export const calculateInferredRelations = (ontology: Ontology): Partial<OntologyRelations> => {
+    const inferred: Record<string, Record<string, string[]>> = {};
+    const { entities, relations } = ontology;
+
+    if (!relations) return inferred as any;
+
+    const partOf = relations.partOf || {};
+    const relTypes = Object.keys(relations) as RelationType[];
+    // Semantic edges (exclude structural ones like partOf and ignored ones like includes)
+    const semanticRelTypes = relTypes.filter(t => t !== 'partOf' && t !== 'includes');
+
+    const areAligned = (childAIri: string, childBIri: string, parentAIri: string, parentBIri: string): boolean => {
+        if (childAIri === childBIri) return false;
+
+        const parentsA = partOf[childAIri] || [];
+        const parentsB = partOf[childBIri] || [];
+
+        // Case 1: Alignment via Shared Context (Intersection)
+        // They share a partOf relationship to the exact same third node (Context_Node)
+        const sharedContext = parentsA.find(p => parentsB.includes(p) && p !== parentAIri && p !== parentBIri);
+        return !!sharedContext;
+    };
+
+    semanticRelTypes.forEach(relType => {
+        const relMap = relations[relType];
+        if (!relMap) return;
+
+        inferred[relType] = {};
+
+        for (const [parentAIri, parentBIris] of Object.entries(relMap)) {
+            // Find children of A
+            const childrenA = entities.filter(e => (partOf[e.iri] || []).includes(parentAIri));
+
+            for (const parentBIri of parentBIris) {
+                // Find children of B
+                const childrenB = entities.filter(e => (partOf[e.iri] || []).includes(parentBIri));
+
+                for (const childA of childrenA) {
+                    for (const childB of childrenB) {
+                        if (areAligned(childA.iri, childB.iri, parentAIri, parentBIri)) {
+                            if (!inferred[relType][childA.iri]) {
+                                inferred[relType][childA.iri] = [];
+                            }
+                            if (!inferred[relType][childA.iri].includes(childB.iri)) {
+                                inferred[relType][childA.iri].push(childB.iri);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    return inferred as any;
+};

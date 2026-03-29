@@ -1,6 +1,7 @@
 import { Parser, Quad } from 'n3';
-import type {Ontology, OntologyRelations} from "../types/ontology-types.ts";
+import type {Ontology, OntologyRelations, RelationType} from "../types/ontology-types.ts";
 import { RELATIONS } from "../config/relations.ts";
+import { calculateInferredRelations } from "./utils.ts";
 
 // RDF URIs based on core-ontology.ttl
 const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
@@ -141,14 +142,11 @@ export const populateOntologyFromQuads = (
 export const enrichOntology = (ontology: Ontology): Ontology => {
     if (!ontology || !ontology.relations) return ontology;
 
-    const transitiveIncludes = computeTransitiveClosure(ontology.relations.includes || {});
+    const inferred = calculateInferredRelations(ontology);
 
     return {
         ...ontology,
-        relations: {
-            ...ontology.relations,
-            includes: transitiveIncludes,
-        }
+        inferredRelations: inferred
     };
 };
 

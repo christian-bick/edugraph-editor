@@ -2,13 +2,16 @@ import React from 'react';
 import './ActionSidebar.scss';
 import {FocusMode, useFocusStore} from "../../../../stores/focus-store.ts";
 import {useSelectedEntityStore} from "../../../../stores/selected-entity-store.ts";
+import {useViewStore} from "../../../../stores/view-store.ts";
 import Focus1Icon from '../../../../assets/icons/focus_1.svg';
 import Focus2Icon from '../../../../assets/icons/focus_2.svg';
 import Focus3Icon from '../../../../assets/icons/focus_3.svg';
+import GeminiIcon from '../../../../assets/icons/gemini.svg';
 
 export const ActionSidebar: React.FC = () => {
     const { activeFocus, setFocus } = useFocusStore();
     const { selectedEntityIri } = useSelectedEntityStore();
+    const { showInferredRelations, toggleInferredRelations } = useViewStore();
 
     const isEntitySelected = selectedEntityIri !== null;
 
@@ -24,29 +27,43 @@ export const ActionSidebar: React.FC = () => {
 
     return (
         <aside className="left-sidebar">
-            <button
-                className={`focus-btn ${activeFocus === 'global' ? 'active' : ''}`}
-                onClick={() => handleFocusChange('global')}
-                title="Global Focus"
-            >
-                <img src={Focus1Icon} alt="Global Focus"/>
-            </button>
-            <button
-                className={`focus-btn ${activeFocus === 'ancestry' ? 'active' : ''}`}
-                onClick={() => handleFocusChange('ancestry')}
-                disabled={!isEntitySelected}
-                title={isEntitySelected ? "Ancestry Focus" : "Select an entity for Ancestry Focus"}
-            >
-                <img src={Focus2Icon} alt="Ancestry Focus"/>
-            </button>
-            <button
-                className={`focus-btn ${activeFocus === 'local' ? 'active' : ''}`}
-                onClick={() => handleFocusChange('local')}
-                disabled={!isEntitySelected}
-                title={isEntitySelected ? "Local Focus" : "Select an entity for Local Focus"}
-            >
-                <img src={Focus3Icon} alt="Local Focus"/>
-            </button>
+            <div className="focus-group">
+                <button
+                    className={`sidebar-btn ${activeFocus === 'global' ? 'active' : ''}`}
+                    onClick={() => handleFocusChange('global')}
+                    title="Global Focus"
+                >
+                    <img src={Focus1Icon} alt="Global Focus"/>
+                </button>
+                <button
+                    className={`sidebar-btn ${activeFocus === 'ancestry' ? 'active' : ''}`}
+                    onClick={() => handleFocusChange('ancestry')}
+                    disabled={!isEntitySelected}
+                    title={isEntitySelected ? "Ancestry Focus" : "Select an entity for Ancestry Focus"}
+                >
+                    <img src={Focus2Icon} alt="Ancestry Focus"/>
+                </button>
+                <button
+                    className={`sidebar-btn ${activeFocus === 'local' ? 'active' : ''}`}
+                    onClick={() => handleFocusChange('local')}
+                    disabled={!isEntitySelected}
+                    title={isEntitySelected ? "Local Focus" : "Select an entity for Local Focus"}
+                >
+                    <img src={Focus3Icon} alt="Local Focus"/>
+                </button>
+            </div>
+
+            <div className="spacer" />
+
+            <div className="view-group">
+                <button
+                    className={`sidebar-btn inferred-toggle ${showInferredRelations ? 'active' : ''}`}
+                    onClick={toggleInferredRelations}
+                    title={showInferredRelations ? "Hide Inferred Relations" : "Show Inferred Relations"}
+                >
+                    <img src={GeminiIcon} alt="Toggle Inferred" />
+                </button>
+            </div>
         </aside>
     );
 };

@@ -21,5 +21,6 @@ export type RelationType = keyof OntologyRelations;
 export interface Ontology {
     entities: OntologyEntity[];
     relations: OntologyRelations;
+    inferredRelations?: Partial<OntologyRelations>;
     sha: string | null;
 }

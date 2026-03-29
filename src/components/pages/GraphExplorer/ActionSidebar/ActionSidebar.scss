@@ -13,7 +13,17 @@
     gap: 0.5rem;
 }
 
-.focus-btn {
+.focus-group, .view-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
+.sidebar-btn {
   width: 36px;
   height: 36px;
   padding: 0;
@@ -27,8 +37,8 @@
   transition: background-color 0.2s, border-color 0.2s;
 
   img {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     filter: invert(0.6); // Medium gray icon for inactive state
   }
 
@@ -48,9 +58,17 @@
 
   &.active {
     border-color: colors.$container-border;
+    background-color: colors.$light-hover-background;
 
     img {
       filter: invert(0.5); // Dark icon for active state on light background
+    }
+  }
+
+  &.inferred-toggle.active {
+    border-color: #8e75ff; // Gemini-like purple
+    img {
+        filter: none; // Show original colors for Gemini icon when active
     }
   }
 }

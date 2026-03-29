@@ -176,24 +176,19 @@
                     background-color: colors.$light-hover-background;
                 }
 
-                .remove-btn {
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    padding: 2px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-
-                    &:hover {
-                        background-color: #e4c8c8;
+                &.is-inferred {
+                    background-color: rgba(colors.$color-ability-light, 0.1);
+                    border-left: 2px solid colors.$color-ability-dark;
+                    
+                    span {
+                        font-style: italic;
                     }
+                }
 
-                    img {
-                        width: 16px;
-                        height: 16px;
-                    }
+                .inferred-hint {
+                    width: 16px;
+                    height: 16px;
+                    opacity: 0.6;
                 }
             }
         }
