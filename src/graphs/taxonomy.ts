@@ -29,8 +29,6 @@ export const getGraphData = (
         });
     });
 
-    const inferredRelations = calculateInferredRelations(ontology);
-
     const addEdges = (relMap: Partial<OntologyRelations>, isInferred: boolean) => {
         filterRelationTypes.forEach(relationType => {
             let relations = relMap[relationType];
@@ -72,7 +70,9 @@ export const getGraphData = (
     addEdges(ontology.relations, false);
 
     // 2. Add Inferred Relations if enabled
+    let inferredRelations: Partial<OntologyRelations> = {};
     if (showInferred) {
+        inferredRelations = calculateInferredRelations(ontology);
         addEdges(inferredRelations, true);
     }
 
