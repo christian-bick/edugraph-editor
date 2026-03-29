@@ -7,15 +7,20 @@ import { getPredecessors, toNaturalName } from '../../../../stores/utils';
 import type { OntologyEntity, RelationType } from '../../../../types/ontology-types';
 import './ModifyRelation.scss';
 import LinkRmIcon from '../../../../assets/icons/link_rm.svg';
+import GraphParentIcon from '../../../../assets/icons/graph_parent.svg';
 import { RELATIONS, getRelationsByPerspective } from '../../../../config/relations.ts';
 import clsx from 'clsx';
+
+interface RelationEntity extends OntologyEntity {
+    isInferred?: boolean;
+}
 
 interface ModifyRelationModalProps {
     isOpen: boolean;
     onClose: () => void;
     relationTitle: string;
     relationName: RelationType;
-    existingRelations: OntologyEntity[];
+    existingRelations: RelationEntity[];
     minRelations?: number;
 }
 
@@ -25,7 +30,7 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
     const { activeDimension, activePerspective } = useBranchStore();
 
     const [searchQuery, setSearchQuery] = useState('');
-    const [currentRelations, setCurrentRelations] = useState<OntologyEntity[]>([]);
+    const [currentRelations, setCurrentRelations] = useState<RelationEntity[]>([]);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const [expandedIris, setExpandedIris] = useState<Set<string>>(new Set());
     const resultsRef = useRef<HTMLDivElement>(null);
@@ -81,7 +86,7 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
     }, [highlightedIndex]);
 
     const handleAddRelation = (entity: OntologyEntity) => {
-        setCurrentRelations(prev => [...prev, entity]);
+        setCurrentRelations(prev => [...prev, { ...entity, isInferred: false }]);
         setSearchQuery('');
         setHighlightedIndex(-1);
     };
@@ -102,7 +107,11 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
     const handleSave = () => {
         if (!selectedEntityIri) return;
 
-        const objectIris = currentRelations.map(e => e.iri);
+        // Only save non-inferred relations back to the store
+        const objectIris = currentRelations
+            .filter(e => !e.isInferred)
+            .map(e => e.iri);
+            
         updateRelations(activeDimension, selectedEntityIri, relationName, objectIris);
         onClose();
     };
@@ -129,7 +138,8 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
         }
     };
 
-    const showRemoveButton = currentRelations.length > minRelations;
+    const originalRelationsCount = currentRelations.filter(e => !e.isInferred).length;
+    const canRemoveOriginal = originalRelationsCount > minRelations;
 
     if (!isOpen) {
         return null;
@@ -177,7 +187,7 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
                 <div className="current-relations-list">
                     <ul>
                         {currentRelations.map(entity => (
-                            <li key={entity.iri} className="relation-item">
+                            <li key={entity.iri} className={clsx("relation-item", { "is-inferred": entity.isInferred })}>
                                 <div className="relation-item-content">
                                     <div className="relation-item-main">
                                         <button 
@@ -188,7 +198,12 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
                                             ▶
                                         </button>
                                         <span className="relation-item-name">{toNaturalName(entity.name)}</span>
-                                        {showRemoveButton && (
+                                        
+                                        {entity.isInferred && (
+                                            <img src={GraphParentIcon} className="inferred-hint" title="Inferred Relation" alt="Inferred" />
+                                        )}
+
+                                        {!entity.isInferred && canRemoveOriginal && (
                                             <button className="remove-btn" onClick={() => handleRemoveRelation(entity.iri)}>
                                                 <img src={LinkRmIcon} alt="Remove"/>
                                             </button>

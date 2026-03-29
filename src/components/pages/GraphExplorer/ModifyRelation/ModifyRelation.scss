@@ -71,6 +71,20 @@
         &:last-child {
             border-bottom: none;
         }
+
+        &.is-inferred {
+            background-color: rgba(colors.$color-ability-light, 0.1);
+
+            .relation-item-name {
+                font-style: italic;
+            }
+        }
+    }
+
+    .inferred-hint {
+        width: 16px;
+        height: 16px;
+        opacity: 0.6;
     }
 
     .no-relations {
