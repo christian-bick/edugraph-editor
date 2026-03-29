@@ -1,6 +1,6 @@
 import type {G6Edge, G6Node} from "../types/graph-types.ts";
 import type {Ontology, OntologyRelations, RelationType} from "../types/ontology-types.ts";
-import {getPredecessors, getSuccessors, invertRelations, toNaturalName} from "../stores/utils.ts";
+import {calculateInferredRelations, getPredecessors, getSuccessors, invertRelations, toNaturalName} from "../stores/utils.ts";
 import {FocusMode} from "../stores/focus-store.ts";
 
 export const getGraphData = (
@@ -28,6 +28,8 @@ export const getGraphData = (
             entityType: activeDimension as any,
         });
     });
+
+    const inferredRelations = calculateInferredRelations(ontology);
 
     const addEdges = (relMap: Partial<OntologyRelations>, isInferred: boolean) => {
         filterRelationTypes.forEach(relationType => {
@@ -70,8 +72,8 @@ export const getGraphData = (
     addEdges(ontology.relations, false);
 
     // 2. Add Inferred Relations if enabled
-    if (showInferred && ontology.inferredRelations) {
-        addEdges(ontology.inferredRelations, true);
+    if (showInferred) {
+        addEdges(inferredRelations, true);
     }
 
     if (focusMode !== 'global' && selectedEntityIri) {
@@ -81,12 +83,12 @@ export const getGraphData = (
         const allRelations: Record<string, Record<string, string[]>> = {};
         const allRelTypes = Array.from(new Set([
             ...Object.keys(ontology.relations),
-            ...(showInferred && ontology.inferredRelations ? Object.keys(ontology.inferredRelations) : [])
+            ...(showInferred ? Object.keys(inferredRelations) : [])
         ])) as RelationType[];
 
         allRelTypes.forEach(type => {
             const original = ontology.relations[type] || {};
-            const inferred = showInferred && ontology.inferredRelations?.[type] || {};
+            const inferred = showInferred ? inferredRelations[type] || {} : {};
             allRelations[type] = { ...original };
             Object.entries(inferred).forEach(([subject, objects]) => {
                 allRelations[type][subject] = Array.from(new Set([...(allRelations[type][subject] || []), ...objects]));

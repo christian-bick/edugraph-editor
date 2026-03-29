@@ -210,7 +210,7 @@ export const useOntologyStore = create<OntologyState>()((set, get) => ({
                 };
 
                 populateOntologyFromQuads(newOntology, quads, entityInfoMap, fileResponse.sha);
-                finalOntologies[type] = enrichOntology(newOntology);
+                finalOntologies[type] = newOntology;
             }
 
             set({ ontologiesOriginal: finalOntologies, loading: false });
