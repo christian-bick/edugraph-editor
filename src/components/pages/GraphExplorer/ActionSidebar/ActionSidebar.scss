@@ -19,6 +19,13 @@
     gap: 0.5rem;
 }
 
+.divider {
+    height: 1px;
+    background-color: colors.$light-border-color;
+    margin: 0.25rem 0;
+    width: 100%;
+}
+
 .spacer {
     flex-grow: 1;
 }

@@ -54,7 +54,7 @@ export const ActionSidebar: React.FC = () => {
                 </button>
             </div>
 
-            <div className="spacer" />
+            <div className="divider" />
 
             <div className="view-group">
                 <button
@@ -72,6 +72,8 @@ export const ActionSidebar: React.FC = () => {
                     <img src={GraphInferredIcon} alt="Include Inferred Relations"/>
                 </button>
             </div>
+
+            <div className="spacer" />
         </aside>
     );
 };
