@@ -168,7 +168,7 @@ export const EditDefinition: React.FC<EditEntityProps> = ({ isOpen, onClose }) =
     }, [originalEntity, isOpen]);
 
     const onSuggest = async () => {
-        const suggestion = await handleSuggest();
+        const suggestion = await handleSuggest(definition);
         if (suggestion) setDefinition(suggestion);
     };
 

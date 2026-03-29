@@ -21,11 +21,16 @@ export const generateDefinition = async (
     context: {
         parent?: { name: string; definition: string };
         siblings?: { name: string; definition: string }[];
+        existingDefinition?: string;
     }
 ): Promise<string> => {
     if (!token) throw new Error("Gemini API token is missing.");
 
     let userPrompt = `Term to define: "${term}"\n\n`;
+
+    if (context.existingDefinition) {
+        userPrompt += `Existing Definition (to be refined): "${context.existingDefinition}"\n\n`;
+    }
 
     if (context.parent) {
         userPrompt += `Context (Parent): The term "${term}" is a sub-competency of "${context.parent.name}".\n`;
@@ -40,7 +45,11 @@ export const generateDefinition = async (
         userPrompt += `\n`;
     }
 
-    userPrompt += `Provide a definition for "${term}" that adopts the wording and style of the context above.`;
+    if (context.existingDefinition) {
+        userPrompt += `Provide an improved definition for "${term}" using the existing definition as a base, while adopting the wording and style of the context above.`;
+    } else {
+        userPrompt += `Provide a definition for "${term}" that adopts the wording and style of the context above.`;
+    }
 
     try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${token}`, {

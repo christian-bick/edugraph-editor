@@ -16,7 +16,7 @@ export const useDefinitionSuggest = (
     const { geminiToken } = useAuthStore();
     const [isSuggesting, setIsSuggesting] = useState(false);
 
-    const handleSuggest = async (): Promise<string | null> => {
+    const handleSuggest = async (existingDefinition?: string): Promise<string | null> => {
         if (!entityName || !geminiToken) return null;
 
         setIsSuggesting(true);
@@ -48,7 +48,8 @@ export const useDefinitionSuggest = (
                 toNaturalName(entityName),
                 {
                     parent: parent ? { name: toNaturalName(parent.name), definition: parent.definition } : undefined,
-                    siblings
+                    siblings,
+                    existingDefinition
                 }
             );
             return suggestion;

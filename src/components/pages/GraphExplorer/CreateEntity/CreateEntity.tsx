@@ -56,7 +56,7 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
     }, [id, allEntityNames]);
 
     const onSuggest = async () => {
-        const suggestion = await handleSuggest();
+        const suggestion = await handleSuggest(definition);
         if (suggestion) setDefinition(suggestion);
     };
 
