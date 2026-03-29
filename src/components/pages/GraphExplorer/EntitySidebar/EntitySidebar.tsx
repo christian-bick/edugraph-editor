@@ -4,7 +4,7 @@ import {useBranchStore} from '../../../../stores/branch-store.ts';
 import './EntitySidebar.scss';
 import EditIcon from '../../../../assets/icons/edit.svg';
 import PlusIcon from '../../../../assets/icons/plus.svg';
-import GeminiIcon from '../../../../assets/icons/gemini.svg';
+import GraphParentIcon from '../../../../assets/icons/graph_parent.svg';
 import {EditDefinition, EditIri} from '../EditEntity/EditEntity.tsx';
 import {calculateInferredRelations, invertRelations, toNaturalName} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
@@ -13,7 +13,6 @@ import {ModifyRelationModal} from '../ModifyRelation/ModifyRelation.tsx';
 import {CreateEntity} from '../CreateEntity/CreateEntity.tsx';
 import {EntitySearch} from '../EntitySearch/EntitySearch.tsx';
 import {getRelationsByPerspective} from '../../../../config/relations.ts';
-import {useViewStore} from "../../../../stores/view-store.ts";
 import clsx from 'clsx';
 
 interface RelationEntity extends OntologyEntity {
@@ -59,7 +58,7 @@ const RelationSection: React.FC<RelationSectionProps> = ({
                     {entities.map(e => (
                         <li key={e.iri} onClick={() => setSelectedEntityIri(e.iri)} className={clsx({"is-inferred": e.isInferred})}>
                             <span>{toNaturalName(e.name)}</span>
-                            {e.isInferred && <img src={GeminiIcon} className="inferred-hint" title="Inferred Relation" alt="Inferred" />}
+                            {e.isInferred && <img src={GraphParentIcon} className="inferred-hint" title="Inferred Relation" alt="Inferred" />}
                         </li>
                     ))}
                 </ul>
@@ -90,14 +89,14 @@ const computeEntityRelations = (
 
     const addRelations = (relMap: any, isInferred: boolean, inverse: boolean = false) => {
         const perspectiveRelations = getRelationsByPerspective(perspective);
-        
+
         if (inverse) {
             perspectiveRelations.forEach(rel => {
                 const inverted = invertRelations(relMap[rel.id] || {});
                 if (inverted[entityIri]) {
                     const iris = inverted[entityIri];
                     if (!relationsMap[rel.inverseId]) relationsMap[rel.inverseId] = [];
-                    
+
                     iris.forEach(iri => {
                         const ent = allEntities.find((e: any) => e.iri === iri);
                         if (ent && !relationsMap[rel.inverseId].some(r => r.iri === ent.iri)) {
@@ -111,7 +110,7 @@ const computeEntityRelations = (
                 if (relMap[relType]?.[entityIri]) {
                     const iris = relMap[relType][entityIri];
                     if (!relationsMap[relType]) relationsMap[relType] = [];
-                    
+
                     iris.forEach((iri: string) => {
                         const ent = allEntities.find((e: any) => e.iri === iri);
                         if (ent && !relationsMap[relType].some(r => r.iri === ent.iri)) {
