@@ -138,8 +138,6 @@ export const calculateInferredRelations = (ontology: Ontology): Partial<Ontology
         const relMap = relations[relType];
         if (!relMap) return;
 
-        inferred[relType] = {};
-
         for (const [parentAIri, parentBIris] of Object.entries(relMap)) {
             // Find children of A
             const childrenA = entities.filter(e => (partOf[e.iri] || []).includes(parentAIri));
@@ -151,6 +149,11 @@ export const calculateInferredRelations = (ontology: Ontology): Partial<Ontology
                 for (const childA of childrenA) {
                     for (const childB of childrenB) {
                         if (areAligned(childA.iri, childB.iri, parentAIri, parentBIri)) {
+                            // SKIP if this relation already exists in the original data to prevent duplication
+                            const existingOriginal = relations[relType]?.[childA.iri] || [];
+                            if (existingOriginal.includes(childB.iri)) continue;
+
+                            if (!inferred[relType]) inferred[relType] = {};
                             if (!inferred[relType][childA.iri]) {
                                 inferred[relType][childA.iri] = [];
                             }

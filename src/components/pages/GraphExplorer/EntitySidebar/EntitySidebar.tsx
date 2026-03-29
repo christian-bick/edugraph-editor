@@ -13,6 +13,7 @@ import {ModifyRelationModal} from '../ModifyRelation/ModifyRelation.tsx';
 import {CreateEntity} from '../CreateEntity/CreateEntity.tsx';
 import {EntitySearch} from '../EntitySearch/EntitySearch.tsx';
 import {getRelationsByPerspective} from '../../../../config/relations.ts';
+import {useViewStore} from "../../../../stores/view-store.ts";
 import clsx from 'clsx';
 
 interface RelationEntity extends OntologyEntity {

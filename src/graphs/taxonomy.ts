@@ -47,6 +47,12 @@ export const getGraphData = (
                         const targetId = entityIRItoIdMap.get(objectIRI);
 
                         if (sourceId && targetId) {
+                            // IF we are adding inferred edges, SKIP if an edge with same source/target/label already exists
+                            if (isInferred) {
+                                const exists = edges.some(e => e.source === sourceId && e.target === targetId && e.label === relationType);
+                                if (exists) return;
+                            }
+
                             edges.push({
                                 id: `${sourceId}-${relationType}-${targetId}-${index}${isInferred ? '-inferred' : ''}`,
                                 source: sourceId,
