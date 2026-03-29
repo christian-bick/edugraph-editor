@@ -8,6 +8,7 @@ interface ViewState {
     setView: (view: ViewMode) => void;
     showInferredRelations: boolean;
     toggleInferredRelations: () => void;
+    setShowInferredRelations: (show: boolean) => void;
 }
 
 export const useViewStore = create<ViewState>((set) => ({
@@ -16,4 +17,5 @@ export const useViewStore = create<ViewState>((set) => ({
     setView: (view: ViewMode) => set(() => ({ view: view })),
     showInferredRelations: true,
     toggleInferredRelations: () => set((state) => ({ showInferredRelations: !state.showInferredRelations })),
+    setShowInferredRelations: (show: boolean) => set(() => ({ showInferredRelations: show })),
 }));

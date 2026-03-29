@@ -6,7 +6,7 @@ import EditIcon from '../../../../assets/icons/edit.svg';
 import PlusIcon from '../../../../assets/icons/plus.svg';
 import GeminiIcon from '../../../../assets/icons/gemini.svg';
 import {EditDefinition, EditIri} from '../EditEntity/EditEntity.tsx';
-import {invertRelations, toNaturalName} from '../../../../stores/utils.ts';
+import {calculateInferredRelations, invertRelations, toNaturalName} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
 import type {OntologyEntity, RelationType} from "../../../../types/ontology-types.ts";
 import {ModifyRelationModal} from '../ModifyRelation/ModifyRelation.tsx';
@@ -86,6 +86,7 @@ const computeEntityRelations = (
 ): { [key: string]: RelationEntity[] } => {
     const allEntities = ontology.entities;
     const relationsMap: { [key: string]: RelationEntity[] } = {};
+    const inferred = calculateInferredRelations(ontology);
 
     const addRelations = (relMap: any, isInferred: boolean, inverse: boolean = false) => {
         const perspectiveRelations = getRelationsByPerspective(perspective);
@@ -124,15 +125,11 @@ const computeEntityRelations = (
 
     // 1. Process direct relations
     addRelations(ontology.relations, false);
-    if (ontology.inferredRelations) {
-        addRelations(ontology.inferredRelations, true);
-    }
+    addRelations(inferred, true);
 
     // 2. Process inverse relations
     addRelations(ontology.relations, false, true);
-    if (ontology.inferredRelations) {
-        addRelations(ontology.inferredRelations, true, true);
-    }
+    addRelations(inferred, true, true);
 
     return relationsMap;
 };

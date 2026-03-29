@@ -6,12 +6,13 @@ import {useViewStore} from "../../../../stores/view-store.ts";
 import Focus1Icon from '../../../../assets/icons/focus_1.svg';
 import Focus2Icon from '../../../../assets/icons/focus_2.svg';
 import Focus3Icon from '../../../../assets/icons/focus_3.svg';
-import GeminiIcon from '../../../../assets/icons/gemini.svg';
+import GraphPlainIcon from '../../../../assets/icons/graph_plain.svg';
+import GraphInferredIcon from '../../../../assets/icons/graph_inferred.svg';
 
 export const ActionSidebar: React.FC = () => {
     const { activeFocus, setFocus } = useFocusStore();
     const { selectedEntityIri } = useSelectedEntityStore();
-    const { showInferredRelations, toggleInferredRelations } = useViewStore();
+    const { showInferredRelations, setShowInferredRelations } = useViewStore();
 
     const isEntitySelected = selectedEntityIri !== null;
 
@@ -57,11 +58,18 @@ export const ActionSidebar: React.FC = () => {
 
             <div className="view-group">
                 <button
-                    className={`sidebar-btn inferred-toggle ${showInferredRelations ? 'active' : ''}`}
-                    onClick={toggleInferredRelations}
-                    title={showInferredRelations ? "Hide Inferred Relations" : "Show Inferred Relations"}
+                    className={`sidebar-btn ${!showInferredRelations ? 'active' : ''}`}
+                    onClick={() => setShowInferredRelations(false)}
+                    title="Original Relations Only"
                 >
-                    <img src={GeminiIcon} alt="Toggle Inferred" />
+                    <img src={GraphPlainIcon} alt="Original Relations Only"/>
+                </button>
+                <button
+                    className={`sidebar-btn ${showInferredRelations ? 'active' : ''}`}
+                    onClick={() => setShowInferredRelations(true)}
+                    title="Include Inferred Relations"
+                >
+                    <img src={GraphInferredIcon} alt="Include Inferred Relations"/>
                 </button>
             </div>
         </aside>
