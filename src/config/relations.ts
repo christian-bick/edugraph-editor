@@ -19,13 +19,6 @@ export const RELATIONS: RelationConfig[] = [
         perspectives: ['Progression', 'Understanding'],
     },
     {
-        id: 'constrains',
-        label: 'Constrains',
-        inverseId: 'constrainedBy',
-        inverseLabel: 'Constrained By',
-        perspectives: ['Progression', 'Understanding'],
-    },
-    {
         id: 'inverts',
         label: 'Inverts',
         inverseId: 'invertedBy',
@@ -37,13 +30,6 @@ export const RELATIONS: RelationConfig[] = [
         label: 'Integrates',
         inverseId: 'integratedIn',
         inverseLabel: 'Integrated In',
-        perspectives: ['Progression', 'Application'],
-    },
-    {
-        id: 'decomposes',
-        label: 'Decomposes',
-        inverseId: 'decomposedBy',
-        inverseLabel: 'Decomposed By',
         perspectives: ['Progression', 'Application'],
     },
     {
@@ -60,13 +46,6 @@ export const RELATIONS: RelationConfig[] = [
         inverseLabel: 'Has Part',
         perspectives: ['Taxonomy'],
     },
-    {
-        id: 'includes',
-        label: 'Includes',
-        inverseId: 'includedIn',
-        inverseLabel: 'Included In',
-        perspectives: ['Taxonomy'],
-    }
 ];
 
 export const getRelationsByPerspective = (perspective: string) =>
