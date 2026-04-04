@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from '../../global/Modal/Modal';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useBranchStore } from '../../../stores/branch-store';
-import { useCurrentOntologyStore } from '../../../stores/ontology-store';
+import { useCurrentOntologyStore, useOntologyStore } from '../../../stores/ontology-store';
 import { serializeOntology } from '../../../stores/ontology-serializer';
 import { promptOntology } from '../../../api/gemini';
 import { getQuadsFromString, createEntityInfoMap, populateOntologyFromQuads } from '../../../stores/ontology-parser';
@@ -19,6 +19,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
     const { geminiToken } = useAuthStore();
     const { activeDimension } = useBranchStore();
     const { ontologies, updateOntology } = useCurrentOntologyStore();
+    const { schema } = useOntologyStore();
     
     const [prompt, setPrompt] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -52,6 +53,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
                 geminiToken,
                 prompt,
                 serialized,
+                schema,
                 (msg) => setStatus(msg),
                 (th) => setThought(th)
             );

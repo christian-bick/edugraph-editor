@@ -112,16 +112,22 @@ export const promptOntology = async (
     token: string,
     userPrompt: string,
     currentFileContent: string,
+    schemaContext?: string | null,
     onProgress?: (message: string) => void,
     onThought?: (thought: string) => void
 ): Promise<string> => {
     if (!token) throw new Error("Gemini API token is missing.");
 
+    let systemInstruction = ONTOLOGY_PROMPT_SYSTEM_INSTRUCTION;
+    if (schemaContext) {
+        systemInstruction += `\n\nCORE SCHEMA CONTEXT:\n${schemaContext}\n\nUse this schema to understand the valid classes and properties available in the ontology.`;
+    }
+
     let history: any[] = [
         {
             role: 'user',
             parts: [
-                { text: `SYSTEM INSTRUCTION:\n${ONTOLOGY_PROMPT_SYSTEM_INSTRUCTION}\n\nCURRENT FILE CONTENT:\n${currentFileContent}\n\nUSER REQUEST: ${userPrompt}` }
+                { text: `SYSTEM INSTRUCTION:\n${systemInstruction}\n\nCURRENT FILE CONTENT:\n${currentFileContent}\n\nUSER REQUEST: ${userPrompt}` }
             ]
         }
     ];

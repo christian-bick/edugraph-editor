@@ -168,6 +168,7 @@ interface OntologyState {
         Ability: Ontology | null;
         Scope: Ontology | null;
     };
+    schema: string | null;
     loading: boolean;
     error: string | null;
     fetchOntology: (branch: string) => Promise<void>;
@@ -175,6 +176,7 @@ interface OntologyState {
 
 export const useOntologyStore = create<OntologyState>()((set, get) => ({
     ontologiesOriginal: { Area: null, Ability: null, Scope: null },
+    schema: null,
     loading: false,
     error: null,
     fetchOntology: async (branch: string) => {
@@ -187,8 +189,11 @@ export const useOntologyStore = create<OntologyState>()((set, get) => ({
                 "core-abilities.ttl": "Ability",
                 "core-scopes-math.ttl": "Scope",
             };
-            const files = Object.keys(fileMapping);
-            const rawTurtles = await loadOntologyFiles(files, branch);
+            const ontologyFiles = Object.keys(fileMapping);
+            const schemaFile = "core-schema.ttl";
+            const allFilesToFetch = [...ontologyFiles, schemaFile];
+            
+            const rawTurtles = await loadOntologyFiles(allFilesToFetch, branch);
 
             const finalOntologies: { Area: Ontology | null; Ability: Ontology | null; Scope: Ontology | null } = {
                 Area: null,
@@ -196,8 +201,9 @@ export const useOntologyStore = create<OntologyState>()((set, get) => ({
                 Scope: null,
             };
 
-            for (let i = 0; i < files.length; i++) {
-                const fileName = files[i];
+            // Parse ontology files
+            for (let i = 0; i < ontologyFiles.length; i++) {
+                const fileName = ontologyFiles[i];
                 const fileResponse = rawTurtles[i];
                 const type = fileMapping[fileName];
 
@@ -219,7 +225,14 @@ export const useOntologyStore = create<OntologyState>()((set, get) => ({
                 finalOntologies[type] = newOntology;
             }
 
-            set({ ontologiesOriginal: finalOntologies, loading: false });
+            // Get schema content (it's the last one in the list)
+            const schemaContent = rawTurtles[allFilesToFetch.length - 1].content;
+
+            set({ 
+                ontologiesOriginal: finalOntologies, 
+                schema: schemaContent,
+                loading: false 
+            });
             useCurrentOntologyStore.getState().setOntologies(structuredClone(finalOntologies));
             useCurrentOntologyStore.temporal.getState().clear();
 
