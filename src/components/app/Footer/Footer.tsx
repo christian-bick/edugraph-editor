@@ -5,6 +5,8 @@ import {useStore} from "zustand";
 import { useViewStore } from '../../../stores/view-store';
 import { useAuthStore } from '../../../stores/auth-store';
 import clsx from 'clsx';
+import { useState } from 'react';
+import { PromptModal } from '../PromptModal/PromptModal';
 
 const useTemporalStore = <T, >(
     selector: (state: TemporalState<CurrentOntologyState>) => T,
@@ -16,7 +18,8 @@ export const Footer = () => {
         (state) => state,
     );
     const { view, setView } = useViewStore();
-    const { token } = useAuthStore();
+    const { token, geminiToken } = useAuthStore();
+    const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
 
     const isDiffActive = view === 'diff';
 
@@ -34,15 +37,26 @@ export const Footer = () => {
                     Undo
                 </button>
                 
-                {token && (
-                    <button
-                        onClick={() => setView('diff')}
-                        disabled={!pastStates.length}
-                        className={clsx('push-button', { active: pastStates.length })}
-                    >
-                        Push
-                    </button>
-                )}
+                <div className="action-group">
+                    {geminiToken && (
+                        <button
+                            onClick={() => setIsPromptModalOpen(true)}
+                            className="prompt-button"
+                        >
+                            Prompt
+                        </button>
+                    )}
+
+                    {token && (
+                        <button
+                            onClick={() => setView('diff')}
+                            disabled={!pastStates.length}
+                            className={clsx('push-button', { active: pastStates.length })}
+                        >
+                            Push
+                        </button>
+                    )}
+                </div>
 
                 <button 
                     onClick={() => redo()} 
@@ -53,6 +67,11 @@ export const Footer = () => {
                     <span className="arrow-right"></span>
                 </button>
             </div>
+
+            <PromptModal 
+                isOpen={isPromptModalOpen} 
+                onClose={() => setIsPromptModalOpen(false)} 
+            />
         </footer>
     );
 }

@@ -25,6 +25,7 @@ export interface CurrentOntologyState {
     updateRelations: (dimension: 'Area' | 'Ability' | 'Scope', subjectIri: string, relation: RelationType, objectIris: string[]) => void;
     createEntity: (dimension: 'Area' | 'Ability' | 'Scope', parentIri: string | null, newId: string, newDefinition: string) => void;
     deleteEntity: (dimension: 'Area' | 'Ability' | 'Scope', iriToDelete: string) => void;
+    updateOntology: (dimension: 'Area' | 'Ability' | 'Scope', newOntology: Ontology) => void;
     setOntologies: (ontologies: CurrentOntologyState['ontologies']) => void;
 }
 
@@ -33,6 +34,11 @@ export const useCurrentOntologyStore = create(
         (set) => ({
             ontologies: { Area: null, Ability: null, Scope: null },
             setOntologies: (ontologies) => set({ ontologies }),
+            updateOntology: (dimension, newOntology) => {
+                set(produce(state => {
+                    state.ontologies[dimension] = newOntology;
+                }));
+            },
             updateIri: (dimension, originalEntity, newId) => {
                 let newIri: string | undefined;
                 set(state => produce(state, (draft) => {
