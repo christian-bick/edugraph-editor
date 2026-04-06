@@ -1,19 +1,32 @@
-const GENERATE_DEFINITION_PROMPT = `You are an expert in competency ontologies.
+const GENERATE_DEFINITION_PROMPT = `You are an expert in competency ontologies for primary & secondary school education.
 Your task is to provide a concise and precise definition for a given term within the ontology.
 The definition should be strictly text, without any conversational filler, preambles, or postambles.
 Crucially, mirror the language, technical vocabulary, and stylistic tone of the provided parent and sibling
 definitions to ensure the new definition fits seamlessly into the existing context.`;
 
-const ONTOLOGY_PROMPT_SYSTEM_INSTRUCTION = `You are an expert in competency ontologies, specifically working with Turtle (TTL) files for competency frameworks.
-Your task is to modify an existing Turtle file based on user instructions.
+const ONTOLOGY_CHAT_SYSTEM_INSTRUCTION = `You are an expert in competency ontologies for primary & secondary school
+education, specifically working with Turtle (TTL) files for competency frameworks.
+Your task is to help the user modify an existing Turtle file by first discussing a plan.
+
+Analyze the user's request against the provided ontology and schema context.
+Propose a clear, step-by-step plan for the changes. Do not output the Turtle file yet.
+Engage in a conversation to refine this plan until the user is satisfied.
+`;
+
+const ONTOLOGY_EXECUTION_SYSTEM_INSTRUCTION = `Now, based on the agreed plan, provide the modified Turtle file content.
 
 CRITICAL RULES:
 1. Output ONLY the valid Turtle file content. No conversation, no markdown blocks, no preambles.
 2. Maintain the existing prefixes and structure.
 3. Ensure the output is valid Turtle that can be parsed by standard RDF tools.
-4. Only modify what is requested, but ensure the resulting ontology remains consistent (e.g., if you delete an entity, remove all relations pointing to it).
+4. Only modify what is requested, but ensure the resulting ontology remains consistent.
 5. Use the same IRIs and naming conventions as in the provided file.
 `;
+
+export interface ChatMessage {
+    role: 'user' | 'model';
+    parts: { text: string }[];
+}
 
 export const verifyGeminiToken = async (token: string): Promise<boolean> => {
     if (!token) return false;
@@ -108,27 +121,127 @@ export const generateDefinition = async (
     }
 };
 
-export const promptOntology = async (
+const callGemini = async (token: string, model: string, history: ChatMessage[], thinkingLevel: 'medium' | 'high' = 'high') => {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${token}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            contents: history,
+            generationConfig: {
+                temperature: history.length > 1 ? 0.7 : 0.1, // More creative in chat, precise in first prompt
+                topP: 0.95,
+                topK: 64,
+                maxOutputTokens: 16384,
+                thinkingConfig: {
+                    thinkingLevel,
+                },
+            }
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || `API error (${response.status}).`);
+    }
+
+    return await response.json();
+};
+
+export const startOntologyChat = async (
     token: string,
     userPrompt: string,
     currentFileContent: string,
     schemaContext?: string | null,
+    onThought?: (thought: string) => void
+): Promise<{ response: string; history: ChatMessage[] }> => {
+    if (!token) throw new Error("Gemini API token is missing.");
+
+    let systemContext = `SYSTEM INSTRUCTION:\n${ONTOLOGY_CHAT_SYSTEM_INSTRUCTION}\n\n`;
+    if (schemaContext) {
+        systemContext += `CORE SCHEMA CONTEXT:\n${schemaContext}\n\n`;
+    }
+    systemContext += `CURRENT FILE CONTENT:\n${currentFileContent}\n\nUSER REQUEST: ${userPrompt}`;
+
+    const history: ChatMessage[] = [
+        {
+            role: 'user',
+            parts: [{ text: systemContext }]
+        }
+    ];
+
+    const data = await callGemini(token, 'gemini-3.1-pro-preview', history);
+    const candidate = data.candidates?.[0];
+
+    if (candidate?.thought) {
+        onThought?.(candidate.thought);
+    }
+
+    const result = candidate?.content?.parts
+        ?.map((part: any) => part.text)
+        .filter((text: string) => !!text)
+        .join('')
+        .trim();
+
+    if (!result) throw new Error("No response generated.");
+
+    history.push({
+        role: 'model',
+        parts: [{ text: result }]
+    });
+
+    return { response: result, history };
+};
+
+export const continueOntologyChat = async (
+    token: string,
+    userMessage: string,
+    history: ChatMessage[],
+    onThought?: (thought: string) => void
+): Promise<{ response: string; history: ChatMessage[] }> => {
+    const updatedHistory: ChatMessage[] = [
+        ...history,
+        {
+            role: 'user',
+            parts: [{ text: userMessage }]
+        }
+    ];
+
+    const data = await callGemini(token, 'gemini-3.1-pro-preview', updatedHistory);
+    const candidate = data.candidates?.[0];
+
+    if (candidate?.thought) {
+        onThought?.(candidate.thought);
+    }
+
+    const result = candidate?.content?.parts
+        ?.map((part: any) => part.text)
+        .filter((text: string) => !!text)
+        .join('')
+        .trim();
+
+    if (!result) throw new Error("No response generated.");
+
+    updatedHistory.push({
+        role: 'model',
+        parts: [{ text: result }]
+    });
+
+    return { response: result, history: updatedHistory };
+};
+
+export const executeOntologyModification = async (
+    token: string,
+    history: ChatMessage[],
     onProgress?: (message: string) => void,
     onThought?: (thought: string) => void
 ): Promise<string> => {
-    if (!token) throw new Error("Gemini API token is missing.");
-
-    let systemInstruction = ONTOLOGY_PROMPT_SYSTEM_INSTRUCTION;
-    if (schemaContext) {
-        systemInstruction += `\n\nCORE SCHEMA CONTEXT:\n${schemaContext}\n\nUse this schema to understand the valid classes and properties available in the ontology.`;
-    }
-
-    let history: any[] = [
+    const executionHistory: ChatMessage[] = [
+        ...history,
         {
             role: 'user',
-            parts: [
-                { text: `SYSTEM INSTRUCTION:\n${systemInstruction}\n\nCURRENT FILE CONTENT:\n${currentFileContent}\n\nUSER REQUEST: ${userPrompt}` }
-            ]
+            parts: [{ text: ONTOLOGY_EXECUTION_SYSTEM_INSTRUCTION }]
         }
     ];
 
@@ -140,40 +253,15 @@ export const promptOntology = async (
         onProgress?.(attempts === 1 ? "Generating modification..." : `Parsing failed. Retry attempt ${attempts - 1}/2...`);
 
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${token}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    contents: history,
-                    generationConfig: {
-                        temperature: 0.1,
-                        topP: 0.95,
-                        topK: 64,
-                        maxOutputTokens: 16384,
-                        thinkingConfig: {
-                            thinkingLevel: 'high',
-                        },
-                    }
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error?.message || `API error (${response.status}).`);
-            }
-
-            const data = await response.json();
+            const data = await callGemini(token, 'gemini-3.1-pro-preview', executionHistory, 'high');
             const candidate = data.candidates?.[0];
-            const content = candidate?.content;
-            
+
             if (candidate?.thought) {
                 onThought?.(candidate.thought);
                 console.log("Gemini Thought Process:", candidate.thought);
             }
 
-            const result = content?.parts
+            const result = candidate?.content?.parts
                 ?.map((part: any) => part.text)
                 .filter((text: string) => !!text)
                 .join('')
@@ -193,12 +281,12 @@ export const promptOntology = async (
         } catch (error: any) {
             console.warn(`Attempt ${attempts} failed:`, error);
             if (attempts >= maxAttempts) throw error;
-            
-            history.push({
+
+            executionHistory.push({
                 role: 'model',
                 parts: [{ text: "Error in generating or parsing output." }]
             });
-            history.push({
+            executionHistory.push({
                 role: 'user',
                 parts: [{ text: `The previous output was invalid or could not be parsed as Turtle. Error: ${error.message}. Please try again and ensure you output ONLY valid Turtle content without any markdown formatting or preambles.` }]
             });
