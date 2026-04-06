@@ -9,6 +9,8 @@ interface ViewState {
     showInferredRelations: boolean;
     toggleInferredRelations: () => void;
     setShowInferredRelations: (show: boolean) => void;
+    boundaryEntityIri: string | null;
+    setBoundaryEntityIri: (iri: string | null) => void;
 }
 
 export const useViewStore = create<ViewState>((set) => ({
@@ -18,4 +20,6 @@ export const useViewStore = create<ViewState>((set) => ({
     showInferredRelations: true,
     toggleInferredRelations: () => set((state) => ({ showInferredRelations: !state.showInferredRelations })),
     setShowInferredRelations: (show: boolean) => set(() => ({ showInferredRelations: show })),
+    boundaryEntityIri: null,
+    setBoundaryEntityIri: (iri) => set({ boundaryEntityIri: iri }),
 }));

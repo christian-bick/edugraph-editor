@@ -13,13 +13,24 @@ export const getGraphData = (
     selectedEntityIri: string | null = null,
     useVirtualRoot = false,
     showInferred = true,
+    boundaryEntityIri: string | null = null,
 ) => {
     let nodes: G6Node[] = [];
     let edges: G6Edge[] = [];
     if (!ontology || filterRelationTypes.length === 0) return { nodes, edges };
 
+    // 0. Boundary Filtering (Ancestors of boundaryEntityIri via partOf)
+    let allowedIris: Set<string> | null = null;
+    if (boundaryEntityIri) {
+        // Ancestors are successors in the partOf relation (X partOf Y)
+        const ancestors = getSuccessors(boundaryEntityIri, ontology.relations as any, ['partOf']);
+        allowedIris = new Set([boundaryEntityIri, ...Array.from(ancestors)]);
+    }
+
     const entityIRItoIdMap = new Map<string, string>();
     ontology.entities.forEach(entity => {
+        if (allowedIris && !allowedIris.has(entity.iri)) return;
+
         const id = entity.iri;
         entityIRItoIdMap.set(entity.iri, id);
         nodes.push({

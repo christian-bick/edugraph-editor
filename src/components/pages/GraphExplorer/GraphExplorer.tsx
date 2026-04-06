@@ -11,6 +11,8 @@ import {useFocusStore} from "../../../stores/focus-store.ts";
 import {Graph} from "@antv/g6";
 import {getRelationsByPerspective} from "../../../config/relations.ts";
 import {useViewStore} from "../../../stores/view-store.ts";
+import CloseIcon from '../../../assets/icons/close.svg';
+import {toNaturalName} from "../../../stores/utils.ts";
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -23,7 +25,7 @@ export const GraphExplorer: React.FC = () => {
     const {activeBranch, activeDimension, activePerspective} = useBranchStore();
     const {selectedEntityIri, setSelectedEntityIri} = useSelectedEntityStore();
     const {activeFocus} = useFocusStore();
-    const {showInferredRelations} = useViewStore();
+    const {showInferredRelations, boundaryEntityIri, setBoundaryEntityIri} = useViewStore();
 
     const activeFocusRef = useRef(activeFocus);
     useEffect(() => {
@@ -37,6 +39,12 @@ export const GraphExplorer: React.FC = () => {
     useEffect(() => {
         setSelectedEntityIri(null);
     }, [activeBranch, activeDimension, setSelectedEntityIri]);
+
+    const boundaryEntityName = useMemo(() => {
+        if (!boundaryEntityIri || !ontology) return null;
+        const entity = ontology.entities.find(e => e.iri === boundaryEntityIri);
+        return entity ? toNaturalName(entity.name) : null;
+    }, [boundaryEntityIri, ontology]);
 
     const setSelected = (graph: any, selectedEntityIri: string | null) => {
         let selectedNode = null;
@@ -79,7 +87,8 @@ export const GraphExplorer: React.FC = () => {
             activeFocus,
             selectedEntityIri,
             useVirtualRoot,
-            showInferredRelations
+            showInferredRelations,
+            boundaryEntityIri
         );
     }
 
@@ -175,7 +184,7 @@ export const GraphExplorer: React.FC = () => {
         };
 
         updateGraph();
-    }, [ontology, activeFocus, selectedEntityIri, showInferredRelations]);
+    }, [ontology, activeFocus, selectedEntityIri, showInferredRelations, boundaryEntityIri]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;
@@ -184,10 +193,20 @@ export const GraphExplorer: React.FC = () => {
     return (
         <div className="graph-explorer-wrapper">
             <ActionSidebar/>
-            <div
-                ref={containerRef}
-                className="graph-explorer"
-            ></div>
+            <div className="graph-explorer-container">
+                {boundaryEntityName && (
+                    <div className="boundary-overlay">
+                        <span>Boundary: <strong>{boundaryEntityName}</strong></span>
+                        <button className="clear-boundary-btn" onClick={() => setBoundaryEntityIri(null)}>
+                            <img src={CloseIcon} alt="Clear Boundary" />
+                        </button>
+                    </div>
+                )}
+                <div
+                    ref={containerRef}
+                    className="graph-explorer"
+                ></div>
+            </div>
             <EntitySidebar/>
         </div>
     );

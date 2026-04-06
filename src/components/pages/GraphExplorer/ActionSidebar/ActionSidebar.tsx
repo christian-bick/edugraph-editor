@@ -8,11 +8,12 @@ import Focus2Icon from '../../../../assets/icons/focus_2.svg';
 import Focus3Icon from '../../../../assets/icons/focus_3.svg';
 import GraphPlainIcon from '../../../../assets/icons/graph_plain.svg';
 import GraphInferredIcon from '../../../../assets/icons/graph_inferred.svg';
+import BoundaryIcon from '../../../../assets/icons/boundary.svg';
 
 export const ActionSidebar: React.FC = () => {
     const { activeFocus, setFocus } = useFocusStore();
     const { selectedEntityIri } = useSelectedEntityStore();
-    const { showInferredRelations, setShowInferredRelations } = useViewStore();
+    const { showInferredRelations, setShowInferredRelations, setBoundaryEntityIri } = useViewStore();
 
     const isEntitySelected = selectedEntityIri !== null;
 
@@ -26,8 +27,27 @@ export const ActionSidebar: React.FC = () => {
         setFocus(newFocus);
     };
 
+    const handleSetBoundary = () => {
+        if (selectedEntityIri) {
+            setBoundaryEntityIri(selectedEntityIri);
+        }
+    };
+
     return (
         <aside className="left-sidebar">
+            <div className="boundary-group">
+                <button
+                    className="sidebar-btn"
+                    onClick={handleSetBoundary}
+                    disabled={!isEntitySelected}
+                    title={isEntitySelected ? "Set Boundary" : "Select an entity to set as boundary"}
+                >
+                    <img src={BoundaryIcon} alt="Set Boundary"/>
+                </button>
+            </div>
+
+            <div className="divider" />
+
             <div className="focus-group">
                 <button
                     className={`sidebar-btn ${activeFocus === 'global' ? 'active' : ''}`}
@@ -48,7 +68,7 @@ export const ActionSidebar: React.FC = () => {
                     className={`sidebar-btn ${activeFocus === 'local' ? 'active' : ''}`}
                     onClick={() => handleFocusChange('local')}
                     disabled={!isEntitySelected}
-                    title={isEntitySelected ? "Local Focus" : "Select an entity for Local Focus"}
+                    title={isEntitySelected ? "Select an entity for Local Focus" : "Select an entity for Local Focus"}
                 >
                     <img src={Focus3Icon} alt="Local Focus"/>
                 </button>
