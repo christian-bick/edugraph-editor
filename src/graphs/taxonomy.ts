@@ -19,12 +19,17 @@ export const getGraphData = (
     let edges: G6Edge[] = [];
     if (!ontology || filterRelationTypes.length === 0) return { nodes, edges };
 
-    // 0. Boundary Filtering (Ancestors of boundaryEntityIri via partOf)
+    // 0. Boundary Filtering
+    // We want to keep the entire "branch" that the boundary entity belongs to.
+    // This includes the boundary entity itself, all its ancestors, and all its descendants.
     let allowedIris: Set<string> | null = null;
     if (boundaryEntityIri) {
-        // Ancestors are successors in the partOf relation (X partOf Y)
+        // Ancestors: Successors in 'partOf' (Child -> Parent -> Root)
         const ancestors = getSuccessors(boundaryEntityIri, ontology.relations as any, ['partOf']);
-        allowedIris = new Set([boundaryEntityIri, ...Array.from(ancestors)]);
+        // Descendants: Predecessors in 'partOf' (Leaf -> ... -> Child)
+        const descendants = getPredecessors(boundaryEntityIri, ontology.relations as any, ['partOf']);
+        
+        allowedIris = new Set([boundaryEntityIri, ...Array.from(ancestors), ...Array.from(descendants)]);
     }
 
     const entityIRItoIdMap = new Map<string, string>();
