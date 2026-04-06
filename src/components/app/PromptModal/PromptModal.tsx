@@ -22,7 +22,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
     const { activeDimension } = useBranchStore();
     const { ontologies, updateOntology } = useCurrentOntologyStore();
     const { schema } = useOntologyStore();
-    const { messages, setMessages, clearMessages } = useChatStore();
+    const { messages, setMessages, clearMessages, wasPlanExecuted, setWasPlanExecuted } = useChatStore();
     
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +43,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
         }
         if (!input.trim() || isLoading) return;
 
-        const userMessage = input.trim();
+        let userMessage = input.trim();
         setInput('');
         setIsLoading(true);
         setError(null);
@@ -56,6 +56,12 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
             
             if (!currentOntology) {
                 throw new Error(`Ontology for ${dimension} not loaded.`);
+            }
+
+            // If a plan was executed, let the model know in the next user message
+            if (wasPlanExecuted) {
+                userMessage = `[CONFIRMATION: The previously discussed plan was successfully executed by the user. The ontology now reflects those changes.]\n\n${userMessage}`;
+                setWasPlanExecuted(false);
             }
 
             if (messages.length === 0) {
@@ -127,7 +133,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
 
             updateOntology(dimension, newOntology);
             setStatus('Success!');
-            // We keep the history as requested.
+            setWasPlanExecuted(true);
         } catch (err: any) {
             console.error('Execution failed:', err);
             setError(err.message || 'Execution failed.');
@@ -220,7 +226,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
                                 Send
                             </button>
                             
-                            {messages.length > 0 && (
+                            {messages.length > 0 && !wasPlanExecuted && (
                                 <button 
                                     onClick={handleExecute} 
                                     disabled={isLoading} 

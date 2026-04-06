@@ -4,7 +4,9 @@ import type { ChatMessage } from '../api/gemini';
 
 interface ChatState {
     messages: ChatMessage[];
+    wasPlanExecuted: boolean;
     setMessages: (messages: ChatMessage[]) => void;
+    setWasPlanExecuted: (val: boolean) => void;
     clearMessages: () => void;
 }
 
@@ -12,8 +14,10 @@ export const useChatStore = create<ChatState>()(
     persist(
         (set) => ({
             messages: [],
+            wasPlanExecuted: false,
             setMessages: (messages: ChatMessage[]) => set({ messages }),
-            clearMessages: () => set({ messages: [] }),
+            setWasPlanExecuted: (wasPlanExecuted: boolean) => set({ wasPlanExecuted }),
+            clearMessages: () => set({ messages: [], wasPlanExecuted: false }),
         }),
         {
             name: 'chat-storage',
