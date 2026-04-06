@@ -36,10 +36,6 @@ export const GraphExplorer: React.FC = () => {
         return ontologies[activeDimension as keyof typeof ontologies];
     }, [ontologies, activeDimension]);
 
-    useEffect(() => {
-        setSelectedEntityIri(null);
-    }, [activeBranch, activeDimension, setSelectedEntityIri]);
-
     const boundaryEntityName = useMemo(() => {
         if (!boundaryEntityIri || !ontology) return null;
         const entity = ontology.entities.find(e => e.iri === boundaryEntityIri);
