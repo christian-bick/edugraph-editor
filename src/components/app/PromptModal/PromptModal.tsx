@@ -4,6 +4,7 @@ import { Modal } from '../../global/Modal/Modal';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useBranchStore } from '../../../stores/branch-store';
 import { useCurrentOntologyStore, useOntologyStore } from '../../../stores/ontology-store';
+import { useChatStore } from '../../../stores/chat-store';
 import { serializeOntology } from '../../../stores/ontology-serializer';
 import { startOntologyChat, continueOntologyChat, executeOntologyModification, ChatMessage } from '../../../api/gemini';
 import { getQuadsFromString, createEntityInfoMap, populateOntologyFromQuads } from '../../../stores/ontology-parser';
@@ -21,8 +22,8 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
     const { activeDimension } = useBranchStore();
     const { ontologies, updateOntology } = useCurrentOntologyStore();
     const { schema } = useOntologyStore();
+    const { messages, setMessages, clearMessages } = useChatStore();
     
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<string>('');
@@ -126,11 +127,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
 
             updateOntology(dimension, newOntology);
             setStatus('Success!');
-            setTimeout(() => {
-                onClose();
-                resetState();
-            }, 1000);
-
+            // We keep the history as requested.
         } catch (err: any) {
             console.error('Execution failed:', err);
             setError(err.message || 'Execution failed.');
@@ -140,16 +137,17 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
         }
     };
 
-    const resetState = () => {
-        setMessages([]);
-        setInput('');
-        setStatus('');
-        setThought('');
-        setError(null);
+    const handleReset = () => {
+        if (window.confirm('Are you sure you want to clear the conversation history?')) {
+            clearMessages();
+            setStatus('');
+            setThought('');
+            setError(null);
+        }
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={() => { onClose(); resetState(); }} className="prompt-modal-container">
+        <Modal isOpen={isOpen} onClose={onClose} className="prompt-modal-container">
             <div className="prompt-modal chat-mode">
                 <div className="prompt-modal-header">
                     <h2>AI Ontology Conversation</h2>
@@ -202,23 +200,36 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
                     />
                     
                     <div className="chat-actions">
-                        <button 
-                            onClick={handleSendMessage} 
-                            disabled={isLoading || !input.trim()} 
-                            className="send-btn"
-                        >
-                            Send
-                        </button>
-                        
-                        {messages.length > 0 && (
+                        <div className="left-actions">
+                            {messages.length > 0 && (
+                                <button 
+                                    onClick={handleReset} 
+                                    className="reset-btn"
+                                    disabled={isLoading}
+                                >
+                                    Reset Conversation
+                                </button>
+                            )}
+                        </div>
+                        <div className="right-actions">
                             <button 
-                                onClick={handleExecute} 
-                                disabled={isLoading} 
-                                className="execute-btn primary"
+                                onClick={handleSendMessage} 
+                                disabled={isLoading || !input.trim()} 
+                                className="send-btn"
                             >
-                                Confirm & Execute Plan
+                                Send
                             </button>
-                        )}
+                            
+                            {messages.length > 0 && (
+                                <button 
+                                    onClick={handleExecute} 
+                                    disabled={isLoading} 
+                                    className="execute-btn primary"
+                                >
+                                    Confirm & Execute Plan
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

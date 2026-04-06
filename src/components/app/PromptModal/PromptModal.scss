@@ -190,9 +190,15 @@
 
         .chat-actions {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
             gap: 12px;
             margin-top: 12px;
+
+            .left-actions, .right-actions {
+                display: flex;
+                gap: 12px;
+            }
 
             button {
                 padding: 8px 20px;
@@ -225,6 +231,17 @@
 
                     &:hover:not(:disabled) {
                         background: #218838;
+                    }
+                }
+
+                &.reset-btn {
+                    color: #dc3545;
+                    border-color: #ffc9c9;
+                    background: #fff5f5;
+
+                    &:hover:not(:disabled) {
+                        background: #fee2e2;
+                        border-color: #fca5a5;
                     }
                 }
 
