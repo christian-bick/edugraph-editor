@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type ViewMode = 'graph' | 'diff';
+type ViewMode = 'graph' | 'diff' | 'inspect';
 
 interface ViewState {
     view: ViewMode;

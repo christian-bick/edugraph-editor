@@ -70,6 +70,22 @@
                 }
             }
 
+            &.inspect-button {
+                background-color: #6c757d;
+                color: white;
+                border-color: darken(#6c757d, 10%);
+                font-weight: bold;
+
+                &:not(:disabled):hover {
+                    background-color: darken(#6c757d, 10%);
+                }
+
+                &.active {
+                    background-color: #495057;
+                    border-color: darken(#495057, 10%);
+                }
+            }
+
             .arrow-left {
                 width: 0;
                 height: 0;

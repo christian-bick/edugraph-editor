@@ -47,6 +47,13 @@ export const Footer = () => {
                         </button>
                     )}
 
+                    <button
+                        onClick={() => setView('inspect')}
+                        className={clsx('inspect-button', { active: view === 'inspect' })}
+                    >
+                        Inspect
+                    </button>
+
                     {token && (
                         <button
                             onClick={() => setView('diff')}

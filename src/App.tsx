@@ -8,6 +8,7 @@ import {GraphExplorer} from "./components/pages/GraphExplorer/GraphExplorer.tsx"
 import { useBranchStore } from './stores/branch-store.ts';
 import { useViewStore } from './stores/view-store.ts';
 import { DiffViewer } from './components/pages/DiffViewer/DiffViewer.tsx';
+import { Inspector } from './components/pages/Inspector/Inspector.tsx';
 
 export const App = () => {
     const fetchOntology = useOntologyStore(state => state.fetchOntology);
@@ -32,7 +33,9 @@ export const App = () => {
         <BrowserRouter>
             <Header/>
             <Content>
-                {view === 'graph' ? <GraphExplorer /> : <DiffViewer />}
+                {view === 'graph' && <GraphExplorer />}
+                {view === 'diff' && <DiffViewer />}
+                {view === 'inspect' && <Inspector />}
             </Content>
             <Footer/>
         </BrowserRouter>
