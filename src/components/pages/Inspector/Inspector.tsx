@@ -31,10 +31,6 @@ export const Inspector: React.FC = () => {
         return grouped;
     }, [issues]);
 
-    const handleEntityClick = (iri: string) => {
-        setSelectedEntityIri(iri);
-    };
-
     const navigateToEntity = (iri: string, perspective: PerspectiveType) => {
         setSelectedEntityIri(iri);
         setActivePerspective(perspective);
@@ -59,10 +55,7 @@ export const Inspector: React.FC = () => {
                     <tbody>
                         {typeIssues.map((issue, idx) => (
                             <tr key={`${issue.entity.iri}-${idx}`}>
-                                <td 
-                                    className="entity-cell"
-                                    onClick={() => handleEntityClick(issue.entity.iri)}
-                                >
+                                <td className="entity-cell">
                                     {toNaturalName(issue.entity.name)}
                                 </td>
                                 <td>{issue.description}</td>

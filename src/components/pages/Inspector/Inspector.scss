@@ -5,7 +5,6 @@
     flex-direction: column;
     height: 100%;
     width: 100%;
-    background-color: colors.$section-background;
     padding: 2rem;
     box-sizing: border-box;
     overflow-y: auto;
@@ -72,13 +71,13 @@
         }
 
         .entity-cell {
-            color: #007bff;
-            cursor: pointer;
+            width: 300px;
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             font-weight: 500;
-
-            &:hover {
-                text-decoration: underline;
-            }
+            color: colors.$dark-text;
         }
 
         .actions-cell {
