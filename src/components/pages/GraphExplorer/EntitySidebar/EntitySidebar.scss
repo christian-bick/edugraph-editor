@@ -9,6 +9,11 @@
     flex-direction: column;
     border-left: 1px solid colors.$light-border-color;
 
+    .sidebar-header-search {
+        padding: 1rem;
+        border-bottom: 1px solid colors.$light-border-color;
+    }
+
     .sidebar-content {
         padding: 1rem;
         flex-grow: 1;
@@ -39,7 +44,7 @@
         .new-child-btn {
             background-color: colors.$color-scope-dark;
             &:hover {
-                background-color: #3e8e41; // A slightly darker green for hover
+                background-color: #3e8e41;
             }
         }
 
@@ -197,7 +202,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100%;
+        flex-grow: 1;
         color: #888;
+        padding: 2rem;
+        text-align: center;
     }
 }

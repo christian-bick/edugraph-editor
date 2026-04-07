@@ -222,6 +222,9 @@ export const EntitySidebar: React.FC = () => {
     return (
         <>
             <aside className="graph-explorer-sidebar">
+                <div className="sidebar-header-search">
+                    <EntitySearch showLabel={false} />
+                </div>
                 {selectedEntity ? (
                     <>
                         <div className="sidebar-content">
@@ -314,7 +317,9 @@ export const EntitySidebar: React.FC = () => {
                         )}
                     </>
                 ) : (
-                    <EntitySearch/>
+                    <div className="sidebar-placeholder">
+                        <p>Select an entity to view details or use search.</p>
+                    </div>
                 )}
             </aside>
             <EditIri

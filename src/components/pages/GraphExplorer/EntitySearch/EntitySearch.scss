@@ -1,7 +1,7 @@
 @use "/src/colors.scss" as colors;
 
 .entity-search-container {
-    padding: 1rem;
+    padding: 0;
 
     h4 {
         margin: 0 0 1rem 0;
@@ -11,7 +11,10 @@
     .search-bar {
         display: flex;
         gap: 0.5rem;
-        margin-bottom: 1rem;
+
+        &.has-results {
+            margin-bottom: 1rem;
+        }
 
         input {
             width: 100%;

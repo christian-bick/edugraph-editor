@@ -3,9 +3,14 @@ import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
 import { useBranchStore } from '../../../../stores/branch-store';
 import { useSelectedEntityStore } from '../../../../stores/selected-entity-store';
 import { toNaturalName } from '../../../../stores/utils';
+import clsx from 'clsx';
 import './EntitySearch.scss';
 
-export const EntitySearch: React.FC = () => {
+interface EntitySearchProps {
+    showLabel?: boolean;
+}
+
+export const EntitySearch: React.FC<EntitySearchProps> = ({ showLabel = true }) => {
     const { ontologies } = useCurrentOntologyStore();
     const { activeDimension } = useBranchStore();
     const { setSelectedEntityIri } = useSelectedEntityStore();
@@ -63,8 +68,8 @@ export const EntitySearch: React.FC = () => {
 
     return (
         <div className="entity-search-container">
-            <h4>Find Entity</h4>
-            <div className="search-bar">
+            {showLabel && <h4>Find Entity</h4>}
+            <div className={clsx("search-bar", { "has-results": searchResults.length > 0 })}>
                 <input
                     type="text"
                     placeholder="Search by name..."
