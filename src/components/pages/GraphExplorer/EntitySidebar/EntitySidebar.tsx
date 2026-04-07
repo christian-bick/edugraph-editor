@@ -220,11 +220,11 @@ export const EntitySidebar: React.FC = () => {
                 </div>
                 {selectedEntity ? (
                     <>
-                        <div className="sidebar-content">
-                            <div className="sidebar-section">
-                                <h2>{toNaturalName(selectedEntity.name)}</h2>
-                            </div>
+                        <div className="sidebar-title-section">
+                            <h2>{toNaturalName(selectedEntity.name)}</h2>
+                        </div>
 
+                        <div className="sidebar-content">
                             <div className="sidebar-section">
                                 <div className="sidebar-header">
                                     <h3>IRI</h3>

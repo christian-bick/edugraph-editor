@@ -2,27 +2,40 @@
 
 .graph-explorer-sidebar {
     width: 400px;
+    height: 100%;
     flex-shrink: 0;
     box-sizing: border-box;
     background-color: colors.$container-background;
     display: flex;
     flex-direction: column;
     border-left: 1px solid colors.$light-border-color;
+    overflow: hidden;
 
     .sidebar-header-search {
         padding: 1rem;
         border-bottom: 1px solid colors.$light-border-color;
+        flex-shrink: 0;
+    }
+
+    .sidebar-title-section {
+        padding: 1rem;
+        border-bottom: 1px solid colors.$light-border-color;
+        flex-shrink: 0;
+        background-color: colors.$container-background;
     }
 
     .sidebar-content {
         padding: 1rem;
         flex-grow: 1;
         overflow-y: auto;
+        min-height: 0; /* Important for flex-grow with overflow */
     }
 
     .sidebar-footer {
         padding: 1rem;
         border-top: 1px solid colors.$light-border-color;
+        flex-shrink: 0;
+        background-color: colors.$container-background;
 
         .footer-buttons {
             display: flex;

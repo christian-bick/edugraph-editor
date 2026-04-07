@@ -5,7 +5,8 @@
     flex-direction: row;
     flex-grow: 1;
     width: 100%;
-    overflow: auto;
+    height: 100%;
+    overflow: hidden;
 }
 
 .graph-explorer-container {
