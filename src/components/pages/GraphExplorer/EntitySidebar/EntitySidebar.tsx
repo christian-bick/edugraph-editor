@@ -12,7 +12,7 @@ import type {OntologyEntity, RelationType} from "../../../../types/ontology-type
 import {ModifyRelationModal} from '../ModifyRelation/ModifyRelation.tsx';
 import {CreateEntity} from '../CreateEntity/CreateEntity.tsx';
 import {EntitySearch} from '../EntitySearch/EntitySearch.tsx';
-import {getRelationsByPerspective} from '../../../../config/relations.ts';
+import {RELATIONS} from '../../../../config/relations.ts';
 import clsx from 'clsx';
 
 interface RelationEntity extends OntologyEntity {
@@ -101,14 +101,11 @@ const RelationSection: React.FC<RelationSectionProps> = ({
  */
 const computeEntityRelations = (
     entityIri: string,
-    ontology: any,
-    perspective: string
+    ontology: any
 ): { [key: string]: RelationEntity[] } => {
     const allEntities = ontology.entities;
     const relationsMap: { [key: string]: RelationEntity[] } = {};
     const inferredMap: InferredRelationsMap = calculateInferredRelations(ontology);
-
-    const perspectiveRelations = getRelationsByPerspective(perspective);
 
     // 1. Process direct relations (original)
     for (const relType in ontology.relations) {
@@ -141,7 +138,7 @@ const computeEntityRelations = (
     }
 
     // 3. Process inverse relations
-    perspectiveRelations.forEach(rel => {
+    RELATIONS.forEach(rel => {
         // Inverse Original
         const invertedOrig = invertRelations(ontology.relations[rel.id] || {});
         if (invertedOrig[entityIri]) {
@@ -182,7 +179,7 @@ const computeEntityRelations = (
 export const EntitySidebar: React.FC = () => {
     const {selectedEntityIri, setSelectedEntityIri} = useSelectedEntityStore();
     const {ontologies, deleteEntity} = useCurrentOntologyStore();
-    const {activeDimension, activePerspective} = useBranchStore();
+    const {activeDimension} = useBranchStore();
     const [isEditIriOpen, setIsEditIriOpen] = useState(false);
     const [isEditDefinitionOpen, setIsEditDefinitionOpen] = useState(false);
     const [isCreateEntityOpen, setIsCreateEntityOpen] = useState(false);
@@ -195,13 +192,13 @@ export const EntitySidebar: React.FC = () => {
         const entity = ontology.entities.find(e => e.iri === selectedEntityIri);
         if (!entity) return null;
 
-        const relations = computeEntityRelations(selectedEntityIri, ontology, activePerspective);
+        const relations = computeEntityRelations(selectedEntityIri, ontology);
 
         return {
             ...entity,
             relations,
         };
-    }, [selectedEntityIri, ontology, activePerspective]);
+    }, [selectedEntityIri, ontology]);
 
     const hasChildren = useMemo(() => {
         if (!selectedEntity?.relations.hasPart) return false;
@@ -214,10 +211,6 @@ export const EntitySidebar: React.FC = () => {
             setSelectedEntityIri(null);
         }
     }
-
-    const currentPerspectiveRelations = useMemo(() =>
-            getRelationsByPerspective(activePerspective),
-        [activePerspective]);
 
     return (
         <>
@@ -259,7 +252,7 @@ export const EntitySidebar: React.FC = () => {
                             </div>
 
                             <div className="relations-group">
-                                {currentPerspectiveRelations
+                                {RELATIONS
                                     .sort((a, b) => {
                                         const aEmpty = !selectedEntity.relations[a.id] || selectedEntity.relations[a.id].length === 0;
                                         const bEmpty = !selectedEntity.relations[b.id] || selectedEntity.relations[b.id].length === 0;
@@ -281,7 +274,7 @@ export const EntitySidebar: React.FC = () => {
                             </div>
 
                             <div className="relations-group inverse">
-                                {currentPerspectiveRelations
+                                {RELATIONS
                                     .sort((a, b) => {
                                         const aEmpty = !selectedEntity.relations[a.inverseId] || selectedEntity.relations[a.inverseId].length === 0;
                                         const bEmpty = !selectedEntity.relations[b.inverseId] || selectedEntity.relations[b.inverseId].length === 0;
@@ -302,19 +295,17 @@ export const EntitySidebar: React.FC = () => {
                                 }
                             </div>
                         </div>
-                        {activePerspective === 'Structure' && (
-                            <div className="sidebar-footer">
-                                <div className="footer-buttons">
-                                    <button className="delete-btn" onClick={handleDelete} disabled={hasChildren}
-                                            title={hasChildren ? 'Cannot delete an entity that has children.' : 'Delete this entity'}>
-                                        Delete Entity
-                                    </button>
-                                    <button className="new-child-btn" onClick={() => setIsCreateEntityOpen(true)}>
-                                        New Child Entity
-                                    </button>
-                                </div>
+                        <div className="sidebar-footer">
+                            <div className="footer-buttons">
+                                <button className="delete-btn" onClick={handleDelete} disabled={hasChildren}
+                                        title={hasChildren ? 'Cannot delete an entity that has children.' : 'Delete this entity'}>
+                                    Delete Entity
+                                </button>
+                                <button className="new-child-btn" onClick={() => setIsCreateEntityOpen(true)}>
+                                    New Child Entity
+                                </button>
                             </div>
-                        )}
+                        </div>
                     </>
                 ) : (
                     <div className="sidebar-placeholder">
