@@ -26,7 +26,7 @@ export const useBranchStore = create<BranchState & BranchAction>()(
             branches: ['main'], // Start with a default, will be overwritten by fetch
             activeBranch: 'main',
             activeDimension: 'Area',
-            activePerspective: 'Taxonomy',
+            activePerspective: 'Structure',
             loading: false,
             error: null,
             isHydrated: false,

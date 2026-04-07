@@ -8,7 +8,7 @@ import { PerspectiveType } from '../../../config/relations';
 import { toNaturalName } from '../../../stores/utils';
 import './Inspector.scss';
 
-const PERSPECTIVES: PerspectiveType[] = ['Taxonomy', 'Progression', 'Application', 'Understanding'];
+const PERSPECTIVES: PerspectiveType[] = ['Structure', 'Progression', 'Integration', 'Expansion'];
 
 export const Inspector: React.FC = () => {
     const { ontologies } = useCurrentOntologyStore();

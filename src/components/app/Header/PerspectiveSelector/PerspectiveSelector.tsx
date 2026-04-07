@@ -8,7 +8,7 @@ export const PerspectiveSelector = () => {
     const { activePerspective, setActivePerspective } = useBranchStore();
     const selectorRef = useRef<HTMLDivElement>(null);
 
-    const perspectives = ['Taxonomy', 'Understanding', 'Application', 'Progression' ];
+    const perspectives = ['Structure', 'Expansion', 'Integration', 'Progression' ];
 
     const handleSelect = (perspective: string) => {
         setActivePerspective(perspective);

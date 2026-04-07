@@ -1,6 +1,6 @@
 import type { OntologyRelations } from "../types/ontology-types";
 
-export type PerspectiveType = 'Progression' | 'Taxonomy' | 'Application' | 'Understanding';
+export type PerspectiveType = 'Progression' | 'Structure' | 'Integration' | 'Expansion';
 
 export interface RelationConfig {
     id: keyof OntologyRelations;
@@ -17,7 +17,7 @@ export const RELATIONS: RelationConfig[] = [
         label: 'Expands',
         inverseId: 'expandedBy',
         inverseLabel: 'Expanded By',
-        perspectives: ['Progression', 'Understanding'],
+        perspectives: ['Progression', 'Expansion'],
         isInherited: true,
     },
     {
@@ -25,7 +25,7 @@ export const RELATIONS: RelationConfig[] = [
         label: 'Inverts',
         inverseId: 'invertedBy',
         inverseLabel: 'Inverted By',
-        perspectives: ['Progression', 'Understanding'],
+        perspectives: ['Progression', 'Expansion'],
         isInherited: true,
     },
     {
@@ -33,7 +33,7 @@ export const RELATIONS: RelationConfig[] = [
         label: 'Integrates',
         inverseId: 'integratedIn',
         inverseLabel: 'Integrated In',
-        perspectives: ['Progression', 'Application'],
+        perspectives: ['Progression', 'Integration'],
         isInherited: true,
     },
     {
@@ -41,7 +41,7 @@ export const RELATIONS: RelationConfig[] = [
         label: 'Translates',
         inverseId: 'translatedTo',
         inverseLabel: 'Translated To',
-        perspectives: ['Progression', 'Application'],
+        perspectives: ['Progression', 'Integration'],
         isInherited: true,
     },
     {
@@ -49,7 +49,7 @@ export const RELATIONS: RelationConfig[] = [
         label: 'Part Of',
         inverseId: 'hasPart',
         inverseLabel: 'Has Part',
-        perspectives: ['Taxonomy'],
+        perspectives: ['Structure'],
     },
 ];
 

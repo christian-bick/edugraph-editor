@@ -302,7 +302,7 @@ export const EntitySidebar: React.FC = () => {
                                 }
                             </div>
                         </div>
-                        {activePerspective === 'Taxonomy' && (
+                        {activePerspective === 'Structure' && (
                             <div className="sidebar-footer">
                                 <div className="footer-buttons">
                                     <button className="delete-btn" onClick={handleDelete} disabled={hasChildren}
