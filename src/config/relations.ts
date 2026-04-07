@@ -8,6 +8,7 @@ export interface RelationConfig {
     inverseId: string;
     inverseLabel: string;
     perspectives: PerspectiveType[];
+    isInherited?: boolean;
 }
 
 export const RELATIONS: RelationConfig[] = [
@@ -17,6 +18,7 @@ export const RELATIONS: RelationConfig[] = [
         inverseId: 'expandedBy',
         inverseLabel: 'Expanded By',
         perspectives: ['Progression', 'Understanding'],
+        isInherited: true,
     },
     {
         id: 'inverts',
@@ -24,6 +26,7 @@ export const RELATIONS: RelationConfig[] = [
         inverseId: 'invertedBy',
         inverseLabel: 'Inverted By',
         perspectives: ['Progression', 'Understanding'],
+        isInherited: true,
     },
     {
         id: 'integrates',
@@ -31,6 +34,7 @@ export const RELATIONS: RelationConfig[] = [
         inverseId: 'integratedIn',
         inverseLabel: 'Integrated In',
         perspectives: ['Progression', 'Application'],
+        isInherited: true,
     },
     {
         id: 'translates',
@@ -38,6 +42,7 @@ export const RELATIONS: RelationConfig[] = [
         inverseId: 'translatedTo',
         inverseLabel: 'Translated To',
         perspectives: ['Progression', 'Application'],
+        isInherited: true,
     },
     {
         id: 'partOf',

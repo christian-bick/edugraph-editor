@@ -1,4 +1,5 @@
 import type {Ontology, OntologyRelations, RelationType} from '../types/ontology-types';
+import { RELATIONS } from '../config/relations';
 
 export const invertRelations = (source: Record<string, string[]>) => {
     const inverse: Record<string, string[]> = {};
@@ -105,13 +106,64 @@ export const getPredecessors = (
  * Calculates inferred relations based on inheritance through partOf relations.
  *
  * Rule:
+ * IF (Parent_A) -[Rel]-> (Target)
+ * AND (Child_A) -[:partOf*]-> (Parent_A)
+ * AND Rel is marked as 'inherited'
+ * THEN (Child_A) -[Rel]-> (Target)
+ */
+export const calculateInheritedRelations = (ontology: Ontology): Partial<OntologyRelations> => {
+    const inferred: Record<string, Record<string, string[]>> = {};
+    const { entities, relations } = ontology;
+
+    if (!relations) return inferred as any;
+
+    const partOf = relations.partOf || {};
+    const hasPart = invertRelations(partOf);
+
+    const inheritedRelTypes = RELATIONS
+        .filter(r => r.isInherited)
+        .map(r => r.id as string);
+
+    inheritedRelTypes.forEach(relType => {
+        const relMap = relations[relType as keyof OntologyRelations];
+        if (!relMap) return;
+
+        for (const [parentIri, targetIris] of Object.entries(relMap)) {
+            // Find ALL descendants of this parent via hasPart
+            const descendants = getSuccessors(parentIri, { hasPart }, ['hasPart']);
+
+            for (const descendantIri of descendants) {
+                for (const targetIri of targetIris) {
+                    // Skip if the relation already exists in original data
+                    const existingOriginal = relations[relType as keyof OntologyRelations]?.[descendantIri] || [];
+                    if (existingOriginal.includes(targetIri)) continue;
+
+                    if (!inferred[relType]) inferred[relType] = {};
+                    if (!inferred[relType][descendantIri]) {
+                        inferred[relType][descendantIri] = [];
+                    }
+                    if (!inferred[relType][descendantIri].includes(targetIri)) {
+                        inferred[relType][descendantIri].push(targetIri);
+                    }
+                }
+            }
+        }
+    });
+
+    return inferred as any;
+};
+
+/**
+ * Calculates inferred relations based on shared context (alignment).
+ *
+ * Rule:
  * IF (Parent_A) -[Rel]-> (Parent_B)
  * AND (Child_A) -[:partOf]-> (Parent_A)
  * AND (Child_B) -[:partOf]-> (Parent_B)
  * AND are_aligned(Child_A, Child_B)
  * THEN (Child_A) -[Rel]-> (Child_B)
  */
-export const calculateInferredRelations = (ontology: Ontology): Partial<OntologyRelations> => {
+export const calculateAlignedRelations = (ontology: Ontology): Partial<OntologyRelations> => {
     const inferred: Record<string, Record<string, string[]>> = {};
     const { entities, relations } = ontology;
 
@@ -149,7 +201,6 @@ export const calculateInferredRelations = (ontology: Ontology): Partial<Ontology
                 for (const childA of childrenA) {
                     for (const childB of childrenB) {
                         if (areAligned(childA.iri, childB.iri, parentAIri, parentBIri)) {
-                            // SKIP if this relation already exists in the original data to prevent duplication
                             const existingOriginal = relations[relType]?.[childA.iri] || [];
                             if (existingOriginal.includes(childB.iri)) continue;
 
@@ -168,4 +219,32 @@ export const calculateInferredRelations = (ontology: Ontology): Partial<Ontology
     });
 
     return inferred as any;
+};
+
+export const calculateInferredRelations = (ontology: Ontology): Partial<OntologyRelations> => {
+    const inherited = calculateInheritedRelations(ontology);
+    const aligned = calculateAlignedRelations(ontology);
+
+    // Combine them
+    const combined: Record<string, Record<string, string[]>> = { ...inherited };
+
+    Object.entries(aligned).forEach(([relType, relMap]) => {
+        if (!combined[relType]) {
+            combined[relType] = relMap;
+        } else {
+            Object.entries(relMap).forEach(([subjectIri, targetIris]) => {
+                if (!combined[relType][subjectIri]) {
+                    combined[relType][subjectIri] = targetIris;
+                } else {
+                    targetIris.forEach(targetIri => {
+                        if (!combined[relType][subjectIri].includes(targetIri)) {
+                            combined[relType][subjectIri].push(targetIri);
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+    return combined as any;
 };
