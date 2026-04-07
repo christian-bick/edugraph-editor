@@ -13,6 +13,9 @@ import {getRelationsByPerspective} from "../../../config/relations.ts";
 import {useViewStore} from "../../../stores/view-store.ts";
 import CloseIcon from '../../../assets/icons/close.svg';
 import {toNaturalName} from "../../../stores/utils.ts";
+import clsx from "clsx";
+
+const PERSPECTIVES = ['Structure', 'Expansion', 'Integration', 'Progression'];
 
 export const GraphExplorer: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -22,7 +25,7 @@ export const GraphExplorer: React.FC = () => {
 
     const {loading, error} = useOntologyStore();
     const {ontologies} = useCurrentOntologyStore();
-    const {activeBranch, activeDimension, activePerspective} = useBranchStore();
+    const {activeBranch, activeDimension, activePerspective, setActivePerspective} = useBranchStore();
     const {selectedEntityIri, setSelectedEntityIri} = useSelectedEntityStore();
     const {activeFocus} = useFocusStore();
     const {showInferredRelations, boundaryEntityIri, setBoundaryEntityIri} = useViewStore();
@@ -198,6 +201,17 @@ export const GraphExplorer: React.FC = () => {
                         </button>
                     </div>
                 )}
+                <div className="perspective-overlay">
+                    {PERSPECTIVES.map((perspective) => (
+                        <button
+                            key={perspective}
+                            className={clsx("perspective-btn", perspective === activePerspective && "active")}
+                            onClick={() => setActivePerspective(perspective)}
+                        >
+                            {perspective}
+                        </button>
+                    ))}
+                </div>
                 <div
                     ref={containerRef}
                     className="graph-explorer"

@@ -62,3 +62,38 @@
         }
     }
 }
+
+.perspective-overlay {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 5;
+    background-color: white;
+    padding: 0.3rem;
+    border-radius: 4px;
+    border: 1px solid colors.$light-border-color;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 0.3rem;
+
+    .perspective-btn {
+        background: none;
+        border: 1px solid transparent;
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: colors.$dark-text;
+        transition: all 0.2s;
+
+        &:hover {
+            background-color: colors.$light-hover-background;
+        }
+
+        &.active {
+            background-color: colors.$dark-text;
+            color: white;
+            font-weight: 500;
+        }
+    }
+}

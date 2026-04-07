@@ -1,6 +1,5 @@
 import { BranchSelector } from './BranchSelector/BranchSelector';
 import { DimensionSelector } from './DimensionSelector/DimensionSelector';
-import { PerspectiveSelector } from "./PerspectiveSelector/PerspectiveSelector.tsx";
 import './Header.scss';
 import GithubIcon from '../../../assets/icons/github.svg';
 import GeminiIcon from '../../../assets/icons/gemini.svg';
@@ -36,7 +35,6 @@ export const Header = () => {
                 </button>
                 <BranchSelector/>
                 <DimensionSelector/>
-                <PerspectiveSelector/>
                 <div className="token-managers">
                     <button className={clsx('github-icon', { 'token-present': token })} onClick={() => setShowGithubTokenManager(true)}>
                         <img src={GithubIcon} alt="GitHub Token"/>
