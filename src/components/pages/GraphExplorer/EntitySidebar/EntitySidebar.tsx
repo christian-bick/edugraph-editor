@@ -6,7 +6,7 @@ import EditIcon from '../../../../assets/icons/edit.svg';
 import PlusIcon from '../../../../assets/icons/plus.svg';
 import GraphParentIcon from '../../../../assets/icons/graph_parent.svg';
 import {EditDefinition, EditIri} from '../EditEntity/EditEntity.tsx';
-import {calculateInferredRelations, invertRelations, toNaturalName} from '../../../../stores/utils.ts';
+import {calculateInferredRelations, invertRelations, toNaturalName, InferredRelationsMap, InferredRelation} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
 import type {OntologyEntity, RelationType} from "../../../../types/ontology-types.ts";
 import {ModifyRelationModal} from '../ModifyRelation/ModifyRelation.tsx';
@@ -17,6 +17,7 @@ import clsx from 'clsx';
 
 interface RelationEntity extends OntologyEntity {
     isInferred?: boolean;
+    inferredFromIri?: string;
 }
 
 interface RelationSectionProps {
@@ -25,7 +26,8 @@ interface RelationSectionProps {
     isInverse?: boolean;
     minRelations?: number;
     relationName?: RelationType;
-    setSelectedEntityIri: (iri: string) => void;
+    setSelectedEntityIri: (iri: string | null) => void;
+    allEntities: OntologyEntity[];
 }
 
 const RelationSection: React.FC<RelationSectionProps> = ({
@@ -34,7 +36,8 @@ const RelationSection: React.FC<RelationSectionProps> = ({
                                                              isInverse = false,
                                                              minRelations = 0,
                                                              relationName,
-                                                             setSelectedEntityIri
+                                                             setSelectedEntityIri,
+                                                             allEntities
                                                          }) => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const isEmpty = !entities || entities.length === 0;
@@ -42,6 +45,11 @@ const RelationSection: React.FC<RelationSectionProps> = ({
     if (isInverse && isEmpty) {
         return null;
     }
+
+    const handleInferredClick = (e: React.MouseEvent, sourceIri: string) => {
+        e.stopPropagation();
+        setSelectedEntityIri(sourceIri);
+    };
 
     return (
         <div className={clsx("sidebar-section", {"is-empty": isEmpty})}>
@@ -55,12 +63,25 @@ const RelationSection: React.FC<RelationSectionProps> = ({
             </div>
             {!isEmpty && (
                 <ul>
-                    {entities.map(e => (
-                        <li key={e.iri} onClick={() => setSelectedEntityIri(e.iri)} className={clsx({"is-inferred": e.isInferred})}>
-                            <span>{toNaturalName(e.name)}</span>
-                            {e.isInferred && <img src={GraphParentIcon} className="inferred-hint" title="Inferred Relation" alt="Inferred" />}
-                        </li>
-                    ))}
+                    {entities.map(e => {
+                        const sourceEntity = e.inferredFromIri ? allEntities.find(ent => ent.iri === e.inferredFromIri) : null;
+                        const tooltip = sourceEntity ? `Inferred from: ${toNaturalName(sourceEntity.name)}` : "Inferred Relation";
+
+                        return (
+                            <li key={e.iri} onClick={() => setSelectedEntityIri(e.iri)} className={clsx({"is-inferred": e.isInferred})}>
+                                <span>{toNaturalName(e.name)}</span>
+                                {e.isInferred && (
+                                    <img 
+                                        src={GraphParentIcon} 
+                                        className="inferred-hint" 
+                                        title={tooltip} 
+                                        alt="Inferred" 
+                                        onClick={(event) => e.inferredFromIri && handleInferredClick(event, e.inferredFromIri)}
+                                    />
+                                )}
+                            </li>
+                        );
+                    })}
                 </ul>
             )}
             {relationName && <ModifyRelationModal
@@ -85,50 +106,75 @@ const computeEntityRelations = (
 ): { [key: string]: RelationEntity[] } => {
     const allEntities = ontology.entities;
     const relationsMap: { [key: string]: RelationEntity[] } = {};
-    const inferred = calculateInferredRelations(ontology);
+    const inferredMap: InferredRelationsMap = calculateInferredRelations(ontology);
 
-    const addRelations = (relMap: any, isInferred: boolean, inverse: boolean = false) => {
-        const perspectiveRelations = getRelationsByPerspective(perspective);
+    const perspectiveRelations = getRelationsByPerspective(perspective);
 
-        if (inverse) {
-            perspectiveRelations.forEach(rel => {
-                const inverted = invertRelations(relMap[rel.id] || {});
-                if (inverted[entityIri]) {
-                    const iris = inverted[entityIri];
-                    if (!relationsMap[rel.inverseId]) relationsMap[rel.inverseId] = [];
+    // 1. Process direct relations (original)
+    for (const relType in ontology.relations) {
+        if (ontology.relations[relType]?.[entityIri]) {
+            const iris = ontology.relations[relType][entityIri];
+            if (!relationsMap[relType]) relationsMap[relType] = [];
 
-                    iris.forEach(iri => {
-                        const ent = allEntities.find((e: any) => e.iri === iri);
-                        if (ent && !relationsMap[rel.inverseId].some(r => r.iri === ent.iri)) {
-                            relationsMap[rel.inverseId].push({ ...ent, isInferred });
-                        }
-                    });
+            iris.forEach((iri: string) => {
+                const ent = allEntities.find((e: any) => e.iri === iri);
+                if (ent && !relationsMap[relType].some(r => r.iri === ent.iri)) {
+                    relationsMap[relType].push({ ...ent, isInferred: false });
                 }
             });
-        } else {
-            for (const relType in relMap) {
-                if (relMap[relType]?.[entityIri]) {
-                    const iris = relMap[relType][entityIri];
-                    if (!relationsMap[relType]) relationsMap[relType] = [];
-
-                    iris.forEach((iri: string) => {
-                        const ent = allEntities.find((e: any) => e.iri === iri);
-                        if (ent && !relationsMap[relType].some(r => r.iri === ent.iri)) {
-                            relationsMap[relType].push({ ...ent, isInferred });
-                        }
-                    });
-                }
-            }
         }
-    };
+    }
 
-    // 1. Process direct relations
-    addRelations(ontology.relations, false);
-    addRelations(inferred, true);
+    // 2. Process direct relations (inferred)
+    for (const relType in inferredMap) {
+        if (inferredMap[relType]?.[entityIri]) {
+            const infRels = inferredMap[relType][entityIri];
+            if (!relationsMap[relType]) relationsMap[relType] = [];
 
-    // 2. Process inverse relations
-    addRelations(ontology.relations, false, true);
-    addRelations(inferred, true, true);
+            infRels.forEach(inf => {
+                const ent = allEntities.find((e: any) => e.iri === inf.targetIri);
+                if (ent && !relationsMap[relType].some(r => r.iri === ent.iri)) {
+                    relationsMap[relType].push({ ...ent, isInferred: true, inferredFromIri: inf.sourceIri });
+                }
+            });
+        }
+    }
+
+    // 3. Process inverse relations
+    perspectiveRelations.forEach(rel => {
+        // Inverse Original
+        const invertedOrig = invertRelations(ontology.relations[rel.id] || {});
+        if (invertedOrig[entityIri]) {
+            if (!relationsMap[rel.inverseId]) relationsMap[rel.inverseId] = [];
+            invertedOrig[entityIri].forEach(iri => {
+                const ent = allEntities.find((e: any) => e.iri === iri);
+                if (ent && !relationsMap[rel.inverseId].some(r => r.iri === ent.iri)) {
+                    relationsMap[rel.inverseId].push({ ...ent, isInferred: false });
+                }
+            });
+        }
+
+        // Inverse Inferred
+        // Need to invert the inferred mapping too
+        const invertedInf: Record<string, InferredRelation[]> = {};
+        const relInfMap = inferredMap[rel.id] || {};
+        for (const [subj, targets] of Object.entries(relInfMap)) {
+            targets.forEach(t => {
+                if (!invertedInf[t.targetIri]) invertedInf[t.targetIri] = [];
+                invertedInf[t.targetIri].push({ targetIri: subj, sourceIri: t.sourceIri });
+            });
+        }
+
+        if (invertedInf[entityIri]) {
+            if (!relationsMap[rel.inverseId]) relationsMap[rel.inverseId] = [];
+            invertedInf[entityIri].forEach(inf => {
+                const ent = allEntities.find((e: any) => e.iri === inf.targetIri);
+                if (ent && !relationsMap[rel.inverseId].some(r => r.iri === ent.iri)) {
+                    relationsMap[rel.inverseId].push({ ...ent, isInferred: true, inferredFromIri: inf.sourceIri });
+                }
+            });
+        }
+    });
 
     return relationsMap;
 };
@@ -141,10 +187,10 @@ export const EntitySidebar: React.FC = () => {
     const [isEditDefinitionOpen, setIsEditDefinitionOpen] = useState(false);
     const [isCreateEntityOpen, setIsCreateEntityOpen] = useState(false);
 
+    const ontology = useMemo(() => ontologies[activeDimension as keyof typeof ontologies], [ontologies, activeDimension]);
+
     const selectedEntity = useMemo(() => {
-        if (!selectedEntityIri) return null;
-        const ontology = ontologies[activeDimension as keyof typeof ontologies];
-        if (!ontology) return null;
+        if (!selectedEntityIri || !ontology) return null;
 
         const entity = ontology.entities.find(e => e.iri === selectedEntityIri);
         if (!entity) return null;
@@ -155,7 +201,7 @@ export const EntitySidebar: React.FC = () => {
             ...entity,
             relations,
         };
-    }, [selectedEntityIri, ontologies, activeDimension, activePerspective]);
+    }, [selectedEntityIri, ontology, activePerspective]);
 
     const hasChildren = useMemo(() => {
         if (!selectedEntity?.relations.hasPart) return false;
@@ -226,6 +272,7 @@ export const EntitySidebar: React.FC = () => {
                                             entities={selectedEntity.relations[rel.id]}
                                             minRelations={rel.id === 'partOf' ? 1 : 0}
                                             setSelectedEntityIri={setSelectedEntityIri}
+                                            allEntities={ontology?.entities || []}
                                         />
                                     ))}
                             </div>
@@ -246,6 +293,7 @@ export const EntitySidebar: React.FC = () => {
                                             entities={selectedEntity.relations[rel.inverseId]}
                                             isInverse
                                             setSelectedEntityIri={setSelectedEntityIri}
+                                            allEntities={ontology?.entities || []}
                                         />
                                     ))
                                 }

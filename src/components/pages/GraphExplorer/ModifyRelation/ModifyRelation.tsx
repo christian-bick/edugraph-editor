@@ -13,6 +13,7 @@ import clsx from 'clsx';
 
 interface RelationEntity extends OntologyEntity {
     isInferred?: boolean;
+    inferredFromIri?: string;
 }
 
 interface ModifyRelationModalProps {

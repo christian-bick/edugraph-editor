@@ -1,6 +1,6 @@
 import type {G6Edge, G6Node} from "../types/graph-types.ts";
 import type {Ontology, OntologyRelations, RelationType} from "../types/ontology-types.ts";
-import {calculateInferredRelations, getPredecessors, getSuccessors, invertRelations, toNaturalName} from "../stores/utils.ts";
+import {calculateInferredRelations, getPredecessors, getSuccessors, invertRelations, toNaturalName, InferredRelationsMap} from "../stores/utils.ts";
 import {FocusMode} from "../stores/focus-store.ts";
 
 export const getGraphData = (
@@ -45,7 +45,7 @@ export const getGraphData = (
         });
     });
 
-    const addEdges = (relMap: Partial<OntologyRelations>, isInferred: boolean) => {
+    const addEdges = (relMap: Record<string, Record<string, string[]>>, isInferred: boolean) => {
         filterRelationTypes.forEach(relationType => {
             let relations = relMap[relationType];
             if (!relations) return;
@@ -83,13 +83,23 @@ export const getGraphData = (
     };
 
     // 1. Add Original Relations
-    addEdges(ontology.relations, false);
+    addEdges(ontology.relations as any, false);
 
     // 2. Add Inferred Relations if enabled
-    let inferredRelations: Partial<OntologyRelations> = {};
+    let inferredMap: InferredRelationsMap = {};
     if (showInferred) {
-        inferredRelations = calculateInferredRelations(ontology);
-        addEdges(inferredRelations, true);
+        inferredMap = calculateInferredRelations(ontology);
+        
+        // Convert InferredRelationsMap to standard format for addEdges
+        const simpleInferred: Record<string, Record<string, string[]>> = {};
+        Object.entries(inferredMap).forEach(([relType, subjects]) => {
+            simpleInferred[relType] = {};
+            Object.entries(subjects).forEach(([subj, targets]) => {
+                simpleInferred[relType][subj] = targets.map(t => t.targetIri);
+            });
+        });
+        
+        addEdges(simpleInferred, true);
     }
 
     if (focusMode !== 'global' && selectedEntityIri) {
@@ -97,18 +107,23 @@ export const getGraphData = (
         
         // Combine relations for successor/predecessor calculation to ensure focus works with inferred
         const allRelations: Record<string, Record<string, string[]>> = {};
+        
+        // Rel types from both original and inferred
         const allRelTypes = Array.from(new Set([
             ...Object.keys(ontology.relations),
-            ...(showInferred ? Object.keys(inferredRelations) : [])
+            ...(showInferred ? Object.keys(inferredMap) : [])
         ])) as RelationType[];
 
         allRelTypes.forEach(type => {
             const original = ontology.relations[type] || {};
-            const inferred = showInferred ? inferredRelations[type] || {} : {};
             allRelations[type] = { ...original };
-            Object.entries(inferred).forEach(([subject, objects]) => {
-                allRelations[type][subject] = Array.from(new Set([...(allRelations[type][subject] || []), ...objects]));
-            });
+            
+            if (showInferred && inferredMap[type]) {
+                Object.entries(inferredMap[type]).forEach(([subject, targets]) => {
+                    const targetIris = targets.map(t => t.targetIri);
+                    allRelations[type][subject] = Array.from(new Set([...(allRelations[type][subject] || []), ...targetIris]));
+                });
+            }
         });
 
         const relationsToFollow = filterRelationTypes;
