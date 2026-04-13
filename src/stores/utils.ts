@@ -120,7 +120,7 @@ export type InferredRelationsMap = Record<string, Record<string, InferredRelatio
  */
 export const calculateInheritedRelations = (ontology: Ontology): InferredRelationsMap => {
     const inferred: InferredRelationsMap = {};
-    const { entities, relations } = ontology;
+    const { relations } = ontology;
 
     if (!relations) return inferred;
 

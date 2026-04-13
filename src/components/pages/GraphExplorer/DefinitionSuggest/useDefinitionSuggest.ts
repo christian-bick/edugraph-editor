@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
 import { useBranchStore } from '../../../../stores/branch-store';
 import { useAuthStore } from '../../../../stores/auth-store';
 import { generateDefinition } from '../../../../api/gemini';
 import { invertRelations, toNaturalName } from '../../../../stores/utils';
-import GeminiIcon from '../../../../assets/icons/gemini.svg';
 
 export const useDefinitionSuggest = (
     entityName: string,
@@ -67,32 +66,4 @@ export const useDefinitionSuggest = (
         handleSuggest, 
         canSuggest: !!geminiToken && !!entityName.trim() 
     };
-};
-
-interface SuggestButtonProps {
-    onClick: () => void;
-    isSuggesting: boolean;
-    disabled: boolean;
-}
-
-export const SuggestButton: React.FC<SuggestButtonProps> = ({ onClick, isSuggesting, disabled }) => {
-    const { geminiToken } = useAuthStore();
-    
-    if (!geminiToken) return null;
-
-    return (
-        <button
-            className="suggest-button"
-            onClick={(e) => {
-                e.preventDefault();
-                onClick();
-            }}
-            disabled={disabled || isSuggesting}
-            type="button"
-            title={disabled ? "Enter an ID/Name first" : "Get definition suggestion from Gemini"}
-        >
-            <img src={GeminiIcon} alt="Gemini" />
-            {isSuggesting ? 'Suggesting...' : 'Suggest'}
-        </button>
-    );
 };

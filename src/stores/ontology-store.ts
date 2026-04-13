@@ -3,7 +3,6 @@ import {loadOntologyFiles} from '../api/github.ts'
 import type {Ontology, OntologyEntity, RelationType, OntologyRelations} from "../types/ontology-types.ts";
 import {
     createEntityInfoMap,
-    enrichOntology,
     getQuadsFromString,
     populateOntologyFromQuads
 } from "./ontology-parser.ts";

@@ -6,7 +6,7 @@ import { useBranchStore } from '../../../stores/branch-store';
 import { useCurrentOntologyStore, useOntologyStore } from '../../../stores/ontology-store';
 import { useChatStore } from '../../../stores/chat-store';
 import { serializeOntology } from '../../../stores/ontology-serializer';
-import { startOntologyChat, continueOntologyChat, executeOntologyModification, ChatMessage } from '../../../api/gemini';
+import { startOntologyChat, continueOntologyChat, executeOntologyModification } from '../../../api/gemini';
 import { getQuadsFromString, createEntityInfoMap, populateOntologyFromQuads } from '../../../stores/ontology-parser';
 import { RELATIONS } from '../../../config/relations';
 import type { Ontology, OntologyRelations } from '../../../types/ontology-types';
@@ -66,7 +66,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
 
             if (messages.length === 0) {
                 const serialized = await serializeOntology(currentOntology, dimension);
-                const { response, history } = await startOntologyChat(
+                const { history } = await startOntologyChat(
                     geminiToken,
                     userMessage,
                     serialized,
@@ -75,7 +75,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
                 );
                 setMessages(history);
             } else {
-                const { response, history } = await continueOntologyChat(
+                const { history } = await continueOntologyChat(
                     geminiToken,
                     userMessage,
                     messages,

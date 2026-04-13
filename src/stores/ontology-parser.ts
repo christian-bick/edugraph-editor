@@ -1,5 +1,5 @@
 import { Parser, Quad } from 'n3';
-import type {Ontology, OntologyRelations} from "../types/ontology-types.ts";
+import type {Ontology} from "../types/ontology-types.ts";
 import { RELATIONS } from "../config/relations.ts";
 
 // RDF URIs based on core-ontology.ttl
@@ -135,45 +135,4 @@ export const populateOntologyFromQuads = (
             relationMap[subjectIri].sort((a, b) => a.localeCompare(b));
         });
     });
-};
-
-
-const computeTransitiveClosure = (source: Record<string, string[]>) => {
-    const closure: Record<string, Set<string>> = {};
-
-    // Initialize with direct relations
-    Object.keys(source).forEach(key => {
-        closure[key] = new Set(source[key]);
-    });
-
-    let changed = true;
-    while (changed) {
-        changed = false;
-        // Create a snapshot of keys to iterate to allow reading updated sets effectively
-        // (though finding fixed point doesn't strictly need snapshot if we just iterate enough)
-        const keys = Object.keys(closure);
-        for (const key of keys) {
-            const currentSet = closure[key];
-            const originalSize = currentSet.size;
-
-            for (const neighbor of Array.from(currentSet)) {
-                if (closure[neighbor]) {
-                    for (const n of Array.from(closure[neighbor])) {
-                        currentSet.add(n);
-                    }
-                }
-            }
-
-            if (currentSet.size > originalSize) {
-                changed = true;
-            }
-        }
-    }
-
-    // Convert back to arrays
-    const result: Record<string, string[]> = {};
-    Object.keys(closure).forEach(key => {
-        result[key] = Array.from(closure[key]);
-    });
-    return result;
 };

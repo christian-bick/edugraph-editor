@@ -8,7 +8,7 @@ import type { OntologyEntity, RelationType } from '../../../../types/ontology-ty
 import './ModifyRelation.scss';
 import LinkRmIcon from '../../../../assets/icons/link_rm.svg';
 import GraphParentIcon from '../../../../assets/icons/graph_parent.svg';
-import { RELATIONS, getRelationsByPerspective } from '../../../../config/relations.ts';
+import { getRelationsByPerspective } from '../../../../config/relations.ts';
 import clsx from 'clsx';
 
 interface RelationEntity extends OntologyEntity {
@@ -150,7 +150,7 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
         <Modal isOpen={isOpen} onClose={onClose}>
             <div className="modify-relation-modal">
                 <h2>{sourceName}</h2>
-                <h3 className="modal-subtitle">Manage "{relationTitle}" Relations</h3>
+                <h3 className="modal-subtitle">Manage &quot;{relationTitle}&quot; Relations</h3>
 
                 <div className="form-group search-container">
                     <input

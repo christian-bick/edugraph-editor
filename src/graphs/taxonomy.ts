@@ -1,5 +1,5 @@
 import type {G6Edge, G6Node} from "../types/graph-types.ts";
-import type {Ontology, OntologyRelations, RelationType} from "../types/ontology-types.ts";
+import type {Ontology, RelationType} from "../types/ontology-types.ts";
 import {calculateInferredRelations, getPredecessors, getSuccessors, invertRelations, toNaturalName, InferredRelationsMap} from "../stores/utils.ts";
 import {FocusMode} from "../stores/focus-store.ts";
 

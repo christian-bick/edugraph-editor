@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef} from 'react';
+import React, {useEffect, useMemo, useRef, useCallback} from 'react';
 import {getGraphData} from "../../../graphs/taxonomy.ts";
 import {useCurrentOntologyStore, useOntologyStore} from "../../../stores/ontology-store.ts";
 import {useBranchStore} from "../../../stores/branch-store.ts";
@@ -25,7 +25,7 @@ export const GraphExplorer: React.FC = () => {
 
     const {loading, error} = useOntologyStore();
     const {ontologies} = useCurrentOntologyStore();
-    const {activeBranch, activeDimension, activePerspective, setActivePerspective} = useBranchStore();
+    const {activeDimension, activePerspective, setActivePerspective} = useBranchStore();
     const {selectedEntityIri, setSelectedEntityIri} = useSelectedEntityStore();
     const {activeFocus} = useFocusStore();
     const {showInferredRelations, boundaryEntityIri, setBoundaryEntityIri} = useViewStore();
@@ -72,7 +72,7 @@ export const GraphExplorer: React.FC = () => {
         }
     };
 
-    const getData = () => {
+    const getData = useCallback(() => {
         const relationTypes = getRelationsByPerspective(activePerspective).map(r => r.id);
         const useVirtualRoot = activePerspective === 'Structure';
         const filterOrphanNodes = activePerspective !== 'Structure';
@@ -89,7 +89,7 @@ export const GraphExplorer: React.FC = () => {
             showInferredRelations,
             boundaryEntityIri
         );
-    }
+    }, [ontology, activePerspective, activeDimension, activeFocus, selectedEntityIri, showInferredRelations, boundaryEntityIri]);
 
     // 1. Lifecycle Effect: Manages the G6 Instance (Creation/Destruction)
     useEffect(() => {
@@ -159,7 +159,7 @@ export const GraphExplorer: React.FC = () => {
                 graphRef.current = null;
             }
         };
-    }, [loading, activeDimension, activePerspective, activeBranch]);
+    }, [loading, ontology, getData, setSelectedEntityIri, selectedEntityIri]);
 
     // 2. Update Effect: Manages data, focus, and selection changes
     useEffect(() => {
@@ -183,7 +183,7 @@ export const GraphExplorer: React.FC = () => {
         };
 
         updateGraph();
-    }, [ontology, activeFocus, selectedEntityIri, showInferredRelations, boundaryEntityIri]);
+    }, [loading, ontology, getData, selectedEntityIri]);
 
     if (loading) return <div>Loading ontology...</div>;
     if (error) return <div>Error loading ontology: {error}</div>;
@@ -234,7 +234,7 @@ const isDeepEqual = (object1, object2) => {
 
     if (objKeys1.length !== objKeys2.length) return false;
 
-    for (var key of objKeys1) {
+    for (const key of objKeys1) {
         const value1 = object1[key];
         const value2 = object2[key];
 
