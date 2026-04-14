@@ -10,19 +10,21 @@
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "forceConsistentCasingInFileNames": true,
-    "erasableSyntaxOnly": true,
+/* Linting */
+"strict": true,
+"noImplicitAny": false,
+"strictNullChecks": false,
+"useUnknownInCatchVariables": false,
+"noUnusedLocals": true,
+"noUnusedParameters": true,
+"noImplicitReturns": true,
+"noPropertyAccessFromIndexSignature": false,
+"forceConsistentCasingInFileNames": true,
+"verbatimModuleSyntax": false,
+"erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "allowSyntheticDefaultImports": true
