@@ -15,7 +15,7 @@ const localStorageMock = (() => {
             store = {};
         },
         length: 0,
-        key: (index: number) => null
+        key: () => null
     };
 })();
 

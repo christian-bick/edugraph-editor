@@ -66,7 +66,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
 
             if (messages.length === 0) {
                 const serialized = await serializeOntology(currentOntology, dimension);
-                const { response, history } = await startOntologyChat(
+                const { history } = await startOntologyChat(
                     geminiToken,
                     userMessage,
                     serialized,
@@ -75,7 +75,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
                 );
                 setMessages(history);
             } else {
-                const { response, history } = await continueOntologyChat(
+                const { history } = await continueOntologyChat(
                     geminiToken,
                     userMessage,
                     messages,

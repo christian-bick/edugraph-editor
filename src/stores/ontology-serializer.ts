@@ -1,7 +1,7 @@
 import type {Ontology, OntologyRelations} from "../types/ontology-types.ts";
 import {DataFactory, Writer} from "n3";
 
-const { namedNode, literal, quad } = DataFactory;
+const { namedNode, literal } = DataFactory;
 
 const BASE_IRI = 'http://edugraph.io/edu/';
 
