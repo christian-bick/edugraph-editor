@@ -1,5 +1,5 @@
-import { Graph } from '@antv/g6';
-import type { G6Edge, G6Node } from '../types/graph-types.ts';
+import {Graph} from '@antv/g6';
+import type {G6Edge, G6Node} from '../types/graph-types.ts';
 
 const dimensionColorMap: { [key: string]: string } = {
     'Area': '#fb8500',

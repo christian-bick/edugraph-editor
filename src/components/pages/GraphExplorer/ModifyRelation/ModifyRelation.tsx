@@ -1,14 +1,14 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { Modal } from '../../../global/Modal/Modal';
-import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
-import { useSelectedEntityStore } from '../../../../stores/selected-entity-store';
-import { useBranchStore } from '../../../../stores/branch-store';
-import { getPredecessors, toNaturalName } from '../../../../stores/utils';
-import type { OntologyEntity, RelationType } from '../../../../types/ontology-types';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {Modal} from '../../../global/Modal/Modal';
+import {useCurrentOntologyStore} from '../../../../stores/ontology-store';
+import {useSelectedEntityStore} from '../../../../stores/selected-entity-store';
+import {useBranchStore} from '../../../../stores/branch-store';
+import {getPredecessors, toNaturalName} from '../../../../stores/utils';
+import type {OntologyEntity, RelationType} from '../../../../types/ontology-types';
 import './ModifyRelation.scss';
 import LinkRmIcon from '../../../../assets/icons/link_rm.svg';
 import GraphParentIcon from '../../../../assets/icons/graph_parent.svg';
-import { RELATIONS, getRelationsByPerspective } from '../../../../config/relations.ts';
+import {getRelationsByPerspective} from '../../../../config/relations.ts';
 import clsx from 'clsx';
 
 interface RelationEntity extends OntologyEntity {
@@ -112,7 +112,7 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
         const objectIris = currentRelations
             .filter(e => !e.isInferred)
             .map(e => e.iri);
-            
+
         updateRelations(activeDimension, selectedEntityIri, relationName, objectIris);
         onClose();
     };
@@ -191,7 +191,7 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
                             <li key={entity.iri} className={clsx("relation-item", { "is-inferred": entity.isInferred })}>
                                 <div className="relation-item-content">
                                     <div className="relation-item-main">
-                                        <button 
+                                        <button
                                             className={clsx("toggle-definition-btn", { expanded: expandedIris.has(entity.iri) })}
                                             onClick={() => toggleDefinition(entity.iri)}
                                             title="Toggle definition"
@@ -199,7 +199,7 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
                                             ▶
                                         </button>
                                         <span className="relation-item-name">{toNaturalName(entity.name)}</span>
-                                        
+
                                         {entity.isInferred && (
                                             <img src={GraphParentIcon} className="inferred-hint" title="Inferred Relation" alt="Inferred" />
                                         )}

@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { loadBranches } from '../api/github.ts';
+import {create} from 'zustand';
+import {createJSONStorage, persist} from 'zustand/middleware';
+import {loadBranches} from '../api/github.ts';
 
 interface BranchState {
     branches: string[];

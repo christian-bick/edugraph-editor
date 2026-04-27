@@ -2,11 +2,11 @@ import './Footer.scss';
 import {type CurrentOntologyState, useCurrentOntologyStore} from '../../../stores/ontology-store';
 import type {TemporalState} from "zundo";
 import {useStore} from "zustand";
-import { useViewStore } from '../../../stores/view-store';
-import { useAuthStore } from '../../../stores/auth-store';
+import {useViewStore} from '../../../stores/view-store';
+import {useAuthStore} from '../../../stores/auth-store';
 import clsx from 'clsx';
-import { useState } from 'react';
-import { PromptModal } from '../PromptModal/PromptModal';
+import {useState} from 'react';
+import {PromptModal} from '../PromptModal/PromptModal';
 
 const useTemporalStore = <T, >(
     selector: (state: TemporalState<CurrentOntologyState>) => T,
@@ -28,15 +28,15 @@ export const Footer = () => {
     return (
         <footer className="footer">
             <div className="footer-controls">
-                <button 
-                    onClick={() => undo()} 
+                <button
+                    onClick={() => undo()}
                     disabled={!pastStates.length}
                     className="icon-button"
                 >
                     <span className="arrow-left"></span>
                     Undo
                 </button>
-                
+
                 <div className="action-group">
                     {geminiToken && (
                         <button
@@ -65,8 +65,8 @@ export const Footer = () => {
                     )}
                 </div>
 
-                <button 
-                    onClick={() => redo()} 
+                <button
+                    onClick={() => redo()}
                     disabled={!futureStates.length}
                     className="icon-button"
                 >
@@ -75,9 +75,9 @@ export const Footer = () => {
                 </button>
             </div>
 
-            <PromptModal 
-                isOpen={isPromptModalOpen} 
-                onClose={() => setIsPromptModalOpen(false)} 
+            <PromptModal
+                isOpen={isPromptModalOpen}
+                onClose={() => setIsPromptModalOpen(false)}
             />
         </footer>
     );

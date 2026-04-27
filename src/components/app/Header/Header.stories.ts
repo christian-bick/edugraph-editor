@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type {Meta, StoryObj} from '@storybook/react-vite';
 
-import { Header } from './Header.tsx';
+import {Header} from './Header.tsx';
 
 const meta = {
   title: 'Search/Header',

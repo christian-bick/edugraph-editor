@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useAuthStore } from '../../../stores/auth-store';
-import { verifyGeminiToken } from '../../../api/gemini';
+import React, {useState} from 'react';
+import {useAuthStore} from '../../../stores/auth-store';
+import {verifyGeminiToken} from '../../../api/gemini';
 import './TokenManager.scss';
 
 export const GeminiTokenManager: React.FC = () => {

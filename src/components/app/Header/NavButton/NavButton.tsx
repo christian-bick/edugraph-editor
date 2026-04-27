@@ -1,5 +1,3 @@
-
-
 import './NavButton.scss';
 import clsx from "clsx";
 

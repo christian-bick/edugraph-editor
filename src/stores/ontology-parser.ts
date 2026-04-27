@@ -1,6 +1,6 @@
-import { Parser, Quad } from 'n3';
+import {Parser, Quad} from 'n3';
 import type {Ontology, OntologyRelations} from "../types/ontology-types.ts";
-import { RELATIONS } from "../config/relations.ts";
+import {RELATIONS} from "../config/relations.ts";
 
 // RDF URIs based on core-ontology.ttl
 const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
@@ -68,7 +68,7 @@ export const populateOntologyFromQuads = (
     sha: string | null = null
 ) => {
     ontology.sha = sha;
-    
+
     const predicateToRelationId = new Map<string, keyof OntologyRelations>();
     RELATIONS.forEach(rel => {
         predicateToRelationId.set(EDU_BASE + rel.id, rel.id);

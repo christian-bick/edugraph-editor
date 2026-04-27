@@ -1,15 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Modal } from '../../global/Modal/Modal';
-import { useAuthStore } from '../../../stores/auth-store';
-import { useBranchStore } from '../../../stores/branch-store';
-import { useCurrentOntologyStore, useOntologyStore } from '../../../stores/ontology-store';
-import { useChatStore } from '../../../stores/chat-store';
-import { serializeOntology } from '../../../stores/ontology-serializer';
-import { startOntologyChat, continueOntologyChat, executeOntologyModification, ChatMessage } from '../../../api/gemini';
-import { getQuadsFromString, createEntityInfoMap, populateOntologyFromQuads } from '../../../stores/ontology-parser';
-import { RELATIONS } from '../../../config/relations';
-import type { Ontology, OntologyRelations } from '../../../types/ontology-types';
+import {Modal} from '../../global/Modal/Modal';
+import {useAuthStore} from '../../../stores/auth-store';
+import {useBranchStore} from '../../../stores/branch-store';
+import {useCurrentOntologyStore, useOntologyStore} from '../../../stores/ontology-store';
+import {useChatStore} from '../../../stores/chat-store';
+import {serializeOntology} from '../../../stores/ontology-serializer';
+import {continueOntologyChat, executeOntologyModification, startOntologyChat} from '../../../api/gemini';
+import {createEntityInfoMap, getQuadsFromString, populateOntologyFromQuads} from '../../../stores/ontology-parser';
+import {RELATIONS} from '../../../config/relations';
+import type {Ontology, OntologyRelations} from '../../../types/ontology-types';
 import './PromptModal.scss';
 
 interface PromptModalProps {
@@ -23,13 +23,13 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
     const { ontologies, updateOntology } = useCurrentOntologyStore();
     const { schema } = useOntologyStore();
     const { messages, setMessages, clearMessages, wasPlanExecuted, setWasPlanExecuted } = useChatStore();
-    
+
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<string>('');
     const [thought, setThought] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
-    
+
     const chatEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -53,7 +53,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
         try {
             const dimension = activeDimension as 'Area' | 'Ability' | 'Scope';
             const currentOntology = ontologies[dimension];
-            
+
             if (!currentOntology) {
                 throw new Error(`Ontology for ${dimension} not loaded.`);
             }
@@ -103,7 +103,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
         try {
             const dimension = activeDimension as 'Area' | 'Ability' | 'Scope';
             const currentOntology = ontologies[dimension];
-            
+
             if (!currentOntology) throw new Error(`Ontology not loaded.`);
 
             const resultTurtle = await executeOntologyModification(
@@ -114,10 +114,10 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
             );
 
             setStatus('Parsing result...');
-            
+
             const quads = await getQuadsFromString(resultTurtle);
             const entityInfoMap = createEntityInfoMap(quads);
-            
+
             const relations: OntologyRelations = {} as any;
             RELATIONS.forEach(rel => {
                 relations[rel.id] = {};
@@ -159,7 +159,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
                     <h2>AI Ontology Conversation</h2>
                     <p>Discuss changes for <strong>{activeDimension}</strong>.</p>
                 </div>
-                
+
                 <div className="chat-history">
                     {messages.length === 0 && (
                         <div className="chat-placeholder">
@@ -176,7 +176,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
                             </div>
                         )
                     ))}
-                    
+
                     {thought && (
                         <div className="chat-message model thinking">
                             <div className="thought-process">
@@ -204,12 +204,12 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
                         placeholder="Type your request or feedback here..."
                         disabled={isLoading}
                     />
-                    
+
                     <div className="chat-actions">
                         <div className="left-actions">
                             {messages.length > 0 && (
-                                <button 
-                                    onClick={handleReset} 
+                                <button
+                                    onClick={handleReset}
                                     className="reset-btn"
                                     disabled={isLoading}
                                 >
@@ -218,18 +218,18 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
                             )}
                         </div>
                         <div className="right-actions">
-                            <button 
-                                onClick={handleSendMessage} 
-                                disabled={isLoading || !input.trim()} 
+                            <button
+                                onClick={handleSendMessage}
+                                disabled={isLoading || !input.trim()}
                                 className="send-btn"
                             >
                                 Send
                             </button>
-                            
+
                             {messages.length > 0 && !wasPlanExecuted && (
-                                <button 
-                                    onClick={handleExecute} 
-                                    disabled={isLoading} 
+                                <button
+                                    onClick={handleExecute}
+                                    disabled={isLoading}
                                     className="execute-btn primary"
                                 >
                                     Confirm & Execute Plan

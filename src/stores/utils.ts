@@ -1,5 +1,5 @@
 import type {Ontology, OntologyRelations, RelationType} from '../types/ontology-types';
-import { RELATIONS } from '../config/relations';
+import {RELATIONS} from '../config/relations';
 
 export const invertRelations = (source: Record<string, string[]>) => {
     const inverse: Record<string, string[]> = {};

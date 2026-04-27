@@ -1,5 +1,5 @@
-import { BranchSelector } from './BranchSelector/BranchSelector';
-import { DimensionSelector } from './DimensionSelector/DimensionSelector';
+import {BranchSelector} from './BranchSelector/BranchSelector';
+import {DimensionSelector} from './DimensionSelector/DimensionSelector';
 import './Header.scss';
 import GithubIcon from '../../../assets/icons/github.svg';
 import GeminiIcon from '../../../assets/icons/gemini.svg';
@@ -25,8 +25,8 @@ export const Header = () => {
                 <a href="/">EduGraph Editor</a>
             </div>
             <div className="header-controls">
-                <button 
-                    className={clsx('refresh-button', { loading })} 
+                <button
+                    className={clsx('refresh-button', { loading })}
                     onClick={() => fetchBranches()}
                     disabled={loading}
                     title="Refresh Branches"

@@ -1,5 +1,5 @@
 // src/vitest.setup.ts
-import { vi } from 'vitest';
+import {vi} from 'vitest';
 
 const localStorageMock = (() => {
     let store: { [key: string]: string } = {};

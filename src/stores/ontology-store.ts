@@ -1,15 +1,10 @@
 import {create} from 'zustand'
 import {loadOntologyFiles} from '../api/github.ts'
-import type {Ontology, OntologyEntity, RelationType, OntologyRelations} from "../types/ontology-types.ts";
-import {
-    createEntityInfoMap,
-    enrichOntology,
-    getQuadsFromString,
-    populateOntologyFromQuads
-} from "./ontology-parser.ts";
+import type {Ontology, OntologyEntity, OntologyRelations, RelationType} from "../types/ontology-types.ts";
+import {createEntityInfoMap, getQuadsFromString, populateOntologyFromQuads} from "./ontology-parser.ts";
 import {temporal} from 'zundo';
 import {produce} from 'immer';
-import { RELATIONS } from "../config/relations.ts";
+import {RELATIONS} from "../config/relations.ts";
 
 const IRI_NAMESPACE = 'http://edugraph.io/edu/';
 
@@ -141,7 +136,7 @@ export const useCurrentOntologyStore = create(
                     Object.values(ontology.relations).forEach(relationMap => {
                         // a) Remove as subject
                         delete relationMap[iriToDelete];
-                        
+
                         // b) Remove as object
                         for (const subjectIri in relationMap) {
                             const originalCount = relationMap[subjectIri].length;
@@ -192,7 +187,7 @@ export const useOntologyStore = create<OntologyState>()((set, get) => ({
             const ontologyFiles = Object.keys(fileMapping);
             const schemaFile = "core-schema.ttl";
             const allFilesToFetch = [...ontologyFiles, schemaFile];
-            
+
             const rawTurtles = await loadOntologyFiles(allFilesToFetch, branch);
 
             const finalOntologies: { Area: Ontology | null; Ability: Ontology | null; Scope: Ontology | null } = {
@@ -228,10 +223,10 @@ export const useOntologyStore = create<OntologyState>()((set, get) => ({
             // Get schema content (it's the last one in the list)
             const schemaContent = rawTurtles[allFilesToFetch.length - 1].content;
 
-            set({ 
-                ontologiesOriginal: finalOntologies, 
+            set({
+                ontologiesOriginal: finalOntologies,
                 schema: schemaContent,
-                loading: false 
+                loading: false
             });
             useCurrentOntologyStore.getState().setOntologies(structuredClone(finalOntologies));
             useCurrentOntologyStore.temporal.getState().clear();

@@ -1,10 +1,10 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import { Modal } from '../../../global/Modal/Modal';
+import {Modal} from '../../../global/Modal/Modal';
 import './CreateEntity.scss';
-import { toNaturalName, toCamelCase } from '../../../../stores/utils';
-import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
-import { useBranchStore } from '../../../../stores/branch-store';
-import { useDefinitionSuggest, SuggestButton } from '../DefinitionSuggest/DefinitionSuggest';
+import {toCamelCase, toNaturalName} from '../../../../stores/utils';
+import {useCurrentOntologyStore} from '../../../../stores/ontology-store';
+import {useBranchStore} from '../../../../stores/branch-store';
+import {SuggestButton, useDefinitionSuggest} from '../DefinitionSuggest/DefinitionSuggest';
 
 interface CreateEntityProps {
     isOpen: boolean;
@@ -103,10 +103,10 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
 
             <div className="form-actions">
                 <div className="left-actions">
-                    <SuggestButton 
-                        onClick={onSuggest} 
-                        isSuggesting={isSuggesting} 
-                        disabled={!canSuggest} 
+                    <SuggestButton
+                        onClick={onSuggest}
+                        isSuggesting={isSuggesting}
+                        disabled={!canSuggest}
                     />
                 </div>
                 <div className="right-actions">

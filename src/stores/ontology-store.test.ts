@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { useOntologyStore, useCurrentOntologyStore } from './ontology-store';
-import { Ontology } from '../types/ontology-types';
+import {beforeEach, describe, expect, it} from 'vitest';
+import {useCurrentOntologyStore, useOntologyStore} from './ontology-store';
+import {Ontology} from '../types/ontology-types';
 
 const IRI_NAMESPACE = 'http://edugraph.io/edu/';
 
@@ -116,7 +116,7 @@ describe('Ontology Store', () => {
         expect(updatedOntology?.relations.expands[subjectIri]).toEqual(newObjectIris);
         // Assert that the old relation to 'B' is gone
         expect(updatedOntology?.relations.expands[subjectIri]).not.toContain('http://edugraph.io/edu/B');
-        
+
         // Assert that other relations are not affected
         expect(updatedOntology?.relations.partOf).toEqual(initialOntology.relations.partOf);
 
@@ -124,7 +124,7 @@ describe('Ontology Store', () => {
         useCurrentOntologyStore.getState().updateRelations('Area', subjectIri, 'expands', []);
         const finalOntology = useCurrentOntologyStore.getState().ontologies.Area;
         expect(finalOntology?.relations.expands[subjectIri]).toBeUndefined();
-        
+
         // History check
         expect(useCurrentOntologyStore.temporal.getState().pastStates).toHaveLength(2);
     });
@@ -149,11 +149,11 @@ describe('Ontology Store', () => {
         expect(newEntity?.name).toBe(newId);
         expect(newEntity?.definition).toBe(newDefinition);
         expect(updatedOntology?.entities).toHaveLength(initialOntology.entities.length + 1);
-        
+
         // Assert the 'partOf' relation was added from the new entity to the parent
         expect(updatedOntology?.relations.partOf[newIri]).toBeDefined();
         expect(updatedOntology?.relations.partOf[newIri]).toContain(parentIri);
-        
+
         expect(useCurrentOntologyStore.temporal.getState().pastStates).toHaveLength(1);
     });
 
@@ -161,19 +161,19 @@ describe('Ontology Store', () => {
         const initialOntology = structuredClone(mockAreaOntology);
         useCurrentOntologyStore.setState({ ontologies: { Area: initialOntology, Ability: null, Scope: null } });
         useCurrentOntologyStore.temporal.getState().clear();
-    
+
         const iriToDelete = 'http://edugraph.io/edu/A';
-    
+
         useCurrentOntologyStore.getState().deleteEntity('Area', iriToDelete);
-    
+
         const updatedOntology = useCurrentOntologyStore.getState().ontologies.Area;
-    
+
         // Assert entity is removed
         expect(updatedOntology?.entities.find(e => e.iri === iriToDelete)).toBeUndefined();
-    
+
         // Assert relations where it was a subject are removed
         expect(updatedOntology?.relations.expands[iriToDelete]).toBeUndefined();
-    
+
         // Assert relations where it was an object are removed
         // Check if the subject key is removed if the array becomes empty
         expect(updatedOntology?.relations.expands['http://edugraph.io/edu/C']).toBeUndefined();

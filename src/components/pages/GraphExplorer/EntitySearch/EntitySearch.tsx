@@ -1,8 +1,8 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
-import { useBranchStore } from '../../../../stores/branch-store';
-import { useSelectedEntityStore } from '../../../../stores/selected-entity-store';
-import { toNaturalName } from '../../../../stores/utils';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {useCurrentOntologyStore} from '../../../../stores/ontology-store';
+import {useBranchStore} from '../../../../stores/branch-store';
+import {useSelectedEntityStore} from '../../../../stores/selected-entity-store';
+import {toNaturalName} from '../../../../stores/utils';
 import clsx from 'clsx';
 import './EntitySearch.scss';
 

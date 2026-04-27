@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import type { ChatMessage } from '../api/gemini';
+import {create} from 'zustand';
+import {createJSONStorage, persist} from 'zustand/middleware';
+import type {ChatMessage} from '../api/gemini';
 
 interface ChatState {
     messages: ChatMessage[];

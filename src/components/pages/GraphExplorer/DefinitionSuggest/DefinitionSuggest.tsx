@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
-import { useBranchStore } from '../../../../stores/branch-store';
-import { useAuthStore } from '../../../../stores/auth-store';
-import { generateDefinition } from '../../../../api/gemini';
-import { invertRelations, toNaturalName } from '../../../../stores/utils';
+import React, {useState} from 'react';
+import {useCurrentOntologyStore} from '../../../../stores/ontology-store';
+import {useBranchStore} from '../../../../stores/branch-store';
+import {useAuthStore} from '../../../../stores/auth-store';
+import {generateDefinition} from '../../../../api/gemini';
+import {invertRelations, toNaturalName} from '../../../../stores/utils';
 import GeminiIcon from '../../../../assets/icons/gemini.svg';
 
 export const useDefinitionSuggest = (
@@ -36,9 +36,9 @@ export const useDefinitionSuggest = (
                 const siblingIris = inverted[effectiveParentIri]?.filter(iri => iri !== currentEntityIri) || [];
                 siblings = siblingIris.map(iri => {
                     const ent = ontology.entities.find(e => e.iri === iri);
-                    return { 
-                        name: toNaturalName(ent?.name || ''), 
-                        definition: ent?.definition || '' 
+                    return {
+                        name: toNaturalName(ent?.name || ''),
+                        definition: ent?.definition || ''
                     };
                 }).filter(s => !!s.name);
             }
@@ -62,10 +62,10 @@ export const useDefinitionSuggest = (
         }
     };
 
-    return { 
-        isSuggesting, 
-        handleSuggest, 
-        canSuggest: !!geminiToken && !!entityName.trim() 
+    return {
+        isSuggesting,
+        handleSuggest,
+        canSuggest: !!geminiToken && !!entityName.trim()
     };
 };
 
@@ -77,7 +77,7 @@ interface SuggestButtonProps {
 
 export const SuggestButton: React.FC<SuggestButtonProps> = ({ onClick, isSuggesting, disabled }) => {
     const { geminiToken } = useAuthStore();
-    
+
     if (!geminiToken) return null;
 
     return (

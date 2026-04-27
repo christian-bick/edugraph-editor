@@ -6,7 +6,13 @@ import EditIcon from '../../../../assets/icons/edit.svg';
 import PlusIcon from '../../../../assets/icons/plus.svg';
 import GraphParentIcon from '../../../../assets/icons/graph_parent.svg';
 import {EditDefinition, EditIri} from '../EditEntity/EditEntity.tsx';
-import {calculateInferredRelations, invertRelations, toNaturalName, InferredRelationsMap, InferredRelation} from '../../../../stores/utils.ts';
+import {
+    calculateInferredRelations,
+    InferredRelation,
+    InferredRelationsMap,
+    invertRelations,
+    toNaturalName
+} from '../../../../stores/utils.ts';
 import {useCurrentOntologyStore} from "../../../../stores/ontology-store.ts";
 import type {OntologyEntity, RelationType} from "../../../../types/ontology-types.ts";
 import {ModifyRelationModal} from '../ModifyRelation/ModifyRelation.tsx';
@@ -71,11 +77,11 @@ const RelationSection: React.FC<RelationSectionProps> = ({
                             <li key={e.iri} onClick={() => setSelectedEntityIri(e.iri)} className={clsx({"is-inferred": e.isInferred})}>
                                 <span>{toNaturalName(e.name)}</span>
                                 {e.isInferred && (
-                                    <img 
-                                        src={GraphParentIcon} 
-                                        className="inferred-hint" 
-                                        title={tooltip} 
-                                        alt="Inferred" 
+                                    <img
+                                        src={GraphParentIcon}
+                                        className="inferred-hint"
+                                        title={tooltip}
+                                        alt="Inferred"
                                         onClick={(event) => e.inferredFromIri && handleInferredClick(event, e.inferredFromIri)}
                                     />
                                 )}

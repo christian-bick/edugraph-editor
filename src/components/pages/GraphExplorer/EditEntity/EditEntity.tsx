@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Modal } from '../../../global/Modal/Modal';
-import { useSelectedEntityStore } from '../../../../stores/selected-entity-store';
+import React, {useEffect, useMemo, useState} from 'react';
+import {Modal} from '../../../global/Modal/Modal';
+import {useSelectedEntityStore} from '../../../../stores/selected-entity-store';
 import './EditEntity.scss';
-import { toNaturalName, toCamelCase } from '../../../../stores/utils';
-import { useCurrentOntologyStore } from '../../../../stores/ontology-store';
-import { useBranchStore } from '../../../../stores/branch-store';
-import { useDefinitionSuggest, SuggestButton } from '../DefinitionSuggest/DefinitionSuggest';
+import {toCamelCase, toNaturalName} from '../../../../stores/utils';
+import {useCurrentOntologyStore} from '../../../../stores/ontology-store';
+import {useBranchStore} from '../../../../stores/branch-store';
+import {SuggestButton, useDefinitionSuggest} from '../DefinitionSuggest/DefinitionSuggest';
 
 interface EditEntityProps {
     isOpen: boolean;
@@ -198,10 +198,10 @@ export const EditDefinition: React.FC<EditEntityProps> = ({ isOpen, onClose }) =
 
             <div className="form-actions">
                 <div className="left-actions">
-                    <SuggestButton 
-                        onClick={onSuggest} 
-                        isSuggesting={isSuggesting} 
-                        disabled={!canSuggest} 
+                    <SuggestButton
+                        onClick={onSuggest}
+                        isSuggesting={isSuggesting}
+                        disabled={!canSuggest}
                     />
                 </div>
                 <div className="right-actions">

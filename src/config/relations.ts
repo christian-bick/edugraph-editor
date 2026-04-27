@@ -1,4 +1,4 @@
-import type { OntologyRelations } from "../types/ontology-types";
+import type {OntologyRelations} from "../types/ontology-types";
 
 export type PerspectiveType = 'Progression' | 'Structure' | 'Integration' | 'Expansion';
 

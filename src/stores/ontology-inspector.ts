@@ -1,5 +1,5 @@
-import { Ontology, OntologyEntity } from "../types/ontology-types";
-import { invertRelations } from "./utils";
+import {Ontology, OntologyEntity} from "../types/ontology-types";
+import {invertRelations} from "./utils";
 
 export type IssueType = 'missing_definition' | 'orphan_structural';
 

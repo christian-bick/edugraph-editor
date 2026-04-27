@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type {Meta, StoryObj} from '@storybook/react-vite';
 
-import { Footer } from './Footer.tsx';
+import {Footer} from './Footer.tsx';
 
 const meta = {
   title: 'Search/Footer',

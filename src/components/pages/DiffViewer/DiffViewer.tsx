@@ -5,9 +5,9 @@ import {DiffModeEnum, DiffView} from '@git-diff-view/react';
 import {generateDiffFile} from "@git-diff-view/file";
 import "@git-diff-view/react/styles/diff-view-pure.css";
 import './DiffViewer.scss';
-import { useViewStore } from '../../../stores/view-store';
-import { pushOntologyFile } from '../../../api/github'; // Assuming relative path
-import { useState, useEffect } from 'react';
+import {useViewStore} from '../../../stores/view-store';
+import {pushOntologyFile} from '../../../api/github'; // Assuming relative path
+import {useEffect, useState} from 'react';
 
 export const DiffViewer = () => {
     const { ontologies: currentOntologyData } = useCurrentOntologyStore();

@@ -1,5 +1,5 @@
-import { useAuthStore } from "../stores/auth-store.ts";
-import { Octokit } from "@octokit/rest";
+import {useAuthStore} from "../stores/auth-store.ts";
+import {Octokit} from "@octokit/rest";
 
 const USE_VITE_PROXY = true; // Set to false to call GitHub API directly
 const REPO_OWNER = 'christian-bick';

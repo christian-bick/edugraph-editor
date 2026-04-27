@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useAuthStore } from '../../../stores/auth-store';
-import { verifyToken } from '../../../api/github';
+import React, {useState} from 'react';
+import {useAuthStore} from '../../../stores/auth-store';
+import {verifyToken} from '../../../api/github';
 import './TokenManager.scss';
 
 export const TokenManager: React.FC = () => {

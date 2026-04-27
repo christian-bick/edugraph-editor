@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react';
-import { useCurrentOntologyStore } from '../../../stores/ontology-store';
-import { useBranchStore } from '../../../stores/branch-store';
-import { useViewStore } from '../../../stores/view-store';
-import { useSelectedEntityStore } from '../../../stores/selected-entity-store';
-import { findOntologyIssues, OntologyIssue, IssueType } from '../../../stores/ontology-inspector';
-import { PerspectiveType } from '../../../config/relations';
-import { toNaturalName } from '../../../stores/utils';
+import React, {useMemo} from 'react';
+import {useCurrentOntologyStore} from '../../../stores/ontology-store';
+import {useBranchStore} from '../../../stores/branch-store';
+import {useViewStore} from '../../../stores/view-store';
+import {useSelectedEntityStore} from '../../../stores/selected-entity-store';
+import {findOntologyIssues, IssueType, OntologyIssue} from '../../../stores/ontology-inspector';
+import {PerspectiveType} from '../../../config/relations';
+import {toNaturalName} from '../../../stores/utils';
 import './Inspector.scss';
 
 const PERSPECTIVES: PerspectiveType[] = ['Structure', 'Progression', 'Integration', 'Expansion'];
@@ -17,7 +17,7 @@ export const Inspector: React.FC = () => {
     const { setSelectedEntityIri } = useSelectedEntityStore();
 
     const currentOntology = ontologies[activeDimension as keyof typeof ontologies];
-    
+
     const issues = useMemo(() => findOntologyIssues(currentOntology), [currentOntology]);
 
     const issuesByType = useMemo(() => {
@@ -62,8 +62,8 @@ export const Inspector: React.FC = () => {
                                 <td className="actions-cell">
                                     <div className="perspective-buttons">
                                         {PERSPECTIVES.map(p => (
-                                            <button 
-                                                key={p} 
+                                            <button
+                                                key={p}
                                                 onClick={() => navigateToEntity(issue.entity.iri, p)}
                                                 title={`View in ${p} perspective`}
                                             >
@@ -86,7 +86,7 @@ export const Inspector: React.FC = () => {
                 <h2>Ontology Inspector - {activeDimension}</h2>
                 <button className="close-btn" onClick={() => setView('graph')}>Back to Graph</button>
             </div>
-            
+
             <div className="inspector-content">
                 {issues.length === 0 ? (
                     <div className="no-issues">No issues found in the current dimension!</div>
