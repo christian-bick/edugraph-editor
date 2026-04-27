@@ -5,7 +5,8 @@ import './EditEntity.scss';
 import {toCamelCase, toNaturalName} from '../../../../stores/utils';
 import {useCurrentOntologyStore} from '../../../../stores/ontology-store';
 import {useBranchStore} from '../../../../stores/branch-store';
-import {SuggestButton, useDefinitionSuggest} from '../DefinitionSuggest/DefinitionSuggest';
+import {SuggestButton} from '../DefinitionSuggest/DefinitionSuggest';
+import {useDefinitionSuggest} from '../DefinitionSuggest/useDefinitionSuggest';
 
 interface EditEntityProps {
     isOpen: boolean;
