@@ -1,6 +1,6 @@
 {
   "projects": {
-    "edugraph": "edugraph-438718"
+    "edugraph-editor": "edugraph-438718"
   },
   "targets": {
     "edugraph-438718": {
