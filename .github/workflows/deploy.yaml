@@ -3,33 +3,42 @@ name: Deploy to Firebase Hosting
 on:
     push:
         branches:
-            - main # Or whatever branch you want to deploy from
+            - main
+
+permissions:
+    contents: read
+    id-token: write
 
 jobs:
     build_and_deploy:
-        if: false # deactivate for now
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Code
                 uses: actions/checkout@v4
 
+            -   id: 'auth'
+                name: 'Authenticate to Google Cloud'
+                uses: 'google-github-actions/auth@v2'
+                with:
+                    # Uses your Project Number and Pool/Provider IDs from the script above
+                    workload_identity_provider: 'projects/575953891979/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+                    service_account: 'firebase-adminsdk-fbsvc@edugraph-438718.iam.gserviceaccount.com'
+
             -   name: Setup Node.js
                 uses: actions/setup-node@v4
                 with:
-                    node-version: '22' # Use a Node.js version compatible with your project
+                    node-version: '22'
 
-            -   name: Install Dependencies
-                run: npm install
-
-            -   name: Build Vite App
-                run: npm run build
+            -   name: Install and Build
+                run: |
+                    npm install
+                    npm run build
 
             -   name: Deploy to Firebase Hosting
                 uses: FirebaseExtended/action-hosting-deploy@v0
                 with:
-                    target: 'imagine-web'
-                    repoToken: '${{ secrets.GITHUB_TOKEN }}' # Required for GitHub deployments
-                    firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' # Your Firebase token secret
-                    projectId: 'edugraph-438718' # Your Firebase Project ID
-                    channelId: live # Deploy to the 'live' channel (your default site)
-                    entryPoint: . # The directory containing firebase.json
+                    target: 'edugraph-editor'
+                    repoToken: '${{ secrets.GITHUB_TOKEN }}'
+                    projectId: 'edugraph-438718'
+                    channelId: live
+                    entryPoint: .
