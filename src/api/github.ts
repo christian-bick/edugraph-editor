@@ -1,7 +1,9 @@
 import {useAuthStore} from "../stores/auth-store.ts";
 import {Octokit} from "@octokit/rest";
 
-const USE_VITE_PROXY = true; // Set to false to call GitHub API directly
+// Vite proxy only works during development (npm run dev).
+// In production, we must call the GitHub API directly.
+const USE_VITE_PROXY = import.meta.env.DEV; 
 const REPO_OWNER = 'christian-bick';
 const REPO_NAME = 'edugraph-ontology';
 
