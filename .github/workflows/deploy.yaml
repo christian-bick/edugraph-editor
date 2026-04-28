@@ -12,6 +12,10 @@ permissions:
 jobs:
     build_and_deploy:
         runs-on: ubuntu-latest
+        # Silence the Node 20 warning
+        env:
+            FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
         steps:
             -   name: Checkout Code
                 uses: actions/checkout@v4
@@ -20,7 +24,6 @@ jobs:
                 name: 'Authenticate to Google Cloud'
                 uses: 'google-github-actions/auth@v2'
                 with:
-                    # Uses your Project Number and Pool/Provider IDs from the script above
                     workload_identity_provider: 'projects/575953891979/locations/global/workloadIdentityPools/gh-pool-v2/providers/gh-provider-v2'
                     service_account: 'firebase-adminsdk-fbsvc@edugraph-438718.iam.gserviceaccount.com'
 
@@ -29,10 +32,11 @@ jobs:
                 with:
                     node-version: '22'
 
-            -   name: Install and Build
-                run: |
-                    npm install
-                    npm run build
+            -   name: Install Dependencies
+                run: npm install
+
+            -   name: Build Vite App
+                run: npm run build
 
             -   name: Deploy to Firebase Hosting
                 uses: FirebaseExtended/action-hosting-deploy@v0
