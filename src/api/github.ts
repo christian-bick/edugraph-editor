@@ -34,7 +34,7 @@ export const loadOntologyFile = async (file: string, branch = 'main'): Promise<s
         throw new Error(`Could not retrieve file content for ${file}.`);
     }
 
-    return atob(response.data.content);
+    return fromBase64(response.data.content.replace(/\n/g, ''));
 };
 
 export const loadBranches = async (): Promise<string[]> => {
@@ -69,7 +69,30 @@ export interface OntologyFileResponse {
 }
 
 export const loadOntologyFiles = async (files: string[], branch = 'main'): Promise<OntologyFileResponse[]> => {
+    const token = useAuthStore.getState().token;
     const octokit = getOctokit();
+
+    if (!token) {
+        // Fallback to REST API for unauthenticated access (public repos only)
+        // GraphQL API always requires a token.
+        return Promise.all(files.map(async (file) => {
+            const response = await octokit.repos.getContent({
+                owner: REPO_OWNER,
+                repo: REPO_NAME,
+                path: file,
+                ref: branch,
+            });
+
+            if (Array.isArray(response.data) || !('content' in response.data)) {
+                throw new Error(`Could not retrieve file content for ${file}.`);
+            }
+
+            return {
+                content: fromBase64(response.data.content.replace(/\n/g, '')),
+                sha: response.data.sha,
+            };
+        }));
+    }
 
     const expressions = files.reduce((obj, file, index) => {
         obj[`expression${index}`] = `${branch}:${file}`;
@@ -100,6 +123,10 @@ export const loadOntologyFiles = async (files: string[], branch = 'main'): Promi
         name: REPO_NAME,
         ...expressions,
     });
+
+    if (!response || !response.repository) {
+        throw new Error("Failed to load ontology: GraphQL response missing repository data. Ensure you are logged in or the repository is public.");
+    }
 
     return files.map((_, index) => {
         const fileContent = response.repository[`file${index}`];
@@ -152,9 +179,15 @@ export const pushOntologyFile = async (
     return response.data.commit.sha; // Return the SHA of the new commit
 };
 
-// Helper to handle Unicode safely
+// Helpers to handle Unicode safely
 const toBase64 = (str: string) => {
     const bytes = new TextEncoder().encode(str);
     const binString = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
     return btoa(binString);
+};
+
+const fromBase64 = (base64: string) => {
+    const binString = atob(base64);
+    const bytes = Uint8Array.from(binString, (m) => m.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
 };
