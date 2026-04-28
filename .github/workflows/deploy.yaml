@@ -21,7 +21,7 @@ jobs:
                 uses: 'google-github-actions/auth@v2'
                 with:
                     # Uses your Project Number and Pool/Provider IDs from the script above
-                    workload_identity_provider: 'projects/575953891979/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+                    workload_identity_provider: 'projects/575953891979/locations/global/workloadIdentityPools/github-pool/providers/gh-provider-v2'
                     service_account: 'firebase-adminsdk-fbsvc@edugraph-438718.iam.gserviceaccount.com'
 
             -   name: Setup Node.js
