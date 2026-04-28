@@ -3,9 +3,12 @@ import {Octokit} from "@octokit/rest";
 
 // Vite proxy only works during development (npm run dev).
 // In production, we must call the GitHub API directly.
-const USE_VITE_PROXY = import.meta.env.DEV; 
-const REPO_OWNER = 'christian-bick';
-const REPO_NAME = 'edugraph-ontology';
+const USE_VITE_PROXY = import.meta.env.DEV;
+
+const getRepoConfig = () => {
+    const { repoOwner, repoName } = useAuthStore.getState();
+    return { owner: repoOwner, name: repoName };
+};
 
 const getOctokit = (overrideToken?: string) => {
     const tokenToUse = overrideToken ?? useAuthStore.getState().token;
@@ -24,9 +27,10 @@ const getOctokit = (overrideToken?: string) => {
 
 export const loadOntologyFile = async (file: string, branch = 'main'): Promise<string> => {
     const octokit = getOctokit();
+    const { owner, name: repo } = getRepoConfig();
     const response = await octokit.repos.getContent({
-        owner: REPO_OWNER,
-        repo: REPO_NAME,
+        owner,
+        repo,
         path: file,
         ref: branch,
     });
@@ -41,20 +45,25 @@ export const loadOntologyFile = async (file: string, branch = 'main'): Promise<s
 
 export const loadBranches = async (): Promise<string[]> => {
     const octokit = getOctokit();
+    const { owner, name: repo } = getRepoConfig();
     const response = await octokit.repos.listBranches({
-        owner: REPO_OWNER,
-        repo: REPO_NAME,
+        owner,
+        repo,
     });
     return response.data.map(branch => branch.name);
 };
 
-export const verifyToken = async (token: string): Promise<boolean> => {
+export const verifyToken = async (token: string, ownerOverride?: string, repoOverride?: string): Promise<boolean> => {
     if (!token) return false;
     const octokit = getOctokit(token);
+    const { owner: defaultOwner, name: defaultRepo } = getRepoConfig();
+    const owner = ownerOverride || defaultOwner;
+    const repo = repoOverride || defaultRepo;
+    
     try {
         const response = await octokit.repos.get({
-            owner: REPO_OWNER,
-            repo: REPO_NAME,
+            owner,
+            repo,
         });
 
         // A successful request with a valid token will include this header.
@@ -73,14 +82,15 @@ export interface OntologyFileResponse {
 export const loadOntologyFiles = async (files: string[], branch = 'main'): Promise<OntologyFileResponse[]> => {
     const token = useAuthStore.getState().token;
     const octokit = getOctokit();
+    const { owner, name: repo } = getRepoConfig();
 
     if (!token) {
         // Fallback to REST API for unauthenticated access (public repos only)
         // GraphQL API always requires a token.
         return Promise.all(files.map(async (file) => {
             const response = await octokit.repos.getContent({
-                owner: REPO_OWNER,
-                repo: REPO_NAME,
+                owner,
+                repo,
                 path: file,
                 ref: branch,
             });
@@ -121,8 +131,8 @@ export const loadOntologyFiles = async (files: string[], branch = 'main'): Promi
     `;
 
     const response: any = await octokit.graphql(query, {
-        owner: REPO_OWNER,
-        name: REPO_NAME,
+        owner,
+        name: repo,
         ...expressions,
     });
 
@@ -145,9 +155,10 @@ export const loadOntologyFiles = async (files: string[], branch = 'main'): Promi
 
 export const getFileSha = async (filePath: string, branch = 'main'): Promise<string> => {
     const octokit = getOctokit();
+    const { owner, name: repo } = getRepoConfig();
     const response = await octokit.repos.getContent({
-        owner: REPO_OWNER,
-        repo: REPO_NAME,
+        owner,
+        repo,
         path: filePath,
         ref: branch,
     });
@@ -167,10 +178,11 @@ export const pushOntologyFile = async (
     expectedSha: string,
 ): Promise<string> => {
     const octokit = getOctokit();
+    const { owner, name: repo } = getRepoConfig();
 
     const response = await octokit.repos.createOrUpdateFileContents({
-        owner: REPO_OWNER,
-        repo: REPO_NAME,
+        owner,
+        repo,
         path: filePath,
         message: commitMessage,
         content: toBase64(content), // Content must be base64 encoded

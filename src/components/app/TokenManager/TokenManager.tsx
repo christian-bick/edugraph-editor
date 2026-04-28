@@ -4,60 +4,91 @@ import {verifyToken} from '../../../api/github';
 import './TokenManager.scss';
 
 export const TokenManager: React.FC = () => {
-    const { token, setToken } = useAuthStore();
-    const [inputValue, setInputValue] = useState(token || '');
+    const { token, setToken, repoOwner, repoName, setRepoConfig } = useAuthStore();
+    const [tokenInput, setTokenInput] = useState(token || '');
+    const [repoInput, setRepoInput] = useState(`${repoOwner}/${repoName}`);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
     const handleSave = async () => {
+        const parts = repoInput.split('/');
+        if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
+            setError('Please use the format "owner/repository"');
+            return;
+        }
+
+        const owner = parts[0].trim();
+        const repo = parts[1].trim();
+
         setIsLoading(true);
         setError(null);
         setSuccess(null);
-        const isValid = await verifyToken(inputValue);
+
+        // Verify access to the specific repository with the provided token
+        const isValid = await verifyToken(tokenInput, owner, repo);
         setIsLoading(false);
 
         if (isValid) {
-            setToken(inputValue);
-            setSuccess('Token is valid and has been saved.');
+            setToken(tokenInput);
+            setRepoConfig(owner, repo);
+            setSuccess('Configuration saved and verified.');
         } else {
-            setError('Invalid token. Please check the token and its permissions.');
+            setError('Verification failed. Please check your token and repository details.');
         }
     };
 
     const handleClear = () => {
         setToken(null);
-        setInputValue('');
+        setTokenInput('');
         setError(null);
         setSuccess(null);
     };
 
     return (
-        <div>
-            <h3>GitHub API Token</h3>
+        <div className="token-manager">
+            <h3>GitHub Configuration</h3>
             <p>
-                Provide a GitHub Personal Access Token to edit files and access private repositories.
-                The token is stored in local storage.
+                Provide a GitHub Personal Access Token and repository details to edit and push changes.
             </p>
-            <div className="form-section">
+
+            <div className="form-group">
+                <label>Repository</label>
                 <input
-                    type="password"
-                    value={inputValue}
+                    type="text"
+                    value={repoInput}
                     onChange={(e) => {
-                        setInputValue(e.target.value);
+                        setRepoInput(e.target.value);
                         setError(null);
                         setSuccess(null);
                     }}
-                    placeholder="Enter your GitHub token"
+                    placeholder="owner/repository"
                 />
+            </div>
+
+            <div className="form-group">
+                <label>GitHub Personal Access Token</label>
+                <input
+                    type="password"
+                    value={tokenInput}
+                    onChange={(e) => {
+                        setTokenInput(e.target.value);
+                        setError(null);
+                        setSuccess(null);
+                    }}
+                    placeholder="ghp_xxxxxxxxxxxx"
+                />
+            </div>
+
+            <div className="form-actions">
                 <button onClick={handleSave} disabled={isLoading} className="primary">
-                    {isLoading ? 'Verifying...' : 'Save'}
+                    {isLoading ? 'Verifying...' : 'Save & Verify'}
                 </button>
-                <button onClick={handleClear}>Clear</button>
+                <button onClick={handleClear} className="secondary">Clear Token</button>
             </div>
 
             <div className="token-manager-feedback">
-                {isLoading && <p className="loading">Verifying token...</p>}
+                {isLoading && <p className="loading">Verifying access...</p>}
                 {error && <p className="error">{error}</p>}
                 {success && <p className="success">{success}</p>}
             </div>
