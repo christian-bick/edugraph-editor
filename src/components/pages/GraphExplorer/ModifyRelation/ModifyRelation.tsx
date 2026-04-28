@@ -10,6 +10,7 @@ import LinkRmIcon from '../../../../assets/icons/link_rm.svg';
 import GraphParentIcon from '../../../../assets/icons/graph_parent.svg';
 import {getRelationsByPerspective} from '../../../../config/relations.ts';
 import clsx from 'clsx';
+import {ActionButton} from '../../../global/ActionButton/ActionButton';
 
 interface RelationEntity extends OntologyEntity {
     isInferred?: boolean;
@@ -105,7 +106,7 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
         });
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!selectedEntityIri) return;
 
         // Only save non-inferred relations back to the store
@@ -223,8 +224,10 @@ export const ModifyRelationModal: React.FC<ModifyRelationModalProps> = ({ isOpen
                 </div>
 
                 <div className="form-actions">
-                    <button onClick={onClose}>Cancel</button>
-                    <button onClick={handleSave} className="primary">Save</button>
+                    <button onClick={onClose} className="secondary">Cancel</button>
+                    <ActionButton onClick={handleSave} className="primary" requireGithubAuth>
+                        Save
+                    </ActionButton>
                 </div>
             </div>
         </Modal>

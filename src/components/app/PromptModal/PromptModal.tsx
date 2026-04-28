@@ -11,6 +11,7 @@ import {createEntityInfoMap, getQuadsFromString, populateOntologyFromQuads} from
 import {RELATIONS} from '../../../config/relations';
 import type {Ontology, OntologyRelations} from '../../../types/ontology-types';
 import './PromptModal.scss';
+import {ActionButton} from '../../global/ActionButton/ActionButton';
 
 interface PromptModalProps {
     isOpen: boolean;
@@ -38,10 +39,9 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
 
     const handleSendMessage = async () => {
         if (!geminiToken) {
-            setError('Gemini API token is missing. Please add it in the header.');
-            return;
+            throw new Error('Gemini API token is missing. Please add it in the header.');
         }
-        if (!input.trim() || isLoading) return;
+        if (!input.trim()) return;
 
         let userMessage = input.trim();
         setInput('');
@@ -88,13 +88,14 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
             console.error('Chat failed:', err);
             setError(err.message || 'An unexpected error occurred.');
             setStatus('Failed.');
+            throw err;
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleExecute = async () => {
-        if (!geminiToken || messages.length === 0 || isLoading) return;
+        if (!geminiToken || messages.length === 0) return;
 
         setIsLoading(true);
         setError(null);
@@ -138,6 +139,7 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
             console.error('Execution failed:', err);
             setError(err.message || 'Execution failed.');
             setStatus('Failed.');
+            throw err;
         } finally {
             setIsLoading(false);
         }
@@ -218,22 +220,23 @@ export const PromptModal: React.FC<PromptModalProps> = ({ isOpen, onClose }) => 
                             )}
                         </div>
                         <div className="right-actions">
-                            <button
+                            <ActionButton
                                 onClick={handleSendMessage}
                                 disabled={isLoading || !input.trim()}
                                 className="send-btn"
                             >
                                 Send
-                            </button>
+                            </ActionButton>
 
                             {messages.length > 0 && !wasPlanExecuted && (
-                                <button
+                                <ActionButton
                                     onClick={handleExecute}
                                     disabled={isLoading}
                                     className="execute-btn primary"
+                                    requireGithubAuth
                                 >
                                     Confirm & Execute Plan
-                                </button>
+                                </ActionButton>
                             )}
                         </div>
                     </div>

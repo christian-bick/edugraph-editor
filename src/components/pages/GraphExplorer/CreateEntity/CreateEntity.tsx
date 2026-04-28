@@ -6,6 +6,7 @@ import {useCurrentOntologyStore} from '../../../../stores/ontology-store';
 import {useBranchStore} from '../../../../stores/branch-store';
 import {SuggestButton} from '../DefinitionSuggest/DefinitionSuggest';
 import {useDefinitionSuggest} from '../DefinitionSuggest/useDefinitionSuggest';
+import {ActionButton} from '../../../global/ActionButton/ActionButton';
 
 
 interface CreateEntityProps {
@@ -62,7 +63,7 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
         if (suggestion) setDefinition(suggestion);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (id && !idError) {
             createEntity(activeDimension, parentIri, id.trim(), definition.trim());
             onClose();
@@ -112,8 +113,15 @@ export const CreateEntity: React.FC<CreateEntityProps> = ({ isOpen, onClose, par
                     />
                 </div>
                 <div className="right-actions">
-                    <button onClick={onClose}>Cancel</button>
-                    <button onClick={handleSave} className="primary" disabled={!id || !!idError}>Create Entity</button>
+                    <button onClick={onClose} className="secondary">Cancel</button>
+                    <ActionButton
+                        onClick={handleSave}
+                        className="primary"
+                        disabled={!id || !!idError}
+                        requireGithubAuth
+                    >
+                        Create Entity
+                    </ActionButton>
                 </div>
             </div>
         </Modal>

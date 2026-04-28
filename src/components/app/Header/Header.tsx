@@ -39,9 +39,11 @@ export const Header = () => {
                     <button className={clsx('github-icon', { 'token-present': token })} onClick={() => setShowGithubTokenManager(true)}>
                         <img src={GithubIcon} alt="GitHub Token"/>
                     </button>
-                    <button className={clsx('gemini-icon', { 'token-present': geminiToken })} onClick={() => setShowGeminiTokenManager(true)}>
-                        <img src={GeminiIcon} alt="Gemini Token"/>
-                    </button>
+                    {token && (
+                        <button className={clsx('gemini-icon', { 'token-present': geminiToken })} onClick={() => setShowGeminiTokenManager(true)}>
+                            <img src={GeminiIcon} alt="Gemini Token"/>
+                        </button>
+                    )}
                 </div>
 
                 <Modal isOpen={showGithubTokenManager} onClose={() => setShowGithubTokenManager(false)}>

@@ -1,0 +1,52 @@
+.action-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .button-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &.loading {
+    .button-content {
+      opacity: 0.7;
+    }
+  }
+
+  &.success {
+    background-color: #28a745 !important;
+    color: white !important;
+    border-color: #28a745 !important;
+  }
+
+  &.error {
+    background-color: #dc3545 !important;
+    color: white !important;
+    border-color: #dc3545 !important;
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+    margin-left: 4px;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

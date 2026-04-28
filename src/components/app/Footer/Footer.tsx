@@ -28,17 +28,19 @@ export const Footer = () => {
     return (
         <footer className="footer">
             <div className="footer-controls">
-                <button
-                    onClick={() => undo()}
-                    disabled={!pastStates.length}
-                    className="icon-button"
-                >
-                    <span className="arrow-left"></span>
-                    Undo
-                </button>
+                {token && (
+                    <button
+                        onClick={() => undo()}
+                        disabled={!pastStates.length}
+                        className="icon-button"
+                    >
+                        <span className="arrow-left"></span>
+                        Undo
+                    </button>
+                )}
 
                 <div className="action-group">
-                    {geminiToken && (
+                    {token && geminiToken && (
                         <button
                             onClick={() => setIsPromptModalOpen(true)}
                             className="prompt-button"
@@ -47,12 +49,14 @@ export const Footer = () => {
                         </button>
                     )}
 
-                    <button
-                        onClick={() => setView('inspect')}
-                        className={clsx('inspect-button', { active: view === 'inspect' })}
-                    >
-                        Inspect
-                    </button>
+                    {token && (
+                        <button
+                            onClick={() => setView('inspect')}
+                            className={clsx('inspect-button', { active: view === 'inspect' })}
+                        >
+                            Inspect
+                        </button>
+                    )}
 
                     {token && (
                         <button
@@ -65,14 +69,16 @@ export const Footer = () => {
                     )}
                 </div>
 
-                <button
-                    onClick={() => redo()}
-                    disabled={!futureStates.length}
-                    className="icon-button"
-                >
-                    Redo
-                    <span className="arrow-right"></span>
-                </button>
+                {token && (
+                    <button
+                        onClick={() => redo()}
+                        disabled={!futureStates.length}
+                        className="icon-button"
+                    >
+                        Redo
+                        <span className="arrow-right"></span>
+                    </button>
+                )}
             </div>
 
             <PromptModal

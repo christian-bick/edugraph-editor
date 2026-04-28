@@ -20,6 +20,8 @@ import {CreateEntity} from '../CreateEntity/CreateEntity.tsx';
 import {EntitySearch} from '../EntitySearch/EntitySearch.tsx';
 import {RELATIONS} from '../../../../config/relations.ts';
 import clsx from 'clsx';
+import {ActionButton} from '../../../global/ActionButton/ActionButton';
+import {useAuthStore} from '../../../../stores/auth-store';
 
 interface RelationEntity extends OntologyEntity {
     isInferred?: boolean;
@@ -46,6 +48,7 @@ const RelationSection: React.FC<RelationSectionProps> = ({
                                                              allEntities
                                                          }) => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const { token } = useAuthStore();
     const isEmpty = !entities || entities.length === 0;
 
     if (isInverse && isEmpty) {
@@ -61,7 +64,7 @@ const RelationSection: React.FC<RelationSectionProps> = ({
         <div className={clsx("sidebar-section", {"is-empty": isEmpty})}>
             <div className="sidebar-header">
                 <h3>{title}</h3>
-                {!isInverse && (
+                {!isInverse && token && (
                     <button className="edit-btn" onClick={() => setIsAddModalOpen(true)}>
                         <img src={isEmpty ? PlusIcon : EditIcon} alt={isEmpty ? "Add Relation" : "Edit Relations"}/>
                     </button>
@@ -186,6 +189,7 @@ export const EntitySidebar: React.FC = () => {
     const {selectedEntityIri, setSelectedEntityIri} = useSelectedEntityStore();
     const {ontologies, deleteEntity} = useCurrentOntologyStore();
     const {activeDimension} = useBranchStore();
+    const { token } = useAuthStore();
     const [isEditIriOpen, setIsEditIriOpen] = useState(false);
     const [isEditDefinitionOpen, setIsEditDefinitionOpen] = useState(false);
     const [isCreateEntityOpen, setIsCreateEntityOpen] = useState(false);
@@ -211,7 +215,7 @@ export const EntitySidebar: React.FC = () => {
         return selectedEntity.relations.hasPart.length > 0;
     }, [selectedEntity]);
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (selectedEntityIri && !hasChildren) {
             deleteEntity(activeDimension, selectedEntityIri);
             setSelectedEntityIri(null);
@@ -234,9 +238,11 @@ export const EntitySidebar: React.FC = () => {
                             <div className="sidebar-section">
                                 <div className="sidebar-header">
                                     <h3>IRI</h3>
-                                    <button className="edit-btn" onClick={() => setIsEditIriOpen(true)}>
-                                        <img src={EditIcon} alt="Edit IRI"/>
-                                    </button>
+                                    {token && (
+                                        <button className="edit-btn" onClick={() => setIsEditIriOpen(true)}>
+                                            <img src={EditIcon} alt="Edit IRI"/>
+                                        </button>
+                                    )}
                                 </div>
                                 <div className="section-content-wrapper">
                                     <div className="iri-display">
@@ -248,9 +254,11 @@ export const EntitySidebar: React.FC = () => {
                             <div className="sidebar-section">
                                 <div className="sidebar-header">
                                     <h3>Definition</h3>
-                                    <button className="edit-btn" onClick={() => setIsEditDefinitionOpen(true)}>
-                                        <img src={EditIcon} alt="Edit Definition"/>
-                                    </button>
+                                    {token && (
+                                        <button className="edit-btn" onClick={() => setIsEditDefinitionOpen(true)}>
+                                            <img src={EditIcon} alt="Edit Definition"/>
+                                        </button>
+                                    )}
                                 </div>
                                 <div className="section-content-wrapper">
                                     <p>{selectedEntity.definition}</p>
@@ -303,13 +311,22 @@ export const EntitySidebar: React.FC = () => {
                         </div>
                         <div className="sidebar-footer">
                             <div className="footer-buttons">
-                                <button className="delete-btn" onClick={handleDelete} disabled={hasChildren}
-                                        title={hasChildren ? 'Cannot delete an entity that has children.' : 'Delete this entity'}>
+                                <ActionButton
+                                    className="delete-btn"
+                                    onClick={handleDelete}
+                                    disabled={hasChildren}
+                                    requireConfirm
+                                    confirmMessage={`Are you sure you want to delete "${toNaturalName(selectedEntity.name)}"? This action cannot be undone.`}
+                                    title={hasChildren ? 'Cannot delete an entity that has children.' : 'Delete this entity'}
+                                    requireGithubAuth
+                                >
                                     Delete Entity
-                                </button>
-                                <button className="new-child-btn" onClick={() => setIsCreateEntityOpen(true)}>
-                                    New Child Entity
-                                </button>
+                                </ActionButton>
+                                {token && (
+                                    <button className="new-child-btn" onClick={() => setIsCreateEntityOpen(true)}>
+                                        New Child Entity
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </>
