@@ -1,6 +1,6 @@
 {
     "hosting": {
-        "target": "imagine-editor",
+        "target": "edugraph-editor",
         "public": "dist",
         "ignore": [
             "firebase.json",
