@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "/src/colors.scss" as colors;
 
 .footer {
@@ -51,38 +52,38 @@
             &.push-button {
                 background-color: #007bff;
                 color: white;
-                border-color: darken(#007bff, 10%);
+                border-color: color.adjust(#007bff, $lightness: -10%);
                 font-weight: bold;
 
                 &:not(:disabled):hover {
-                    background-color: darken(#007bff, 10%);
+                    background-color: color.adjust(#007bff, $lightness: -10%);
                 }
             }
 
             &.prompt-button {
                 background-color: #8e75ff;
                 color: white;
-                border-color: darken(#8e75ff, 10%);
+                border-color: color.adjust(#8e75ff, $lightness: -10%);
                 font-weight: bold;
 
                 &:not(:disabled):hover {
-                    background-color: darken(#8e75ff, 10%);
+                    background-color: color.adjust(#8e75ff, $lightness: -10%);
                 }
             }
 
             &.inspect-button {
                 background-color: #6c757d;
                 color: white;
-                border-color: darken(#6c757d, 10%);
+                border-color: color.adjust(#6c757d, $lightness: -10%);
                 font-weight: bold;
 
                 &:not(:disabled):hover {
-                    background-color: darken(#6c757d, 10%);
+                    background-color: color.adjust(#6c757d, $lightness: -10%);
                 }
 
                 &.active {
                     background-color: #495057;
-                    border-color: darken(#495057, 10%);
+                    border-color: color.adjust(#495057, $lightness: -10%);
                 }
             }
 
