@@ -5,8 +5,8 @@
   "targets": {
     "edugraph-438718": {
       "hosting": {
-        "imagine-editor": [
-          "imagine-editor"
+        "edugraph-editor": [
+          "edugraph-editor"
         ]
       }
     }
