@@ -1,6 +1,6 @@
 {
     "hosting": {
-        "target": "imagine-web",
+        "target": "imagine-editor",
         "public": "dist",
         "ignore": [
             "firebase.json",
