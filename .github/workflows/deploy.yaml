@@ -12,13 +12,10 @@ permissions:
 jobs:
     build_and_deploy:
         runs-on: ubuntu-latest
-        # Silence the Node 20 warning
-        env:
-            FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
         steps:
             -   name: Checkout Code
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -   id: 'auth'
                 name: 'Authenticate to Google Cloud'
@@ -28,7 +25,7 @@ jobs:
                     service_account: 'firebase-adminsdk-fbsvc@edugraph-438718.iam.gserviceaccount.com'
 
             -   name: Setup Node.js
-                uses: actions/setup-node@v4
+                uses: actions/setup-node@v5
                 with:
                     node-version: '22'
 
