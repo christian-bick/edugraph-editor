@@ -17,7 +17,7 @@ export const useViewStore = create<ViewState>((set) => ({
     view: 'graph',
     toggleView: () => set((state) => ({ view: state.view === 'graph' ? 'diff' : 'graph' })),
     setView: (view: ViewMode) => set(() => ({ view: view })),
-    showInferredRelations: true,
+    showInferredRelations: false,
     toggleInferredRelations: () => set((state) => ({ showInferredRelations: !state.showInferredRelations })),
     setShowInferredRelations: (show: boolean) => set(() => ({ showInferredRelations: show })),
     boundaryEntityIri: null,
